@@ -33,12 +33,12 @@
             this.Ok = new System.Windows.Forms.Button();
             this.panel1 = new System.Windows.Forms.Panel();
             this.panel2 = new System.Windows.Forms.Panel();
-            this.panel3 = new System.Windows.Forms.Panel();
             this.panel5 = new System.Windows.Forms.Panel();
+            this.panel3 = new System.Windows.Forms.Panel();
             this.textBox1 = new System.Windows.Forms.TextBox();
             this.panel2.SuspendLayout();
-            this.panel3.SuspendLayout();
             this.panel5.SuspendLayout();
+            this.panel3.SuspendLayout();
             this.SuspendLayout();
             // 
             // label1
@@ -90,15 +90,6 @@
             this.panel2.Size = new System.Drawing.Size(535, 58);
             this.panel2.TabIndex = 5;
             // 
-            // panel3
-            // 
-            this.panel3.Controls.Add(this.Cancle);
-            this.panel3.Dock = System.Windows.Forms.DockStyle.Left;
-            this.panel3.Location = new System.Drawing.Point(0, 0);
-            this.panel3.Name = "panel3";
-            this.panel3.Size = new System.Drawing.Size(151, 58);
-            this.panel3.TabIndex = 4;
-            // 
             // panel5
             // 
             this.panel5.Controls.Add(this.Ok);
@@ -107,6 +98,15 @@
             this.panel5.Name = "panel5";
             this.panel5.Size = new System.Drawing.Size(384, 58);
             this.panel5.TabIndex = 0;
+            // 
+            // panel3
+            // 
+            this.panel3.Controls.Add(this.Cancle);
+            this.panel3.Dock = System.Windows.Forms.DockStyle.Left;
+            this.panel3.Location = new System.Drawing.Point(0, 0);
+            this.panel3.Name = "panel3";
+            this.panel3.Size = new System.Drawing.Size(151, 58);
+            this.panel3.TabIndex = 4;
             // 
             // textBox1
             // 
@@ -131,8 +131,8 @@
             this.Name = "GetString";
             this.Text = "GetString";
             this.panel2.ResumeLayout(false);
-            this.panel3.ResumeLayout(false);
             this.panel5.ResumeLayout(false);
+            this.panel3.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 

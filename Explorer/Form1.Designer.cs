@@ -31,7 +31,7 @@
             this.listView1 = new System.Windows.Forms.ListView();
             this.button1 = new System.Windows.Forms.Button();
             this.panel1 = new System.Windows.Forms.Panel();
-            this.treeView1 = new System.Windows.Forms.TreeView();
+            this.listBrowderView = new System.Windows.Forms.TreeView();
             this.panel2 = new System.Windows.Forms.Panel();
             this.StatusLabel = new System.Windows.Forms.Label();
             this.splitter1 = new System.Windows.Forms.Splitter();
@@ -63,24 +63,24 @@
             // 
             // panel1
             // 
-            this.panel1.Controls.Add(this.treeView1);
+            this.panel1.Controls.Add(this.listBrowderView);
             this.panel1.Dock = System.Windows.Forms.DockStyle.Left;
             this.panel1.Location = new System.Drawing.Point(0, 0);
             this.panel1.Name = "panel1";
             this.panel1.Size = new System.Drawing.Size(170, 606);
             this.panel1.TabIndex = 2;
             // 
-            // treeView1
+            // listBrowderView
             // 
-            this.treeView1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.treeView1.Location = new System.Drawing.Point(0, 0);
-            this.treeView1.Name = "treeView1";
-            this.treeView1.Size = new System.Drawing.Size(170, 606);
-            this.treeView1.TabIndex = 2;
-            this.treeView1.AfterCollapse += new System.Windows.Forms.TreeViewEventHandler(this.treeView1_AfterCollapse);
-            this.treeView1.AfterExpand += new System.Windows.Forms.TreeViewEventHandler(this.treeView1_AfterExpand);
-            this.treeView1.Click += new System.EventHandler(this.treeView1_Click);
-            this.treeView1.DoubleClick += new System.EventHandler(this.treeView1_DoubleClick);
+            this.listBrowderView.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.listBrowderView.Location = new System.Drawing.Point(0, 0);
+            this.listBrowderView.Name = "listBrowderView";
+            this.listBrowderView.Size = new System.Drawing.Size(170, 606);
+            this.listBrowderView.TabIndex = 2;
+            this.listBrowderView.AfterCollapse += new System.Windows.Forms.TreeViewEventHandler(this.treeView1_AfterCollapse);
+            this.listBrowderView.AfterExpand += new System.Windows.Forms.TreeViewEventHandler(this.treeView1_AfterExpand);
+            this.listBrowderView.Click += new System.EventHandler(this.treeView1_Click);
+            this.listBrowderView.DoubleClick += new System.EventHandler(this.treeView1_DoubleClick);
             // 
             // panel2
             // 
@@ -135,7 +135,7 @@
         private System.Windows.Forms.Panel panel1;
         private System.Windows.Forms.Panel panel2;
         private System.Windows.Forms.Label StatusLabel;
-        private System.Windows.Forms.TreeView treeView1;
+        private System.Windows.Forms.TreeView listBrowderView;
         private System.Windows.Forms.Splitter splitter1;
     }
 }

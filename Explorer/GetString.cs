@@ -17,15 +17,15 @@ namespace Explorer {
         }
 
         private void Ok_Click(object sender, EventArgs e) {
-            DialogResult = DialogResult.OK;
+            this.DialogResult = DialogResult.OK;
             this.outref  = this.textBox1.Text;
-            this.Close();
+            Close();
         }
 
         private void Cancle_Click(object sender, EventArgs e) {
-            DialogResult = DialogResult.Cancel;
+            this.DialogResult = DialogResult.Cancel;
             this.outref = null;
-            this.Close();
+            Close();
         }
     }
 }
