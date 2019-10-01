@@ -29,13 +29,12 @@
         private void InitializeComponent()
         {
             this.listView1 = new System.Windows.Forms.ListView();
-            this.button1 = new System.Windows.Forms.Button();
             this.panel1 = new System.Windows.Forms.Panel();
             this.listBrowderView = new System.Windows.Forms.TreeView();
             this.panel2 = new System.Windows.Forms.Panel();
+            this.button2 = new System.Windows.Forms.Button();
             this.StatusLabel = new System.Windows.Forms.Label();
             this.splitter1 = new System.Windows.Forms.Splitter();
-            this.button2 = new System.Windows.Forms.Button();
             this.panel1.SuspendLayout();
             this.panel2.SuspendLayout();
             this.SuspendLayout();
@@ -47,20 +46,12 @@
             this.listView1.Location = new System.Drawing.Point(170, 0);
             this.listView1.Name = "listView1";
             this.listView1.Size = new System.Drawing.Size(906, 586);
+            this.listView1.Sorting = System.Windows.Forms.SortOrder.Ascending;
             this.listView1.TabIndex = 0;
             this.listView1.UseCompatibleStateImageBehavior = false;
+            this.listView1.View = System.Windows.Forms.View.Details;
             this.listView1.DoubleClick += new System.EventHandler(this.listView1_DoubleClick);
             this.listView1.MouseClick += new System.Windows.Forms.MouseEventHandler(this.ListView1_MouseClick);
-            // 
-            // button1
-            // 
-            this.button1.Location = new System.Drawing.Point(544, -2);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(72, 19);
-            this.button1.TabIndex = 1;
-            this.button1.Text = "scan c:\\";
-            this.button1.UseVisualStyleBackColor = true;
-            this.button1.Click += new System.EventHandler(this.button1_Click);
             // 
             // panel1
             // 
@@ -88,12 +79,22 @@
             // 
             this.panel2.Controls.Add(this.button2);
             this.panel2.Controls.Add(this.StatusLabel);
-            this.panel2.Controls.Add(this.button1);
             this.panel2.Dock = System.Windows.Forms.DockStyle.Bottom;
             this.panel2.Location = new System.Drawing.Point(170, 586);
             this.panel2.Name = "panel2";
             this.panel2.Size = new System.Drawing.Size(906, 20);
             this.panel2.TabIndex = 3;
+            // 
+            // button2
+            // 
+            this.button2.Dock = System.Windows.Forms.DockStyle.Right;
+            this.button2.Location = new System.Drawing.Point(834, 0);
+            this.button2.Name = "button2";
+            this.button2.Size = new System.Drawing.Size(72, 20);
+            this.button2.TabIndex = 2;
+            this.button2.Text = "LocalDisks";
+            this.button2.UseVisualStyleBackColor = true;
+            this.button2.Click += new System.EventHandler(this.button2_Click);
             // 
             // StatusLabel
             // 
@@ -111,16 +112,6 @@
             this.splitter1.Size = new System.Drawing.Size(3, 586);
             this.splitter1.TabIndex = 4;
             this.splitter1.TabStop = false;
-            // 
-            // button2
-            // 
-            this.button2.Location = new System.Drawing.Point(622, 0);
-            this.button2.Name = "button2";
-            this.button2.Size = new System.Drawing.Size(72, 19);
-            this.button2.TabIndex = 2;
-            this.button2.Text = "LocalDisks";
-            this.button2.UseVisualStyleBackColor = true;
-            this.button2.Click += new System.EventHandler(this.button2_Click);
             // 
             // Form1
             // 
@@ -144,7 +135,6 @@
         #endregion
 
         private System.Windows.Forms.ListView listView1;
-        private System.Windows.Forms.Button button1;
         private System.Windows.Forms.Panel panel1;
         private System.Windows.Forms.Panel panel2;
         private System.Windows.Forms.Label StatusLabel;
