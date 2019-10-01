@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
+using System.Linq;
 using System.Security.AccessControl;
 using System.Windows.Forms;
 using Explorer.Properties;
@@ -23,9 +24,16 @@ namespace Explorer {
             this.listView1.Columns.Add( "Size", 70,  HorizontalAlignment.Left );
             this.listView1.Columns.Add( "Type", -2,  HorizontalAlignment.Left );
 
-            this.listBrowderView.Nodes.Add( "C:\\" );
-            var e = new TreeViewEventArgs( this.listBrowderView.Nodes[0] );
-            treeView1_AfterExpand( null, e );
+            //this.listBrowderView.Nodes.Add( "C:\\" );
+            var i = 0;
+            foreach ( var dir in "ABCDEFGHIJKLMNOPQRSTUVWXYZ".Select( c => c + ":\\" ).Where( dir => Directory.Exists( dir ) ) ) {
+                this.listBrowderView.Nodes.Add( dir );
+
+                this.listBrowderView.Nodes[i].Nodes.Add( "empty" );
+                //var e = new TreeViewEventArgs( this.listBrowderView.Nodes[i] );
+                //treeView1_AfterExpand( null, e );
+                i++;
+            }
 
             this._ct = new ContextMenu( new[] { NewDialog() } );
         }
@@ -219,5 +227,6 @@ namespace Explorer {
             if ( e.Button == MouseButtons.Right ) this._ct.Show( this.listView1, e.Location );
         }
 
+        private void button2_Click(object sender, EventArgs e) { }
     }
 }

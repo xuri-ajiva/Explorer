@@ -58,6 +58,7 @@
     <Compile Include="GetString.Designer.cs">
       <DependentUpon>GetString.cs</DependentUpon>
     </Compile>
+    <Compile Include="Handler.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="Form1.resx">
