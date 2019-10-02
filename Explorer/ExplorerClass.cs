@@ -8,14 +8,14 @@ using System.Windows.Forms;
 using Explorer.Properties;
 
 namespace Explorer {
-    public partial class Form1 : Form {
-        private readonly IHandler _handler;
+    public partial class ExplorerClass : UserControl {
+        private IHandler _handler;
 
         //public static    string   CurrentDirectory = "C:\\";
         public const string TYPE_DIR  = "Directory";
         public const string TYPE_FILE = "File";
 
-        public Form1(IHandler _handler) {
+        public void Init(IHandler _handler) {
             this._handler = _handler;
             InitializeComponent();
             this.listView1.View       = View.Details;
@@ -41,6 +41,8 @@ namespace Explorer {
             this._ct = new ContextMenu( new[] { NewDialog() } );
         }
 
+        public ExplorerClass() { this.BackgroundImage = resources.ExplorerClassResources.Image1; }
+
         private MenuItem NewDialog() {
             var subitems = new[] { new MenuItem( "Folder", CoreateFolder ), new MenuItem( "File", CreateFile ) };
             return new MenuItem( "New", subitems );
@@ -49,7 +51,7 @@ namespace Explorer {
         private void CreateFile(object sender, EventArgs e) {
             var dir = new GetString( "FileName With Extention Name" );
             if ( dir.ShowDialog() == DialogResult.OK ) {
-                this._handler.CreateFile( this._handler.GetCurrentPath(), dir.outref );
+                this._handler.CreateFile( this._handler.GetCurrentPath()  + dir.outref );
                 List( this._handler.GetCurrentPath() );
             }
         }
@@ -57,15 +59,10 @@ namespace Explorer {
         private void CoreateFolder(object sender, EventArgs e) {
             var dir = new GetString( "Directory Name" );
             if ( dir.ShowDialog() == DialogResult.OK ) {
-                _handler.CreateDirectory( this._handler.GetCurrentPath(), dir.outref );
+                _handler.CreateDirectory( this._handler.GetCurrentPath() + dir.outref );
                 List( this._handler.GetCurrentPath() );
             }
         }
-
-        //private void button1_Click(object sender, EventArgs e) {
-        //    this._handler.SetCurrentPath( @"C:\" );
-        //    List( this._handler.GetCurrentPath() );
-        //}
 
         private void List(string dirToScan) {
             this._handler.ValidatePath();
@@ -157,7 +154,7 @@ namespace Explorer {
                 for ( var i = count; i < files.Length + count; i++ ) {
                     var item = new ListViewItem( Path.GetFileName( files[i - count] ), i );
                     item.SubItems.Add( files[i - count] );
-                    item.SubItems.Add( GetFileLenght( files[i - count] ) );
+                    item.SubItems.Add( /*GetFileLenght( files[i - count] )*/"" );
 
                     //type
                     item.SubItems.Add( TYPE_FILE );
@@ -190,7 +187,10 @@ namespace Explorer {
         }
 
 
-        private void Form1_Load(object sender, EventArgs e) { this.button2_Click( null, null ); }
+        private void Form1_Load(object sender, EventArgs e) {
+            
+            List( this._handler.GetCurrentPath() );
+        }
 
         private void treeView1_DoubleClick(object sender, EventArgs e) {
             try {
@@ -225,7 +225,7 @@ namespace Explorer {
             } catch { }
         }
 
-        private readonly ContextMenu _ct;
+        private ContextMenu _ct;
 
         private void ListView1_MouseClick(object sender, MouseEventArgs e) {
             if ( e.Button == MouseButtons.Right ) this._ct.Show( this.listView1, e.Location );

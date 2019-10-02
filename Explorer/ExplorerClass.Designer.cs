@@ -1,6 +1,6 @@
 ﻿namespace Explorer
 {
-    partial class Form1
+    partial class ExplorerClass
     {
         /// <summary>
         /// Erforderliche Designervariable.
@@ -45,7 +45,7 @@
             this.listView1.HideSelection = false;
             this.listView1.Location = new System.Drawing.Point(170, 0);
             this.listView1.Name = "listView1";
-            this.listView1.Size = new System.Drawing.Size(906, 586);
+            this.listView1.Size = new System.Drawing.Size(569, 412);
             this.listView1.Sorting = System.Windows.Forms.SortOrder.Ascending;
             this.listView1.TabIndex = 0;
             this.listView1.UseCompatibleStateImageBehavior = false;
@@ -59,7 +59,7 @@
             this.panel1.Dock = System.Windows.Forms.DockStyle.Left;
             this.panel1.Location = new System.Drawing.Point(0, 0);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(170, 606);
+            this.panel1.Size = new System.Drawing.Size(170, 432);
             this.panel1.TabIndex = 2;
             // 
             // listBrowderView
@@ -68,7 +68,7 @@
             this.listBrowderView.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.listBrowderView.Location = new System.Drawing.Point(0, 0);
             this.listBrowderView.Name = "listBrowderView";
-            this.listBrowderView.Size = new System.Drawing.Size(170, 606);
+            this.listBrowderView.Size = new System.Drawing.Size(170, 432);
             this.listBrowderView.TabIndex = 2;
             this.listBrowderView.AfterCollapse += new System.Windows.Forms.TreeViewEventHandler(this.treeView1_AfterCollapse);
             this.listBrowderView.AfterExpand += new System.Windows.Forms.TreeViewEventHandler(this.treeView1_AfterExpand);
@@ -80,15 +80,15 @@
             this.panel2.Controls.Add(this.button2);
             this.panel2.Controls.Add(this.StatusLabel);
             this.panel2.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.panel2.Location = new System.Drawing.Point(170, 586);
+            this.panel2.Location = new System.Drawing.Point(170, 412);
             this.panel2.Name = "panel2";
-            this.panel2.Size = new System.Drawing.Size(906, 20);
+            this.panel2.Size = new System.Drawing.Size(569, 20);
             this.panel2.TabIndex = 3;
             // 
             // button2
             // 
             this.button2.Dock = System.Windows.Forms.DockStyle.Right;
-            this.button2.Location = new System.Drawing.Point(834, 0);
+            this.button2.Location = new System.Drawing.Point(497, 0);
             this.button2.Name = "button2";
             this.button2.Size = new System.Drawing.Size(72, 20);
             this.button2.TabIndex = 2;
@@ -109,21 +109,20 @@
             // 
             this.splitter1.Location = new System.Drawing.Point(170, 0);
             this.splitter1.Name = "splitter1";
-            this.splitter1.Size = new System.Drawing.Size(3, 586);
+            this.splitter1.Size = new System.Drawing.Size(3, 412);
             this.splitter1.TabIndex = 4;
             this.splitter1.TabStop = false;
             // 
-            // Form1
+            // ExplorerClass
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1076, 606);
             this.Controls.Add(this.splitter1);
             this.Controls.Add(this.listView1);
             this.Controls.Add(this.panel2);
             this.Controls.Add(this.panel1);
-            this.Name = "Form1";
-            this.Text = "Form1";
+            this.Name = "ExplorerClass";
+            this.Size = new System.Drawing.Size(739, 432);
             this.Load += new System.EventHandler(this.Form1_Load);
             this.panel1.ResumeLayout(false);
             this.panel2.ResumeLayout(false);

@@ -10,15 +10,14 @@ namespace Explorer {
         string SetCurrentPath(string path);
 
         bool DirectoryExists(string  path);
-        void CreateDirectory(string  path, string directoryName);
-        void CreateFile(string       path, string filename);
-        void DeleteDirectory(string path, string directoryName);
-        void DeleteFile(string      path, string filename);
+        void CreateDirectory(string  path);
+        void CreateFile(string       path);
+        void DeleteDirectory(string path);
+        void DeleteFile(string      path);
         void ValidatePath();
         void DownloadFile(string     remotePath, string localPath);
         void OpenFile(string         localPath);
         void SetRemotePath(string    path);
-        void DeleteFile(string       filePath);
 
         string[] ListDirectory(string dirToList);
         string[] ListFiles(string     dirToList);

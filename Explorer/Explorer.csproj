@@ -46,11 +46,16 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Form1.cs">
-      <SubType>Form</SubType>
+    <Compile Include="ExplorerClass.cs">
+      <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="Form1.Designer.cs">
-      <DependentUpon>Form1.cs</DependentUpon>
+    <Compile Include="ExplorerClass.Designer.cs">
+      <DependentUpon>ExplorerClass.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ExplorerClass1.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>ExplorerClass.resx</DependentUpon>
     </Compile>
     <Compile Include="GetString.cs">
       <SubType>Form</SubType>
@@ -62,8 +67,17 @@
     <Compile Include="localHandler.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <EmbeddedResource Include="Form1.resx">
-      <DependentUpon>Form1.cs</DependentUpon>
+    <Compile Include="RemoteHandler.cs" />
+    <Compile Include="UserInterface.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="UserInterface.Designer.cs">
+      <DependentUpon>UserInterface.cs</DependentUpon>
+    </Compile>
+    <EmbeddedResource Include="ExplorerClass.resx">
+      <DependentUpon>ExplorerClass.cs</DependentUpon>
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>ExplorerClass1.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <EmbeddedResource Include="GetString.resx">
       <DependentUpon>GetString.cs</DependentUpon>
@@ -78,6 +92,9 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
+    <EmbeddedResource Include="UserInterface.resx">
+      <DependentUpon>UserInterface.cs</DependentUpon>
+    </EmbeddedResource>
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -90,6 +107,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Image1.bmp" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

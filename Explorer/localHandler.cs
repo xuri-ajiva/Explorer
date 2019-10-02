@@ -24,19 +24,19 @@ namespace Explorer {
         public bool DirectoryExists(string path) => Directory.Exists( path );
 
         /// <inheritdoc />
-        public void CreateDirectory(string path, string directoryName) { Directory.CreateDirectory( path + "\\" + directoryName ); }
+        public void CreateDirectory(string path) { Directory.CreateDirectory( path ); }
 
         /// <inheritdoc />
-        public void CreateFile(string path, string filename) { File.Create( path + filename ).Close(); }
+        public void CreateFile(string path) { File.Create( path  ).Close(); }
 
         /// <inheritdoc />
-        public void DeleteDirectory(string path, string directoryName) { Directory.Delete( path + directoryName ); }
+        public void DeleteDirectory(string path) { Directory.Delete( path ); }
 
         /// <inheritdoc />
-        public void DeleteFile(string path, string filename) { File.Delete( path + filename ); }
+        public void DeleteFile(string path) { File.Delete( path  ); }
 
         /// <inheritdoc />
-        public void ValidatePath() { this.CurrentPath = Path.GetFullPath( this.CurrentPath ); }
+        public void ValidatePath() { this.CurrentPath = Path.GetFullPath( string.IsNullOrEmpty( this.CurrentPath ) ? "." : this.CurrentPath ); }
 
         /// <inheritdoc />
         public void DownloadFile(string remotePath, string localPath) { }
@@ -52,10 +52,7 @@ namespace Explorer {
 
         /// <inheritdoc />
         public void SetRemotePath(string path) { this.CurrentPath = path; }
-
-        /// <inheritdoc />
-        public void DeleteFile(string filePath) { File.Delete( filePath ); }
-
+        
         /// <inheritdoc />
         public string[] ListDirectory(string dirToList) => Directory.GetDirectories( dirToList );
 
