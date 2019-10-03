@@ -1,22 +1,35 @@
-﻿using System;
+﻿#region using
+
+using System;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
-using System.Security.AccessControl;
 using System.Windows.Forms;
 using Explorer.Properties;
+using Explorer.Resources;
+
+#endregion
 
 namespace Explorer {
     public partial class ExplorerClass : UserControl {
-        private IHandler _handler;
-
         //public static    string   CurrentDirectory = "C:\\";
         public const string TYPE_DIR  = "Directory";
         public const string TYPE_FILE = "File";
 
-        public void Init(IHandler _handler) {
-            this._handler = _handler;
+        private ContextMenu _ct;
+        private IHandler    _handler;
+
+        private bool _abs = true;
+
+        public ExplorerClass() => this.BackgroundImage = Resource1.Image1;
+
+        public void Init(IHandler handler) {
+            this.BackgroundImage = new ErrorProvider().Icon.ToBitmap();
+            BackgroundImageLayout = ImageLayout.Center;
+            if ( handler.GetType() == typeof(NullHandler) ) return;
+
+            this._handler = handler;
             InitializeComponent();
             this.listView1.View       = View.Details;
             this.listView1.CheckBoxes = false;
@@ -29,7 +42,7 @@ namespace Explorer {
 
             //this.listBrowderView.Nodes.Add( "C:\\" );
             var i = 0;
-            foreach ( var dir in "ABCDEFGHIJKLMNOPQRSTUVWXYZ".Select( c => c + ":\\" ).Where( _handler.DirectoryExists ) ) {
+            foreach ( var dir in "ABCDEFGHIJKLMNOPQRSTUVWXYZ".Select( c => c + ":\\" ).Where( handler.DirectoryExists ) ) {
                 this.listBrowderView.Nodes.Add( dir );
 
                 this.listBrowderView.Nodes[i].Nodes.Add( "empty" );
@@ -41,8 +54,6 @@ namespace Explorer {
             this._ct = new ContextMenu( new[] { NewDialog() } );
         }
 
-        public ExplorerClass() { this.BackgroundImage = resources.ExplorerClassResources.Image1; }
-
         private MenuItem NewDialog() {
             var subitems = new[] { new MenuItem( "Folder", CoreateFolder ), new MenuItem( "File", CreateFile ) };
             return new MenuItem( "New", subitems );
@@ -51,7 +62,7 @@ namespace Explorer {
         private void CreateFile(object sender, EventArgs e) {
             var dir = new GetString( "FileName With Extention Name" );
             if ( dir.ShowDialog() == DialogResult.OK ) {
-                this._handler.CreateFile( this._handler.GetCurrentPath()  + dir.outref );
+                this._handler.CreateFile( this._handler.GetCurrentPath() + dir.outref );
                 List( this._handler.GetCurrentPath() );
             }
         }
@@ -59,7 +70,7 @@ namespace Explorer {
         private void CoreateFolder(object sender, EventArgs e) {
             var dir = new GetString( "Directory Name" );
             if ( dir.ShowDialog() == DialogResult.OK ) {
-                _handler.CreateDirectory( this._handler.GetCurrentPath() + dir.outref );
+                this._handler.CreateDirectory( this._handler.GetCurrentPath() + dir.outref );
                 List( this._handler.GetCurrentPath() );
             }
         }
@@ -69,10 +80,10 @@ namespace Explorer {
             var count = 0;
             this.listView1.Items.Clear();
             count = Add_Parent_Dir( count );
-            _handler.ValidatePath();
+            this._handler.ValidatePath();
             count = List_Dir( dirToScan, count );
             count = List_Files( dirToScan, count );
-            if ( this.StatusLabel.ForeColor == Color.DarkGreen ) this.StatusLabel.Text = Resources.Form1_List_CurrentDirectory__ + this._handler.GetCurrentPath();
+            if ( this.StatusLabel.ForeColor == Color.DarkGreen ) this.StatusLabel.Text = "CurrentDirectory: " + this._handler.GetCurrentPath();
         }
 
         private void ProcrestreeView(string dirToList) {
@@ -97,15 +108,22 @@ namespace Explorer {
 
         private void listView1_DoubleClick(object sender, EventArgs e) {
             if ( this.listView1.SelectedItems[0].SubItems[3].Text == TYPE_DIR ) {
-                this._handler.SetCurrentPath( this._handler.GetCurrentPath() + this.listView1.SelectedItems[0].Text + @"\" );
-                _handler.ValidatePath();
+                if ( this._abs ) {
+                    this._handler.SetCurrentPath( this.listView1.SelectedItems[0].Text + @"\" );
+                    this._abs = false;
+                }
+                else {
+                    this._handler.SetCurrentPath( this._handler.GetCurrentPath() + this.listView1.SelectedItems[0].Text + @"\" );
+                    this._handler.ValidatePath();
+                }
+
                 List( this._handler.GetCurrentPath() );
             }
             else {
                 try {
                     this._handler.OpenFile( this.listView1.SelectedItems[0].SubItems[1].Text );
-                } catch {
-                    // ignored
+                } catch (Exception ex) {
+                    MessageBox.Show( ex.Message );
                 }
             }
         }
@@ -188,8 +206,8 @@ namespace Explorer {
 
 
         private void Form1_Load(object sender, EventArgs e) {
-            
-            List( this._handler.GetCurrentPath() );
+            this.button2_Click( null, null );
+            //List( this._handler.GetCurrentPath() );
         }
 
         private void treeView1_DoubleClick(object sender, EventArgs e) {
@@ -225,8 +243,6 @@ namespace Explorer {
             } catch { }
         }
 
-        private ContextMenu _ct;
-
         private void ListView1_MouseClick(object sender, MouseEventArgs e) {
             if ( e.Button == MouseButtons.Right ) this._ct.Show( this.listView1, e.Location );
         }
@@ -236,7 +252,7 @@ namespace Explorer {
             this.listBrowderView.Nodes.Clear();
 
             var i = 0;
-            foreach ( var dir in "ABCDEFGHIJKLMNOPQRSTUVWXYZ".Select( c => c + ":\\" ).Where( _handler.DirectoryExists ) ) {
+            foreach ( var dir in "ABCDEFGHIJKLMNOPQRSTUVWXYZ".Select( c => c + ":\\" ).Where( this._handler.DirectoryExists ) ) {
                 var item = new ListViewItem( dir.Substring( 0, 2 ) );
                 item.SubItems.Add( dir );
                 item.SubItems.Add( "" );
@@ -250,6 +266,7 @@ namespace Explorer {
                 i++;
             }
 
+            this._abs = true;
             this._handler.SetCurrentPath( "" );
         }
     }

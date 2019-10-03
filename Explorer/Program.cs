@@ -17,16 +17,14 @@ namespace Explorer {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault( false );
 
-            var xml = To_XML( new LocalHandler( "C:\\" ).ListDirectory( "C:\\" ) );
-            var enc = Encoder( xml );
-            var dec = Decoder( enc );
-            Console.WriteLine( xml );
-            Console.WriteLine( dec );
-            var nor = From_XML( dec );
-            
+            // var xml = To_XML( new LocalHandler( "C:\\" ).ListDirectory( "C:\\" ) );
+            // var enc = Encoder( xml );
+            // var dec = Decoder( enc );
+            // Console.WriteLine( xml );
+            // Console.WriteLine( dec );
+            // var nor = From_XML( dec );
 
             new Program();
-
         }
 
         private static IHandler _remoteHandler;
@@ -95,8 +93,7 @@ namespace Explorer {
                             my.SetCurrentPath( contend );
                             break;
                         case GET_REMOTE_PATH:
-                            ret = TRUE;
-                            my.GetCurrentPath();
+                            ret = my.GetCurrentPath();
                             break;
                         default:
                             ret = FALSE;
@@ -111,12 +108,20 @@ namespace Explorer {
         }
 
         private void initRemote() {
-            //var h = new GetString( "Bitte Remote ip Angeben" );
-            //if ( h.ShowDialog() == DialogResult.OK ) {
-            TcpClient cl = new TcpClient();
-            cl.Connect( IPAddress.Parse( /* h.outref*/ "127.0.0.1" ), PORT );
-            _remoteHandler = new RemoteHandler( cl );
-            //}
+            var h = new GetString( "Bitte Remote ip Angeben" );
+            if ( h.ShowDialog() == DialogResult.OK ) {
+                try {
+                    TcpClient cl = new TcpClient();
+                    cl.Connect( IPAddress.Parse( h.outref /*"127.0.0.1" */ ), PORT );
+                    _remoteHandler = new RemoteHandler( cl );
+                } catch (Exception e) {
+                    MessageBox.Show( e.Message );
+                    Environment.Exit( e.HResult );
+                }
+            }
+            else {
+                _remoteHandler = new NullHandler();
+            }
         }
     }
 }

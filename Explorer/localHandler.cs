@@ -15,10 +15,16 @@ namespace Explorer {
         public LocalHandler(string currentPath = "") { this.CurrentPath = currentPath; }
 
         /// <inheritdoc />
-        public string GetCurrentPath() => this.CurrentPath;
+        public string GetCurrentPath() => string.IsNullOrEmpty( this.CurrentPath ) ? "/" : this.CurrentPath;
 
         /// <inheritdoc />
-        public string SetCurrentPath(string path) => this.CurrentPath = path;
+        public void SetCurrentPath(string path) => this.CurrentPath = path;
+
+        /// <inheritdoc />
+        public string GetRemotePath() => this.CurrentPath;
+
+        /// <inheritdoc />
+        public void SetRemotePath(string path) { this.CurrentPath = path; }
 
         /// <inheritdoc />
         public bool DirectoryExists(string path) => Directory.Exists( path );
@@ -27,13 +33,13 @@ namespace Explorer {
         public void CreateDirectory(string path) { Directory.CreateDirectory( path ); }
 
         /// <inheritdoc />
-        public void CreateFile(string path) { File.Create( path  ).Close(); }
+        public void CreateFile(string path) { File.Create( path ).Close(); }
 
         /// <inheritdoc />
         public void DeleteDirectory(string path) { Directory.Delete( path ); }
 
         /// <inheritdoc />
-        public void DeleteFile(string path) { File.Delete( path  ); }
+        public void DeleteFile(string path) { File.Delete( path ); }
 
         /// <inheritdoc />
         public void ValidatePath() { this.CurrentPath = Path.GetFullPath( string.IsNullOrEmpty( this.CurrentPath ) ? "." : this.CurrentPath ); }
@@ -50,9 +56,6 @@ namespace Explorer {
             }
         }
 
-        /// <inheritdoc />
-        public void SetRemotePath(string path) { this.CurrentPath = path; }
-        
         /// <inheritdoc />
         public string[] ListDirectory(string dirToList) => Directory.GetDirectories( dirToList );
 

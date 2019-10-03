@@ -2,13 +2,11 @@
 
 using System;
 using System.Diagnostics;
-using System.Globalization;
 using System.IO;
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
 using System.Text;
-using System.Windows.Forms;
-using System.Xml;
+using System.Threading;
 using System.Xml.Serialization;
 
 #endregion
@@ -33,17 +31,17 @@ namespace Explorer {
         private readonly TcpClient _cl;
         protected        byte[]    buffer;
 
-        public string CurrentPath;
+        public string CurrentPath { get => GetRemotePath(); set => SetRemotePath( value ); }
 
         public RemoteHandler(TcpClient cl) {
             this._cl         = cl;
             this.CurrentPath = "";
         }
 
-        [DebuggerStepThrough] private void ResetBuffer(int size = BUFFER_SIZE) { this.buffer = new byte[size]; }
-
         [DebuggerStepThrough] public static byte[] Encoder(string text)  => Encoding.Unicode.GetBytes( text );
         [DebuggerStepThrough] public static string Decoder(byte[] bytes) => Encoding.Unicode.GetString( bytes );
+
+        [DebuggerStepThrough] private void ResetBuffer(int size = BUFFER_SIZE) { this.buffer = new byte[size]; }
 
         //[DebuggerStepThrough]
         public void BufferCopy(string ac, string contend) {
@@ -70,7 +68,7 @@ namespace Explorer {
             }
         }
 
-        [DebuggerStepThrough]
+        //[DebuggerStepThrough]
         private string ReseveString() {
             ResetBuffer();
 
@@ -85,8 +83,24 @@ namespace Explorer {
         /// <inheritdoc />
         public string GetCurrentPath() => this.CurrentPath;
 
+
         /// <inheritdoc />
-        public string SetCurrentPath(string path) => this.CurrentPath = path;
+        public void SetCurrentPath(string path) => this.CurrentPath = path;
+
+        /// <inheritdoc />
+        public string GetRemotePath() {
+            BufferCopy( GET_REMOTE_PATH, "" );
+            Send();
+            return ReseveString();
+        }
+
+        /// <inheritdoc />
+        public void SetRemotePath(string path) {
+            BufferCopy( SET_REMOTE_PATH, path );
+            Send();
+            var str = ReseveString();
+            if ( str != TRUE ) throw new ExternalException( str );
+        }
 
         /// <inheritdoc />
         public bool DirectoryExists(string path) {
@@ -138,8 +152,7 @@ namespace Explorer {
         public void ValidatePath() {
             BufferCopy( MAKE_PATH, "" );
             Send();
-            var str = ReseveString();
-            //if ( str != TRUE ) throw new ExternalException( str );
+            ReseveString();
         }
 
         /// <inheritdoc />
@@ -149,14 +162,6 @@ namespace Explorer {
         public void OpenFile(string localPath) { throw new NotImplementedException(); }
 
         /// <inheritdoc />
-        public void SetRemotePath(string path) {
-            BufferCopy( SET_REMOTE_PATH, path );
-            Send();
-            var str = ReseveString();
-            if ( str != TRUE ) throw new ExternalException( str );
-        }
-
-        /// <inheritdoc />
         public string[] ListDirectory(string dirToList) {
             BufferCopy( GET_DIRECTORYS, dirToList );
             Send();
@@ -164,8 +169,9 @@ namespace Explorer {
             try {
                 return From_XML( str );
             } catch (Exception e) {
-                if ( !e.Message.Contains( "(1, 1)" ) )
-                    MessageBox.Show( e.Message +"\n" + str);
+                //if ( !e.Message.Contains( "(1, 1)" ) )
+                //MessageBox.Show( /*e.Message +"\n" +*/ str );
+                throw new Exception( str );
             }
 
             return null;
@@ -179,8 +185,9 @@ namespace Explorer {
             try {
                 return From_XML( str );
             } catch (Exception e) {
-                if ( !e.Message.Contains( "(1, 1)" ) )
-                    MessageBox.Show( e.Message +"\n" + str);
+                //if ( !e.Message.Contains( "(1, 1)" ) )
+                //MessageBox.Show( /*e.Message +"\n" + */str );
+                throw new Exception( str );
             }
 
             return null;
@@ -199,7 +206,7 @@ namespace Explorer {
 
         public static string To_XML(string[] contend) {
             var x = new XmlSerializer( typeof(string[]) );
-            using ( StringWriter textWriter = new StringWriter() ) {
+            using ( var textWriter = new StringWriter() ) {
                 x.Serialize( textWriter, contend );
                 return textWriter.ToString();
             }
