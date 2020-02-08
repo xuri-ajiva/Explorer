@@ -35,12 +35,23 @@ namespace ExplorerBase {
         public RemoteHandler(TcpClient cl) {
             this._cl         = cl;
             this.CurrentPath = "";
+            OnSetCurrentPath?.Invoke();
         }
 
-        public string CurrentPath { get => GetRemotePath(); set => SetRemotePath( value ); }
+        public string CurrentPath {
+            get {
+                OnGetCurrentPath?.Invoke();
+                return GetRemotePath();
+            }
+            set {
+                OnSetCurrentPath?.Invoke();
+                SetRemotePath( value );
+            }
+        }
 
-        [DebuggerStepThrough] public static byte[] Encoder(string text)  => Encoding.Unicode.GetBytes( text );
-        [DebuggerStepThrough] public static string Decoder(byte[] bytes) => Encoding.Unicode.GetString( bytes );
+        [DebuggerStepThrough] public static byte[] Encoder(string text) { return Encoding.Unicode.GetBytes( text ); }
+
+        [DebuggerStepThrough] public static string Decoder(byte[] bytes) { return Encoding.Unicode.GetString( bytes ); }
 
 
         public static Thread StartServer(int PORT) {
@@ -153,14 +164,21 @@ namespace ExplorerBase {
         #region Implementation of IHandler
 
         /// <inheritdoc />
-        public string GetCurrentPath() => this.CurrentPath;
+        public string GetCurrentPath() {
+            OnGetCurrentPath?.Invoke();
+            return this.CurrentPath;
+        }
 
 
         /// <inheritdoc />
-        public void SetCurrentPath(string path) => this.CurrentPath = path;
+        public void SetCurrentPath(string path) {
+            OnSetCurrentPath?.Invoke();
+            this.CurrentPath = path;
+        }
 
         /// <inheritdoc />
         public string GetRemotePath() {
+            OnGetRemotePath?.Invoke();
             BufferCopy( GET_REMOTE_PATH, "" );
             Send();
             return ReseveString();
@@ -168,6 +186,7 @@ namespace ExplorerBase {
 
         /// <inheritdoc />
         public void SetRemotePath(string path) {
+            OnSetRemotePath?.Invoke();
             BufferCopy( SET_REMOTE_PATH, path );
             Send();
             var str = ReseveString();
@@ -176,6 +195,7 @@ namespace ExplorerBase {
 
         /// <inheritdoc />
         public bool DirectoryExists(string path) {
+            OnDirectoryExists?.Invoke();
             BufferCopy( DIRECTORY_EXISTS, path );
             Send();
             var str = ReseveString();
@@ -191,6 +211,7 @@ namespace ExplorerBase {
 
         /// <inheritdoc />
         public void CreateDirectory(string path) {
+            OnCreateDirectory?.Invoke();
             BufferCopy( CREATE_DIRECTORY, path );
             Send();
             var str = ReseveString();
@@ -199,6 +220,7 @@ namespace ExplorerBase {
 
         /// <inheritdoc />
         public void CreateFile(string path) {
+            OnCreateFile?.Invoke();
             BufferCopy( CREATE_FILE, path );
             Send();
             var str = ReseveString();
@@ -207,6 +229,7 @@ namespace ExplorerBase {
 
         /// <inheritdoc />
         public void DeleteDirectory(string path) {
+            OnDeleteDirectory?.Invoke();
             BufferCopy( DELETE_DIRECTORY, path );
             Send();
             var str = ReseveString();
@@ -215,6 +238,7 @@ namespace ExplorerBase {
 
         /// <inheritdoc />
         public void DeleteFile(string path) {
+            OnDeleteFile?.Invoke();
             BufferCopy( DELETE_FILE, path );
             Send();
             var str = ReseveString();
@@ -223,19 +247,27 @@ namespace ExplorerBase {
 
         /// <inheritdoc />
         public void ValidatePath() {
+            OnValidatePath?.Invoke();
             BufferCopy( MAKE_PATH, "" );
             Send();
             ReseveString();
         }
 
         /// <inheritdoc />
-        public void DownloadFile(string remotePath, string localPath) { throw new NotImplementedException(); }
+        public void DownloadFile(string remotePath, string localPath) {
+            OnDownloadFile?.Invoke();
+            throw new NotImplementedException();
+        }
 
         /// <inheritdoc />
-        public void OpenFile(string localPath) { throw new NotImplementedException(); }
+        public void OpenFile(string localPath) {
+            OnOpenFile?.Invoke();
+            throw new NotImplementedException();
+        }
 
         /// <inheritdoc />
         public string[] ListDirectory(string dirToList) {
+            OnListDirectory?.Invoke();
             BufferCopy( GET_DIRECTORYS, dirToList );
             Send();
             var str = ReseveString();
@@ -253,6 +285,7 @@ namespace ExplorerBase {
 
         /// <inheritdoc />
         public string[] ListFiles(string dirToList) {
+            OnListFiles?.Invoke();
             BufferCopy( GET_FILES, dirToList );
             Send();
             var str = ReseveString();
@@ -267,6 +300,48 @@ namespace ExplorerBase {
 
             return null;
         }
+
+        /// <inheritdoc />
+        public event Action OnGetCurrentPath;
+
+        /// <inheritdoc />
+        public event Action OnSetCurrentPath;
+
+        /// <inheritdoc />
+        public event Action OnSetRemotePath;
+
+        /// <inheritdoc />
+        public event Action OnGetRemotePath;
+
+        /// <inheritdoc />
+        public event Action OnDirectoryExists;
+
+        /// <inheritdoc />
+        public event Action OnCreateDirectory;
+
+        /// <inheritdoc />
+        public event Action OnCreateFile;
+
+        /// <inheritdoc />
+        public event Action OnDeleteDirectory;
+
+        /// <inheritdoc />
+        public event Action OnDeleteFile;
+
+        /// <inheritdoc />
+        public event Action OnValidatePath;
+
+        /// <inheritdoc />
+        public event Action OnDownloadFile;
+
+        /// <inheritdoc />
+        public event Action OnOpenFile;
+
+        /// <inheritdoc />
+        public event Action OnListDirectory;
+
+        /// <inheritdoc />
+        public event Action OnListFiles;
 
         #endregion
 

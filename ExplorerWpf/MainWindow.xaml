@@ -4,18 +4,19 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:local="clr-namespace:ExplorerWpf"
-    xmlns:WPF="clr-namespace:ConsoleControl.WPF;assembly=ConsoleControl.WPF" x:Class="ExplorerWpf.MainWindow"
+    xmlns:WPF="clr-namespace:ConsoleControl.WPF;assembly=ConsoleControl.WPF"
+    xmlns:forms="clr-namespace:System.Windows.Forms;assembly=System.Windows.Forms"
+    xmlns:wf="clr-namespace:System.Windows.Forms;assembly=System.Windows.Forms"
+    x:Class="ExplorerWpf.MainWindow"
     mc:Ignorable="d"
-    Title="MainWindow" Height="524.626" Width="800.07" Background="#1F000000" AllowsTransparency="True"
-    WindowStyle="None" WindowState="Normal" ResizeMode="CanResize">
+    Title="MainWindow" Height="524.626" Width="800.07" Background="#1F000000"  ResizeMode="CanResize" Loaded="MainWindow_OnLoaded">
     <WindowChrome.WindowChrome>
         <WindowChrome
             CaptionHeight="0"
-            ResizeBorderThickness="5" />
+            ResizeBorderThickness="10" />
     </WindowChrome.WindowChrome>
 
     <Grid>
-
         <Grid Background="Red" MouseDown="MoveWindow" Height="20" VerticalAlignment="Top">
             <Button VerticalAlignment="Top" Height="20" Content="❌" FontSize="10" Foreground="#FFFF1111" Click="CloseClick" HorizontalAlignment="Right" Width="20">
                 <Button.Background>
@@ -55,7 +56,7 @@
                 </Button.Background>
             </Button>
         </Grid>
-        <Grid Background="#FF535353" Margin="0,20,0,0">
+        <Grid Margin="0,20,0,0">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="21*"/>
@@ -67,21 +68,15 @@
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="10*" />
                 </Grid.RowDefinitions>
-                <Grid Background="Black"/>
+                <Grid />
 
                 <GridSplitter Grid.Column="1" HorizontalAlignment="Stretch"/>
-                <ScrollViewer Background="#FF395300" Template="{DynamicResource ScrollViewerControlTemplate1}" Grid.Column="2">
-                    <Grid Height="838">
-                        <Grid.RowDefinitions>
-                            <RowDefinition/>
-                        </Grid.RowDefinitions>
-                    </Grid>
-                </ScrollViewer>
+                <Grid Grid.Column="2"  x:Name="grid1" />
                 <GridSplitter Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Center" Background="Black"
-                    ShowsPreview="True" Height="6" Grid.ColumnSpan="3" />
+                              ShowsPreview="True" Height="6" Grid.ColumnSpan="3" />
 
-                <Grid Grid.Row="2" Grid.Column="0" Background="#FF0901AE" Grid.ColumnSpan="3">
-                    <WPF:ConsoleControl x:Name="consoleX" Background="#60111111" />
+                <Grid Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3" Background="Black">
+                    <WPF:ConsoleControl x:Name="consoleX" Background="#60111111" FontWeight="Bold" Foreground="Red" />
                 </Grid>
             </Grid>
         </Grid>

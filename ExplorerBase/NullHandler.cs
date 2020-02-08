@@ -1,5 +1,7 @@
-﻿namespace ExplorerBase {
-    internal class NullHandler : IHandler {
+﻿using System;
+
+namespace ExplorerBase {
+    public class NullHandler : IHandler {
 
         #region Implementation of IHandler
 
@@ -44,6 +46,48 @@
 
         /// <inheritdoc />
         public string[] ListFiles(string dirToList) { return new string[] { }; }
+
+        /// <inheritdoc />
+        public event Action OnGetCurrentPath;
+
+        /// <inheritdoc />
+        public event Action OnSetCurrentPath;
+
+        /// <inheritdoc />
+        public event Action OnSetRemotePath;
+
+        /// <inheritdoc />
+        public event Action OnGetRemotePath;
+
+        /// <inheritdoc />
+        public event Action OnDirectoryExists;
+
+        /// <inheritdoc />
+        public event Action OnCreateDirectory;
+
+        /// <inheritdoc />
+        public event Action OnCreateFile;
+
+        /// <inheritdoc />
+        public event Action OnDeleteDirectory;
+
+        /// <inheritdoc />
+        public event Action OnDeleteFile;
+
+        /// <inheritdoc />
+        public event Action OnValidatePath;
+
+        /// <inheritdoc />
+        public event Action OnDownloadFile;
+
+        /// <inheritdoc />
+        public event Action OnOpenFile;
+
+        /// <inheritdoc />
+        public event Action OnListDirectory;
+
+        /// <inheritdoc />
+        public event Action OnListFiles;
 
         #endregion
 

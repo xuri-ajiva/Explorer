@@ -13,6 +13,7 @@ using System.Windows.Automation.Peers;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Documents;
+using System.Windows.Forms;
 using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media;
@@ -20,6 +21,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using ConsoleControlAPI;
+using Explorer;
 
 namespace ExplorerWpf {
     /// <summary>
@@ -39,12 +41,17 @@ namespace ExplorerWpf {
             InitializeComponent();
             /*DataContext =  dc;
             Loaded      += MainWindow_Loaded;*/
-            //this.consoleX.ShowDiagnostics = true;
+            //this.consoleX.ShowDiagnostics = true;   
+            this.consoleX.InitializeComponent();
             this.consoleX.OnProcessOutput += ConsoleXOnOnProcessOutput;
             this.consoleX.OnProcessInput  += ConsoleXOnOnProcessInput;
             this.consoleX.StartProcess( "cmd.exe", "" );
             this.consoleX.IsInputEnabled = true;
+            this.consoleX.Visibility     = Visibility.Collapsed;
+            this.consoleX.Foreground = Brushes.LimeGreen;
+            consoleX.FontStyle = new FontStyle(){};
         }
+
 
         private bool first = false;
 
@@ -56,21 +63,23 @@ namespace ExplorerWpf {
         private void ConsoleXOnOnProcessOutput(object sender, ProcessEventArgs args) {
             if ( !this.first ) {
                 new Thread( () => {
-                    Thread.Sleep( 2000 );
+                    Thread.Sleep( 1000 );
 
                     var dispatcher = this.Dispatcher;
 
                     if ( dispatcher != null ) {
                         dispatcher.Invoke( () => { this.consoleX.ProcessInterface.WriteInput( "@echo off" ); } );
-                        Thread.Sleep( 1000 );
+                        Thread.Sleep( 100 );
                         dispatcher.Invoke( () => {
                             this.consoleX.ClearOutput();
-                            this.consoleX.WriteOutput( "Console Support Enabled!", Color.FromRgb( 0, 129, 255 ) );
+                            this.consoleX.WriteOutput( "Console Support Enabled!\n", Color.FromRgb( 0, 129, 255 ) );
+                            this.consoleX.Visibility = Visibility.Visible;
                         } );
                     }
                     else { }
-                } ).Start();
-
+                } );//.Start();
+                 
+                this.consoleX.Visibility = Visibility.Visible;
                 this.first = true;
             }
 
@@ -79,7 +88,8 @@ namespace ExplorerWpf {
             }
 
             //if ( Regex.IsMatch( args.Content, @"[A-Z]:\\[^>]*>" ) ) {
-            this.consoleX.WriteOutput( "->", Colors.Yellow );
+            this.consoleX.WriteOutput( "> ", Colors.Yellow );
+            this.consoleX.WriteOutput( " ", Colors.DeepSkyBlue );
             //}
         }
 
@@ -125,21 +135,41 @@ namespace ExplorerWpf {
 
             return IntPtr.Zero;
         }*/
-        private void CloseClick(object sender, RoutedEventArgs e) {
-            this.Close();
-        }
+        private void CloseClick(object sender, RoutedEventArgs e) { this.Close(); }
 
         private void MaxClick(object sender, RoutedEventArgs e) { this.WindowState = this.WindowState == WindowState.Normal ? WindowState.Maximized : WindowState.Normal; }
 
         private void MinClick(object sender, RoutedEventArgs e) {
             //if ( WindowState == WindowState.Normal ) 
-                WindowState = WindowState.Minimized;
+            WindowState = WindowState.Minimized;
         }
 
         private void PingClick(object sender, RoutedEventArgs e) { this.Topmost = !Topmost; }
 
-        private void MoveWindow(object sender, MouseButtonEventArgs e) {
-            this.DragMove();
+        private void MoveWindow(object sender, MouseButtonEventArgs e) { this.DragMove(); }
+
+        private void listview_SelectionChanged(object sender, SelectionChangedEventArgs e) { }
+
+        ExplorerClass             c;
+        private ExplorerBase.LocalHandler le = new ExplorerBase.LocalHandler( "C:\\" );
+
+        private void MainWindow_OnLoaded(object sender, RoutedEventArgs e) {
+            System.Windows.Forms.Integration.WindowsFormsHost host =
+                new System.Windows.Forms.Integration.WindowsFormsHost();
+
+            c = new ExplorerClass();
+
+        this.le.OnSetCurrentPath += Update;
+        this.le.OnSetRemotePath += Update;
+
+            this.c.Init(le);
+            this.c.Dock = DockStyle.Fill;
+            host.Child  = this.c;
+            this.grid1.Children.Add( host );
+        }
+
+        private void Update() {
+            this.consoleX.ProcessInterface.WriteInput( "cd \""+le.GetCurrentPath() + "\"" );
         }
     }
 
