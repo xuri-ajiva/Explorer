@@ -42,7 +42,7 @@
             // 
             this.splitter1.Location = new System.Drawing.Point(652, 0);
             this.splitter1.Name = "splitter1";
-            this.splitter1.Size = new System.Drawing.Size(10, 544);
+            this.splitter1.Size = new System.Drawing.Size(10, 519);
             this.splitter1.TabIndex = 1;
             this.splitter1.TabStop = false;
             // 
@@ -52,7 +52,7 @@
             this.LocalExplorer.Dock = System.Windows.Forms.DockStyle.Fill;
             this.LocalExplorer.Location = new System.Drawing.Point(662, 0);
             this.LocalExplorer.Name = "LocalExplorer";
-            this.LocalExplorer.Size = new System.Drawing.Size(668, 544);
+            this.LocalExplorer.Size = new System.Drawing.Size(644, 519);
             this.LocalExplorer.TabIndex = 3;
             this.LocalExplorer.TabStop = false;
             this.LocalExplorer.Text = "LocalExplorer";
@@ -63,7 +63,7 @@
             this.explorerClass2.Dock = System.Windows.Forms.DockStyle.Fill;
             this.explorerClass2.Location = new System.Drawing.Point(3, 16);
             this.explorerClass2.Name = "explorerClass2";
-            this.explorerClass2.Size = new System.Drawing.Size(662, 525);
+            this.explorerClass2.Size = new System.Drawing.Size(638, 500);
             this.explorerClass2.TabIndex = 3;
             this.explorerClass2.Load += new System.EventHandler(this.explorerClass2_Load);
             // 
@@ -73,7 +73,7 @@
             this.RemoteExplorrer.Dock = System.Windows.Forms.DockStyle.Left;
             this.RemoteExplorrer.Location = new System.Drawing.Point(0, 0);
             this.RemoteExplorrer.Name = "RemoteExplorrer";
-            this.RemoteExplorrer.Size = new System.Drawing.Size(652, 544);
+            this.RemoteExplorrer.Size = new System.Drawing.Size(652, 519);
             this.RemoteExplorrer.TabIndex = 4;
             this.RemoteExplorrer.TabStop = false;
             this.RemoteExplorrer.Text = "RemoteExplorrer";
@@ -84,7 +84,7 @@
             this.explorerClass1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.explorerClass1.Location = new System.Drawing.Point(3, 16);
             this.explorerClass1.Name = "explorerClass1";
-            this.explorerClass1.Size = new System.Drawing.Size(646, 525);
+            this.explorerClass1.Size = new System.Drawing.Size(646, 500);
             this.explorerClass1.TabIndex = 2;
             this.explorerClass1.Load += new System.EventHandler(this.explorerClass1_Load);
             // 
@@ -92,7 +92,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1330, 544);
+            this.ClientSize = new System.Drawing.Size(1306, 519);
             this.Controls.Add(this.LocalExplorer);
             this.Controls.Add(this.splitter1);
             this.Controls.Add(this.RemoteExplorrer);

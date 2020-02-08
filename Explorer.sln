@@ -1,11 +1,15 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.28307.421
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29728.190
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Explorer", "Explorer\Explorer.csproj", "{79E51DDB-FA42-49AF-9F2E-3F63A5B688B8}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestBuilds", "TestBuilds\TestBuilds.csproj", "{D6BC168C-BE2B-4FA1-A0C2-6838F3C182FF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExplorerBase", "ExplorerBase\ExplorerBase.csproj", "{6EC7B9E5-C196-4E31-B5BB-A84BE017E164}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExplorerWpf", "ExplorerWpf\ExplorerWpf.csproj", "{966F2BCD-54BE-41BD-A1E0-E6798F5B12FE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +25,14 @@ Global
 		{D6BC168C-BE2B-4FA1-A0C2-6838F3C182FF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D6BC168C-BE2B-4FA1-A0C2-6838F3C182FF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D6BC168C-BE2B-4FA1-A0C2-6838F3C182FF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6EC7B9E5-C196-4E31-B5BB-A84BE017E164}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6EC7B9E5-C196-4E31-B5BB-A84BE017E164}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6EC7B9E5-C196-4E31-B5BB-A84BE017E164}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6EC7B9E5-C196-4E31-B5BB-A84BE017E164}.Release|Any CPU.Build.0 = Release|Any CPU
+		{966F2BCD-54BE-41BD-A1E0-E6798F5B12FE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{966F2BCD-54BE-41BD-A1E0-E6798F5B12FE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{966F2BCD-54BE-41BD-A1E0-E6798F5B12FE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{966F2BCD-54BE-41BD-A1E0-E6798F5B12FE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

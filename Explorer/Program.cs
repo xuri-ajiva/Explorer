@@ -30,8 +30,6 @@ namespace Explorer {
         private static IHandler _remoteHandler;
 
         public Program() {
-            new Thread( CreateServer ).Start();
-
             initRemote();
 
             var t = new Thread( () => {
