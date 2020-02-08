@@ -7,10 +7,11 @@ using System.IO;
 using System.Linq;
 using System.Windows.Forms;
 using ExplorerBase;
+using ExplorerBase.Handlers;
 
 #endregion
 
-namespace Explorer {
+namespace ExplorerBase.UI {
     public partial class ExplorerClass : UserControl {
         //public static    string   CurrentDirectory = "C:\\";
         public const string TYPE_DIR  = "Directory";
@@ -62,21 +63,21 @@ namespace Explorer {
         }
 
         private void CreateFile(object sender, EventArgs e) {
-            //var dir = new GetString( "FileName With Extention Name" );
-            //if ( dir.ShowDialog() == DialogResult.OK ) {
-            //    this._handler.CreateFile( this._handler.GetCurrentPath() + dir.outref );
-            //    List( this._handler.GetCurrentPath() );
-            //}
-            MessageBox.Show( "not supported" );
+            var dir = new GetString( "FileName With Extention Name" );
+            if ( dir.ShowDialog() == DialogResult.OK ) {
+                this._handler.CreateFile( this._handler.GetCurrentPath() + dir.outref );
+                List( this._handler.GetCurrentPath() );
+            }
+            //MessageBox.Show( "not supported" );
         }
 
         private void CoreateFolder(object sender, EventArgs e) {
-            //var dir = new GetString( "Directory Name" );
-            //if ( dir.ShowDialog() == DialogResult.OK ) {
-            //    this._handler.CreateDirectory( this._handler.GetCurrentPath() + dir.outref );
-            //    List( this._handler.GetCurrentPath() );
-            //}
-            MessageBox.Show( "not supported" );
+            var dir = new GetString( "Directory Name" );
+            if ( dir.ShowDialog() == DialogResult.OK ) {
+                this._handler.CreateDirectory( this._handler.GetCurrentPath() + dir.outref );
+                List( this._handler.GetCurrentPath() );
+            }
+            //MessageBox.Show( "not supported" );
         }
 
         private void List(string dirToScan) {

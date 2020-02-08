@@ -1,4 +1,4 @@
-﻿namespace Explorer
+﻿namespace ExplorerBase.UI
 {
     partial class ExplorerClass
     {

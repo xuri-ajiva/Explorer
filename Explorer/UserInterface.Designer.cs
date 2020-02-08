@@ -31,9 +31,9 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(UserInterface));
             this.splitter1 = new System.Windows.Forms.Splitter();
             this.LocalExplorer = new System.Windows.Forms.GroupBox();
-            this.explorerClass2 = new Explorer.ExplorerClass();
+            this.explorerClass2 = new ExplorerBase.UI.ExplorerClass();
             this.RemoteExplorrer = new System.Windows.Forms.GroupBox();
-            this.explorerClass1 = new Explorer.ExplorerClass();
+            this.explorerClass1 = new ExplorerBase.UI.ExplorerClass();
             this.LocalExplorer.SuspendLayout();
             this.RemoteExplorrer.SuspendLayout();
             this.SuspendLayout();
@@ -109,7 +109,7 @@
         private System.Windows.Forms.Splitter splitter1;
         private System.Windows.Forms.GroupBox LocalExplorer;
         private System.Windows.Forms.GroupBox RemoteExplorrer;
-        private ExplorerClass explorerClass1;
-        private ExplorerClass explorerClass2;
+        private ExplorerBase.UI.ExplorerClass explorerClass1;
+        private ExplorerBase.UI.ExplorerClass explorerClass2;
     }
 }

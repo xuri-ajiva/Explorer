@@ -21,7 +21,9 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using ConsoleControlAPI;
-using Explorer;
+using ExplorerBase;
+using ExplorerBase.Handlers;
+using ExplorerBase.UI;
 
 namespace ExplorerWpf {
     /// <summary>
@@ -151,7 +153,7 @@ namespace ExplorerWpf {
         private void listview_SelectionChanged(object sender, SelectionChangedEventArgs e) { }
 
         ExplorerClass             c;
-        private ExplorerBase.LocalHandler le = new ExplorerBase.LocalHandler( "C:\\" );
+        private LocalHandler le = new LocalHandler( "C:\\" );
 
         private void MainWindow_OnLoaded(object sender, RoutedEventArgs e) {
             System.Windows.Forms.Integration.WindowsFormsHost host =

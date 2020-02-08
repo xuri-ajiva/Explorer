@@ -5,7 +5,7 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{79E51DDB-FA42-49AF-9F2E-3F63A5B688B8}</ProjectGuid>
-    <OutputType>WinExe</OutputType>
+    <OutputType>Exe</OutputType>
     <RootNamespace>Explorer</RootNamespace>
     <AssemblyName>Explorer</AssemblyName>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
@@ -32,6 +32,9 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject />
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -46,24 +49,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ExplorerClass.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="ExplorerClass.Designer.cs">
-      <DependentUpon>ExplorerClass.cs</DependentUpon>
-    </Compile>
-    <Compile Include="GetString.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="GetString.Designer.cs">
-      <DependentUpon>GetString.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Handler.cs" />
-    <Compile Include="localHandler.cs" />
-    <Compile Include="NullHandler.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="RemoteHandler.cs" />
     <Compile Include="Resources\Resource1.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -75,9 +62,6 @@
     <Compile Include="UserInterface.Designer.cs">
       <DependentUpon>UserInterface.cs</DependentUpon>
     </Compile>
-    <EmbeddedResource Include="GetString.resx">
-      <DependentUpon>GetString.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
@@ -113,6 +97,12 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Resources\Image2.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\ExplorerBase\ExplorerBase.csproj">
+      <Project>{6ec7b9e5-c196-4e31-b5bb-a84be017e164}</Project>
+      <Name>ExplorerBase</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -1,10 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace Explorer {
+namespace ExplorerBase.Handlers {
     public interface IHandler {
         string GetCurrentPath();
         void   SetCurrentPath(string path);
@@ -23,5 +19,22 @@ namespace Explorer {
 
         string[] ListDirectory(string dirToList);
         string[] ListFiles(string     dirToList);
+
+        event Action OnGetCurrentPath;
+        event Action OnSetCurrentPath;
+        event Action OnSetRemotePath;
+        event Action OnGetRemotePath;
+  
+        event Action OnDirectoryExists;
+        event Action OnCreateDirectory;
+        event Action OnCreateFile;
+        event Action OnDeleteDirectory;
+        event Action OnDeleteFile;
+        event Action OnValidatePath;
+        event Action OnDownloadFile;
+        event Action OnOpenFile;
+        
+        event Action OnListDirectory;
+        event Action OnListFiles;
     }
 }
