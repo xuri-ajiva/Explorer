@@ -5,7 +5,10 @@ using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
+using System.Threading;
 using System.Windows.Forms;
+using ConsoleControlAPI;
 using ExplorerBase;
 using ExplorerBase.Handlers;
 
@@ -22,13 +25,12 @@ namespace ExplorerBase.UI {
 
         private bool _abs = true;
 
-        public ExplorerClass() {
-        }
+        public ExplorerClass() { }
 
-        public event Action<string> PathUpdate; 
+        public event Action<string> PathUpdate;
 
         public void Init(IHandler handler) {
-            this.BackgroundImage = new ErrorProvider().Icon.ToBitmap();
+            this.BackgroundImage  = new ErrorProvider().Icon.ToBitmap();
             BackgroundImageLayout = ImageLayout.Center;
             if ( handler.GetType() == typeof(NullHandler) ) return;
 
@@ -45,6 +47,7 @@ namespace ExplorerBase.UI {
 
             //this.listBrowderView.Nodes.Add( "C:\\" );
             var i = 0;
+
             foreach ( var dir in "ABCDEFGHIJKLMNOPQRSTUVWXYZ".Select( c => c + ":\\" ).Where( handler.DirectoryExists ) ) {
                 this.listBrowderView.Nodes.Add( dir );
 
@@ -55,6 +58,23 @@ namespace ExplorerBase.UI {
             }
 
             this._ct = new ContextMenu( new[] { NewDialog() } );
+
+            this.button2_Click( null, null );
+
+            this.consoleX.StartProcess( "cmd.exe", "" );
+            this.consoleX.ProcessInterface.Process.OutputDataReceived += ProcessOnOutputDataReceived;
+            this.consoleX.ProcessInterface.OnProcessOutput            += ConsoleXOnOnProcessOutput;
+            this.consoleX.ProcessInterface.OnProcessInput             += ConsoleXOnOnProcessInput;
+            this.consoleX.InternalRichTextBox.KeyDown                 += InternalRichTextBoxOnKeyDown;
+            this.consoleX.IsInputEnabled                              =  true;
+            this.consoleX.Visible                                     =  false;
+        }
+
+
+        private void InternalRichTextBoxOnKeyDown(object sender, KeyEventArgs e) {
+            if ( e.KeyCode == Keys.Return ) {
+                this.nextIn = true;
+            }
         }
 
         private MenuItem NewDialog() {
@@ -64,23 +84,27 @@ namespace ExplorerBase.UI {
 
         private void CreateFile(object sender, EventArgs e) {
             var dir = new GetString( "FileName With Extention Name" );
+
             if ( dir.ShowDialog() == DialogResult.OK ) {
                 this._handler.CreateFile( this._handler.GetCurrentPath() + dir.outref );
                 List( this._handler.GetCurrentPath() );
             }
+
             //MessageBox.Show( "not supported" );
         }
 
         private void CoreateFolder(object sender, EventArgs e) {
             var dir = new GetString( "Directory Name" );
+
             if ( dir.ShowDialog() == DialogResult.OK ) {
                 this._handler.CreateDirectory( this._handler.GetCurrentPath() + dir.outref );
                 List( this._handler.GetCurrentPath() );
             }
+
             //MessageBox.Show( "not supported" );
         }
 
-        private void List(string dirToScan) {
+        private void List(string dirToScan, bool noCd = false) {
             this._handler.ValidatePath();
             var count = 0;
             this.listView1.Items.Clear();
@@ -88,11 +112,16 @@ namespace ExplorerBase.UI {
             this._handler.ValidatePath();
             count = List_Dir( dirToScan, count );
             count = List_Files( dirToScan, count );
-            if ( this.StatusLabel.ForeColor == Color.DarkGreen ) this.StatusLabel.Text = "CurrentDirectory: " + this._handler.GetCurrentPath();
+
+            if ( this.StatusLabel.ForeColor == Color.DarkGreen ) {
+                if ( !noCd ) this.consoleX.ProcessInterface.WriteInput( "cd \"" + this._handler.GetCurrentPath() + "\"" );
+                this.StatusLabel.Text = "CurrentDirectory: " + this._handler.GetCurrentPath();
+            }
         }
 
         private void ProcrestreeView(string dirToList) {
             this.listBrowderView.Nodes.Add( "C:\\" );
+
             if ( Scan_Dir( dirToList ) is string[] tI )
                 for ( var i = 0; i < tI.Length; i++ ) {
                     this.listBrowderView.Nodes[0].Nodes.Add( tI[i] );
@@ -199,6 +228,7 @@ namespace ExplorerBase.UI {
             if ( length > Math.Pow( 10, 9 ) ) return ( length / Math.Pow( 10, 9 ) ).ToString( "0.00" )   + "Gb";
             if ( length > Math.Pow( 10, 6 ) ) return ( length / Math.Pow( 10, 6 ) ).ToString( "0.00" )   + "Mb";
             if ( length > Math.Pow( 10, 3 ) ) return ( length / Math.Pow( 10, 3 ) ).ToString( "0.00" )   + "Kb";
+
             return length + "b";
         }
 
@@ -211,8 +241,72 @@ namespace ExplorerBase.UI {
 
 
         private void Form1_Load(object sender, EventArgs e) {
-            this.button2_Click( null, null );
             //List( this._handler.GetCurrentPath() );
+        }
+
+        private bool first = false;
+
+        private bool nextIn = false;
+
+        private void ConsoleXOnOnProcessInput(object sender, ProcessEventArgs args) {
+            if ( args.Content.StartsWith( "cd" ) ) {
+                this.nextIn = true;
+            }
+        }
+
+        private void ConsoleXOnOnProcessOutput(object sender, ProcessEventArgs args) {
+            if ( !this.first ) {
+                new Thread( () => {
+                    Thread.Sleep( 1000 );
+
+                    this.Invoke( new Action( () => { this.consoleX.ProcessInterface.WriteInput( "@echo off" ); } ) );
+                    Thread.Sleep( 100 );
+                    this.Invoke( new Action( () => {
+                        this.consoleX.ClearOutput();
+                        this.consoleX.WriteOutput( "Console Support Enabled!\n", Color.FromArgb( 0, 129, 255 ) );
+                        this.consoleX.Visible = true;
+                    } ) );
+                } ); //.Start();
+
+                this.consoleX.Visible = true;
+                this.first            = true;
+            }
+
+            if ( args.Code.HasValue ) {
+                this.consoleX.WriteOutput( $"[{args.Code.Value}]", Color.DarkBlue );
+            }
+
+            //if ( Regex.IsMatch( args.Content, @"[A-Z]:\\[^>]*>" ) ) {
+            this.consoleX.WriteOutput( "> ", Color.Yellow );
+            this.consoleX.WriteOutput( " ",  Color.DeepSkyBlue );
+
+            /*if ( this.nextIn ) {
+
+                //List( args.Content.Substring( 0, args.Content.Length-1 ) );
+                this._handler.SetCurrentPath(args.Content.Substring( 0, args.Content.Length -1 ).Replace( "\n","" ).Replace( "\r","" ) + "\\" );
+                List( this._handler.GetCurrentPath() );
+
+                this.nextIn = false;
+            }*/
+
+            //}
+            var march = Regex.Match( args.Content, @"[A-Z]:\\[^>]*>" );
+
+            if ( march.Success ) {
+                this._handler.SetCurrentPath( march.Value.Substring( 0, march.Value.Length - 1 ).Replace( "\n", "" ).Replace( "\r", "" ) + "\\" );
+                List( this._handler.GetCurrentPath(),true );
+
+                this.nextIn = false;
+            }
+        }
+
+        private void ProcessOnOutputDataReceived(object sender, DataReceivedEventArgs e) {
+            if ( Regex.IsMatch( e.Data, @"[A-Z]:\\[^>]*>" ) ) {
+                this._handler.SetCurrentPath( e.Data.Substring( 0, e.Data.Length - 1 ).Replace( "\n", "" ).Replace( "\r", "" ) + "\\" );
+                List( this._handler.GetCurrentPath() );
+
+                this.nextIn = false;
+            }
         }
 
         private void treeView1_DoubleClick(object sender, EventArgs e) {
@@ -229,6 +323,7 @@ namespace ExplorerBase.UI {
                 e.Node.Nodes.Clear();
                 this._handler.SetCurrentPath( e.Node.Text + "\\" );
                 var x = Scan_Dir( this._handler.GetCurrentPath() );
+
                 if ( x != null )
                     for ( var i = 0; i < x.Length; i++ ) {
                         e.Node.Nodes.Add( x[i] );
@@ -257,6 +352,7 @@ namespace ExplorerBase.UI {
             this.listBrowderView.Nodes.Clear();
 
             var i = 0;
+
             foreach ( var dir in "ABCDEFGHIJKLMNOPQRSTUVWXYZ".Select( c => c + ":\\" ).Where( this._handler.DirectoryExists ) ) {
                 var item = new ListViewItem( dir.Substring( 0, 2 ) );
                 item.SubItems.Add( dir );
