@@ -6,10 +6,10 @@
     xmlns:local="clr-namespace:ExplorerWpf"
     xmlns:WPF="clr-namespace:ConsoleControl.WPF;assembly=ConsoleControl.WPF"
     xmlns:forms="clr-namespace:System.Windows.Forms;assembly=System.Windows.Forms"
-    xmlns:wf="clr-namespace:System.Windows.Forms;assembly=System.Windows.Forms"
+    xmlns:wf="clr-namespace:System.Windows.Forms;assembly=System.Windows.Forms" xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit" x:Name="WindowX"
     x:Class="ExplorerWpf.MainWindow"
     mc:Ignorable="d"
-    Title="MainWindow" Height="524.626" Width="800.07" Background="#1F000000"  ResizeMode="CanResize" Loaded="MainWindow_OnLoaded">
+    Title="MainWindow" Height="714.626" Width="1067.07" Background="#1F000000"  ResizeMode="CanResize" Loaded="MainWindow_OnLoaded" AllowsTransparency="True" WindowStyle="None">
     <WindowChrome.WindowChrome>
         <WindowChrome
             CaptionHeight="0"
@@ -17,7 +17,13 @@
     </WindowChrome.WindowChrome>
 
     <Grid>
-        <Grid Background="Red" MouseDown="MoveWindow" Height="20" VerticalAlignment="Top">
+        <Grid MouseDown="MoveWindow" Height="20" VerticalAlignment="Top">
+            <Grid.Background>
+                <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                    <GradientStop Color="#E5000000" Offset="1"/>
+                    <GradientStop Color="#CC191919"/>
+                </LinearGradientBrush>
+            </Grid.Background>
             <Button VerticalAlignment="Top" Height="20" Content="❌" FontSize="10" Foreground="#FFFF1111" Click="CloseClick" HorizontalAlignment="Right" Width="20">
                 <Button.Background>
                     <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
@@ -66,17 +72,61 @@
                 <Grid.RowDefinitions>
                     <RowDefinition Height="90*" />
                     <RowDefinition Height="Auto" />
-                    <RowDefinition Height="10*" />
+                    <RowDefinition Height="40*" />
                 </Grid.RowDefinitions>
-                <Grid />
+                <Grid x:Name="pt" >
+                    <TreeView x:Name="listBrowderView" Margin="0,0,-7.991,0" BorderBrush="Black">
+                        <TreeView.Background>
+                            <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                                <GradientStop Color="Black" Offset="0"/>
+                                <GradientStop Color="#FF360000" Offset="1"/>
+                                <GradientStop Color="#FF4D2300" Offset="0.456"/>
+                                <GradientStop Color="#FF2B2700" Offset="0.257"/>
+                            </LinearGradientBrush>
+                        </TreeView.Background>
+                    </TreeView>
+                </Grid>
 
                 <GridSplitter Grid.Column="1" HorizontalAlignment="Stretch"/>
-                <Grid Grid.Column="2"  x:Name="grid1" />
+                <Grid Grid.Column="2"  x:Name="grid1" Background="Black" >
+                    <Grid.RowDefinitions>
+                        <RowDefinition/>
+                        <RowDefinition Height="25"/>
+                    </Grid.RowDefinitions>
+                    <ListView x:Name="listView1" AutomationProperties.IsColumnHeader="True" MouseDoubleClick="listView1_MouseDoubleClick" BorderBrush="Black">
+                        <ListView.Foreground>
+                            <LinearGradientBrush EndPoint="0,0" StartPoint="1,0">
+                                <GradientStop Color="Red" Offset="1"/>
+                                <GradientStop Color="#FFFFD100"/>
+                            </LinearGradientBrush>
+                        </ListView.Foreground>
+                        <ListView.Background>
+                            <LinearGradientBrush EndPoint="0.5,0" StartPoint="0.5,1">
+                                <GradientStop Color="#FF0B1123"/>
+                                <GradientStop Color="#FF044716" Offset="1"/>
+                                <GradientStop Color="#FF121E40" Offset="0.276"/>
+                                <GradientStop Color="#FF103334" Offset="0.675"/>
+                                <GradientStop Color="#FF0B2829" Offset="0.52"/>
+                                <GradientStop Color="#FF0D1429" Offset="0.083"/>
+                            </LinearGradientBrush>
+                        </ListView.Background>
+                        <ListView.View>
+                            <GridView>
+                                <GridViewColumn Header="Name" Width="200" DisplayMemberBinding="{Binding Name}" />
+                                <GridViewColumn Header="Path" Width="200" DisplayMemberBinding="{Binding Path}" />
+                                <GridViewColumn Header="Size" Width="70" DisplayMemberBinding="{Binding Size}" />
+                                <GridViewColumn Header="Type" Width="Auto" DisplayMemberBinding="{Binding Type}" />
+                            </GridView>
+                        </ListView.View>
+                    </ListView>
+                    <Label x:Name="StatusLabel" Style="{DynamicResource SimpleLabel}" Background="Black" BorderBrush="Black" OpacityMask="Black" Grid.Row="1"/>
+                    <Button Content="LocalDisks" Margin="842.945,0,0,0" Grid.Row="1"/>
+                </Grid>
                 <GridSplitter Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Center" Background="Black"
                               ShowsPreview="True" Height="6" Grid.ColumnSpan="3" />
 
-                <Grid Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3" Background="Black">
-                    <WPF:ConsoleControl x:Name="consoleX" Background="#60111111" FontWeight="Bold" Foreground="Red" />
+                <Grid Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3">
+                    <WPF:ConsoleControl x:Name="consoleX" Background="#99111111" FontWeight="Bold" Foreground="Red" />
                 </Grid>
             </Grid>
         </Grid>

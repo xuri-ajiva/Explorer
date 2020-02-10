@@ -1,37 +1,29 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.ComponentModel;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Text.RegularExpressions;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Automation.Peers;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Forms;
 using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using ConsoleControlAPI;
-using ExplorerBase;
 using ExplorerBase.Handlers;
 using ExplorerBase.UI;
+using ContextMenu = System.Windows.Forms.ContextMenu;
+using MenuItem = System.Windows.Forms.MenuItem;
+using MessageBox = System.Windows.Forms.MessageBox;
+using MouseEventArgs = System.Windows.Forms.MouseEventArgs;
+using Path = System.IO.Path;
 
 namespace ExplorerWpf {
     /// <summary>
     /// Interaktionslogik für MainWindow.xaml
     /// </summary>
-    public partial class MainWindow : Window {
-        [DllImport( "kernel32" )]
-        static extern bool AllocConsole();
+    public partial class MainWindow {
+        [DllImport( "kernel32" )] private static extern bool AllocConsole();
 
         /*const int GripSize   = 16;
         const int BorderSize = 7;
@@ -50,17 +42,34 @@ namespace ExplorerWpf {
             this.consoleX.StartProcess( "cmd.exe", "" );
             this.consoleX.IsInputEnabled = true;
             this.consoleX.Visibility     = Visibility.Collapsed;
-            this.consoleX.Foreground = Brushes.LimeGreen;
-            consoleX.FontStyle = new FontStyle(){};
+            this.consoleX.Foreground     = Brushes.LimeGreen;
+            consoleX.FontStyle           = new FontStyle();
+
+            Init( new LocalHandler( "C:\\" ) );
+            EnableBlur();
         }
 
+
+        public class Item {
+            public string Name { get; set; }
+
+            public string Path { get; set; }
+
+            public string   Size { get; set; }
+            public FileType Type { get; set; }
+
+            public Item(string name, string path, string size, FileType type) {
+                this.Name = name;
+                this.Path = path;
+                this.Size = size;
+                this.Type = type;
+            }
+        }
 
         private bool first = false;
 
         private void ConsoleXOnOnProcessInput(object sender, ProcessEventArgs args) { }
 
-
-        TimeSpan last = TimeSpan.Zero;
 
         private void ConsoleXOnOnProcessOutput(object sender, ProcessEventArgs args) {
             if ( !this.first ) {
@@ -79,10 +88,10 @@ namespace ExplorerWpf {
                         } );
                     }
                     else { }
-                } );//.Start();
-                 
+                } ); //.Start();
+
                 this.consoleX.Visibility = Visibility.Visible;
-                this.first = true;
+                this.first               = true;
             }
 
             if ( args.Code.HasValue ) {
@@ -91,52 +100,10 @@ namespace ExplorerWpf {
 
             //if ( Regex.IsMatch( args.Content, @"[A-Z]:\\[^>]*>" ) ) {
             this.consoleX.WriteOutput( "> ", Colors.Yellow );
-            this.consoleX.WriteOutput( " ", Colors.DeepSkyBlue );
+            this.consoleX.WriteOutput( " ",  Colors.DeepSkyBlue );
             //}
         }
 
-        /*void MainWindow_Loaded(object sender, RoutedEventArgs e) {
-            InputBlock.KeyDown += InputBlock_KeyDown;
-            InputBlock.Focus();
-        }
-
-        void InputBlock_KeyDown(object sender, KeyEventArgs e) {
-            if ( e.Key == Key.Enter ) {
-                dc.ConsoleInput = InputBlock.Text;
-                dc.RunCommand();
-                InputBlock.Focus();
-                Scroller.ScrollToBottom();
-            }
-        }*/
-
-        /*protected override void OnSourceInitialized(EventArgs e)
-        {
-            base.OnSourceInitialized(e);
-            IntPtr     windowHandle = new WindowInteropHelper(this).Handle;
-            HwndSource windowSource = HwndSource.FromHwnd(windowHandle);
-            windowSource.AddHook(WndProc);
-        }
-
-        private IntPtr WndProc(IntPtr hwnd,   int    msg,
-            IntPtr                    wParam, IntPtr lParam, ref bool handled)
-        {
-            if (msg == NativeMethods.WM_NCHITTEST)
-            {
-                int   x   = lParam.ToInt32() << 16 >> 16, y = lParam.ToInt32() >> 16;
-                Point pos = PointFromScreen(new Point(x, y));
-
-                if (pos.X > GripSize                 && 
-                    pos.X < ActualWidth   - GripSize &&
-                    pos.Y >= ActualHeight - BorderSize)
-                {
-                    return (IntPtr)NativeMethods.HTBOTTOM; // This doesn't work?
-                }
-
-                // Top, Left, Right, Corners, Etc.
-            }
-
-            return IntPtr.Zero;
-        }*/
         private void CloseClick(object sender, RoutedEventArgs e) { this.Close(); }
 
         private void MaxClick(object sender, RoutedEventArgs e) { this.WindowState = this.WindowState == WindowState.Normal ? WindowState.Maximized : WindowState.Normal; }
@@ -150,82 +117,352 @@ namespace ExplorerWpf {
 
         private void MoveWindow(object sender, MouseButtonEventArgs e) { this.DragMove(); }
 
-        private void listview_SelectionChanged(object sender, SelectionChangedEventArgs e) { }
-
-        ExplorerClass             c;
+        ExplorerClass        c;
         private LocalHandler le = new LocalHandler( "C:\\" );
 
         private void MainWindow_OnLoaded(object sender, RoutedEventArgs e) {
-            System.Windows.Forms.Integration.WindowsFormsHost host =
-                new System.Windows.Forms.Integration.WindowsFormsHost();
-
-            c = new ExplorerClass();
-
-        this.le.OnSetCurrentPath += Update;
-        this.le.OnSetRemotePath += Update;
-
-            this.c.Init(le);
-            this.c.Dock = DockStyle.Fill;
-            host.Child  = this.c;
-            this.grid1.Children.Add( host );
+            //System.Windows.Forms.Integration.WindowsFormsHost host =
+            //    new System.Windows.Forms.Integration.WindowsFormsHost();
+            //
+            //c = new ExplorerClass();
+            //
+            //this.le.OnSetCurrentPath += Update;
+            //this.le.OnSetRemotePath  += Update;
+            //
+            //this.c.Init( le );
+            //this.c.Dock = DockStyle.Fill;
+            //host.Child  = this.c;
+            //this.grid1.Children.Add( host );
         }
 
-        private void Update() {
-            this.consoleX.ProcessInterface.WriteInput( "cd \""+le.GetCurrentPath() + "\"" );
+        private void Update() { this.consoleX.ProcessInterface.WriteInput( "cd \"" + le.GetCurrentPath() + "\"" ); }
+
+        #region Explorer
+
+        public enum FileType {
+            Directory, File
         }
+
+        private ContextMenu _ct;
+        private IHandler    _handler;
+
+        private bool _abs = true;
+
+        public event Action<string> PathUpdate;
+
+        public void Init(IHandler handler) {
+            if ( handler.GetType() == typeof(NullHandler) ) return;
+
+            this._handler = handler;
+            //InitializeComponent();
+            //(this.listView1.View as GridView)
+            //this.listView1.Columns.Add( "Name", 200, System.Windows.Forms.HorizontalAlignment.Left );
+            //this.listView1.Columns.Add( "Path", 200, System.Windows.Forms.HorizontalAlignment.Left );
+            //this.listView1.Columns.Add( "Size", 70,  System.Windows.Forms.HorizontalAlignment.Left );
+            //this.listView1.Columns.Add( "Type", -2,  System.Windows.Forms.HorizontalAlignment.Left );
+
+            //this.listBrowderView.Nodes.Add( "C:\\" );
+            var i = 0;
+
+            foreach ( var dir in "ABCDEFGHIJKLMNOPQRSTUVWXYZ".Select( c => c + ":\\" ).Where( handler.DirectoryExists ) ) {
+                //TODO:this.listBrowderView.Nodes.Add( dir );
+                //TODO:
+                //TODO:this.listBrowderView.Nodes[i].Nodes.Add( "empty" );
+                //var e = new TreeViewEventArgs( this.listBrowderView.Nodes[i] );
+                //treeView1_AfterExpand( null, e );
+                i++;
+            }
+
+            this._ct = new ContextMenu( new[] { NewDialog() } );
+
+            this.button2_Click( null, null );
+        }
+
+
+        private MenuItem NewDialog() {
+            var subitems = new[] { new MenuItem( "Folder", CoreateFolder ), new MenuItem( "File", CreateFile ) };
+            return new MenuItem( "New", subitems );
+        }
+
+        private void CreateFile(object sender, EventArgs e) {
+            var dir = new GetString( "FileName With Extention Name" );
+
+            if ( dir.ShowDialog() == System.Windows.Forms.DialogResult.OK ) {
+                this._handler.CreateFile( this._handler.GetCurrentPath() + dir.outref );
+                List( this._handler.GetCurrentPath() );
+            }
+
+            //MessageBox.Show( "not supported" );
+        }
+
+        private void CoreateFolder(object sender, EventArgs e) {
+            var dir = new GetString( "Directory Name" );
+
+            if ( dir.ShowDialog() == System.Windows.Forms.DialogResult.OK ) {
+                this._handler.CreateDirectory( this._handler.GetCurrentPath() + dir.outref );
+                List( this._handler.GetCurrentPath() );
+            }
+
+            //MessageBox.Show( "not supported" );
+        }
+
+        private void List(string dirToScan, bool noCd = false) {
+            this._handler.ValidatePath();
+            var count = 0;
+            this.listView1.Items.Clear();
+            count = Add_Parent_Dir( count );
+            this._handler.ValidatePath();
+            count = List_Dir( dirToScan, count );
+            count = List_Files( dirToScan, count );
+
+            if ( this.StatusLabel.Foreground == Brushes.DarkGreen ) {
+                if ( !noCd ) this.consoleX.ProcessInterface.WriteInput( "cd \"" + this._handler.GetCurrentPath() + "\"" );
+                this.StatusLabel.Content = ( "CurrentDirectory: " + this._handler.GetCurrentPath() );
+            }
+        }
+
+        private void ProcrestreeView(string dirToList) {
+            //TODO:this.listBrowderView.Nodes.Add( "C:\\" );
+
+            //TODO:if ( Scan_Dir( dirToList ) is string[] tI )
+            //TODO:    for ( var i = 0; i < tI.Length; i++ ) {
+            //TODO:        this.listBrowderView.Nodes[0].Nodes.Add( tI[i] );
+            //TODO:        if ( Scan_Dir( tI[i] ) is string[] tJ )
+            //TODO:            for ( var j = 0; j < tJ.Length; j++ )
+            //TODO:                this.listBrowderView.Nodes[0].Nodes[i].Nodes.Add( tJ[j] );
+            //TODO:    }
+        }
+
+        private int Add_Parent_Dir(int count) {
+            var pt = this._handler.GetCurrentPath();
+            this._handler.SetCurrentPath( this._handler.GetCurrentPath() + "\\..\\" );
+            this._handler.ValidatePath();
+            var  p    = this._handler.GetCurrentPath();
+            Item item = new Item( "..", p, "", FileType.Directory );
+            this.listView1.Items.Add( item );
+            this._handler.SetCurrentPath( pt );
+            this._handler.ValidatePath();
+            return count + 1;
+        }
+
+        private void listView1_DoubleClick(object sender, EventArgs e) {
+            if ( listView1.SelectedItems.Count > 0 ) {
+                var item = listView1.SelectedItems[0] as Item;
+
+                if ( item.Type == FileType.Directory ) {
+                    //if ( this._abs ) {
+                    //    this._handler.SetCurrentPath( item.Name + @"\" );
+                    //    this._abs = false;
+                    //}
+                    //else {
+                    //    this._handler.SetCurrentPath( item.Path + @"\" );
+                    //    this._handler.ValidatePath();
+                    //}
+                    this._handler.SetCurrentPath( item.Path + @"\" );
+
+                    List( this._handler.GetCurrentPath() );
+                }
+                else {
+                    try {
+                        this._handler.OpenFile( item.Path );
+                    } catch (Exception ex) {
+                        MessageBox.Show( ex.Message );
+                    }
+                }
+            }
+        }
+
+        [DebuggerStepThrough]
+        private string[] Scan_Dir(string dirToScan) {
+            try {
+                Set_Status( "online", true );
+                return this._handler.ListDirectory( dirToScan );
+            } catch (Exception e) {
+                Set_Status( e.Message, false );
+                return null;
+            }
+        }
+
+        private int List_Dir(string dirToList, int count) {
+            if ( Scan_Dir( dirToList ) is string[] dirs ) {
+                for ( var i = count; i < dirs.Length + count; i++ ) {
+                    Item item = new Item( Path.GetFileName( dirs[i - count] ), dirs[i - count], "", FileType.Directory );
+
+                    this.listView1.Items.Add( item );
+                }
+
+                return count + dirs.Length;
+            }
+
+            return count;
+        }
+
+        [DebuggerStepThrough]
+        private string[] Scan_Files(string dirToScan) {
+            try {
+                Set_Status( "online", true );
+                return this._handler.ListFiles( dirToScan );
+            } catch (Exception e) {
+                Set_Status( e.Message, false );
+                return null;
+            }
+        }
+
+        private int List_Files(string dirToList, int count) {
+            if ( Scan_Files( dirToList ) is string[] files ) {
+                for ( var i = count; i < files.Length + count; i++ ) {
+                    Item item = new Item( Path.GetFileName( files[i - count] ), files[i - count], GetFileLenght( files[i - count] ), FileType.File );
+                    this.listView1.Items.Add( item );
+                }
+
+                return count + files.Length;
+            }
+
+            return count;
+        }
+
+        [DebuggerStepThrough]
+        private string GetFileLenght(string fileName) {
+            var length = new FileInfo( fileName ).Length;
+
+            if ( length > Math.Pow( 10, 15 ) ) return ( length / Math.Pow( 10, 15 ) ).ToString( "0.00" ) + "Pb";
+            if ( length > Math.Pow( 10, 12 ) ) return ( length / Math.Pow( 10, 12 ) ).ToString( "0.00" ) + "Tb";
+            if ( length > Math.Pow( 10, 9 ) ) return ( length / Math.Pow( 10, 9 ) ).ToString( "0.00" )   + "Gb";
+            if ( length > Math.Pow( 10, 6 ) ) return ( length / Math.Pow( 10, 6 ) ).ToString( "0.00" )   + "Mb";
+            if ( length > Math.Pow( 10, 3 ) ) return ( length / Math.Pow( 10, 3 ) ).ToString( "0.00" )   + "Kb";
+
+            return length + "b";
+        }
+
+        [DebuggerStepThrough]
+        private void Set_Status(string status, bool state) {
+            this.StatusLabel.Foreground = Brushes.DarkRed;
+            if ( state ) this.StatusLabel.Foreground = Brushes.DarkGreen;
+            this.StatusLabel.Content = status;
+        }
+
+
+        private void treeView1_DoubleClick(object sender, EventArgs e) {
+            try {
+                //TODO:this._handler.SetCurrentPath( this.listBrowderView.SelectedNode.Text + "\\" );
+                //TODO:List( this._handler.GetCurrentPath() );
+            } catch { }
+        }
+
+        private void treeView1_Click(object sender, EventArgs e) { }
+
+        private void treeView1_AfterExpand(object sender, TreeViewEventArgs e) {
+            try {
+                e.Node.Nodes.Clear();
+                this._handler.SetCurrentPath( e.Node.Text + "\\" );
+                var x = Scan_Dir( this._handler.GetCurrentPath() );
+
+                if ( x != null )
+                    for ( var i = 0; i < x.Length; i++ ) {
+                        e.Node.Nodes.Add( x[i] );
+                        if ( Scan_Dir( this._handler.GetCurrentPath() ) is string[] xJ )
+                            for ( var j = 0; j < xJ.Length; j++ )
+                                e.Node.Nodes[i].Nodes.Add( xJ[j] );
+                    }
+
+                e.Node.Expand();
+            } catch { }
+        }
+
+        private void treeView1_AfterCollapse(object sender, TreeViewEventArgs e) {
+            try {
+                e.Node.Nodes.Clear();
+                e.Node.Nodes.Add( "Loding.." );
+            } catch { }
+        }
+
+        private void ListView1_MouseClick(object sender, MouseEventArgs e) {
+            //TODO:if ( e.Button == MouseButtons.Right ) this._ct.Show( this.listView1, e.Location );
+        }
+
+        private void button2_Click(object sender, EventArgs e) {
+            //TODO:this.listView1.Items.Clear();
+            //TODO:this.listBrowderView.Nodes.Clear();
+
+            var i = 0;
+
+            foreach ( var dir in "ABCDEFGHIJKLMNOPQRSTUVWXYZ".Select( c => c + ":\\" ).Where( this._handler.DirectoryExists ) ) {
+                Item item = new Item( dir.Substring( 0, 2 ), dir, "", FileType.Directory );
+
+                this.listView1.Items.Add( item );
+
+                //TODO:this.listBrowderView.Nodes.Add( dir );
+                //TODO:this.listBrowderView.Nodes[i].Nodes.Add( "empty" );
+                //var e = new TreeViewEventArgs( this.listBrowderView.Nodes[i] );
+                //treeView1_AfterExpand( null, e );
+                i++;
+            }
+
+            this._abs = true;
+            this._handler.SetCurrentPath( "" );
+        }
+
+        protected virtual void OnPathUpdate(string obj) { this.PathUpdate?.Invoke( obj ); }
+
+        #endregion
+
+        #region Blur
+
+        [DllImport( "user32.dll" )]
+        internal static extern int SetWindowCompositionAttribute(IntPtr hwnd, ref WindowCompositionAttributeData data);
+
+        [StructLayout( LayoutKind.Sequential )]
+        internal struct WindowCompositionAttributeData {
+            public WindowCompositionAttribute Attribute;
+            public IntPtr                     Data;
+            public int                        SizeOfData;
+        }
+
+        internal enum WindowCompositionAttribute {
+            // ...
+            WCA_ACCENT_POLICY = 19
+            // ...
+        }
+
+        internal enum AccentState {
+            ACCENT_DISABLED                   = 0,
+            ACCENT_ENABLE_GRADIENT            = 1,
+            ACCENT_ENABLE_TRANSPARENTGRADIENT = 2,
+            ACCENT_ENABLE_BLURBEHIND          = 3,
+            ACCENT_INVALID_STATE              = 4
+        }
+
+        [StructLayout( LayoutKind.Sequential )]
+        internal struct AccentPolicy {
+            public AccentState AccentState;
+            public int         AccentFlags;
+            public int         GradientColor;
+            public int         AnimationId;
+        }
+
+        internal void EnableBlur() {
+            var windowHelper = new WindowInteropHelper( this );
+
+            var accent           = new AccentPolicy();
+            var accentStructSize = Marshal.SizeOf( accent );
+            accent.AccentState = AccentState.ACCENT_ENABLE_GRADIENT;
+
+            var accentPtr = Marshal.AllocHGlobal( accentStructSize );
+            Marshal.StructureToPtr( accent, accentPtr, false );
+
+            var data = new WindowCompositionAttributeData();
+            data.Attribute  = WindowCompositionAttribute.WCA_ACCENT_POLICY;
+            data.SizeOfData = accentStructSize;
+            data.Data       = accentPtr;
+
+            SetWindowCompositionAttribute( windowHelper.Handle, ref data );
+
+            Marshal.FreeHGlobal( accentPtr );
+        }
+
+        #endregion
+
+
+        private void listView1_MouseDoubleClick(object sender, MouseButtonEventArgs e) { listView1_DoubleClick( sender, e ); }
     }
-
-    /*public class ConsoleContent : INotifyPropertyChanged {
-        string                       consoleInput  = string.Empty;
-        ObservableCollection<string> consoleOutput = new ObservableCollection<string>() { "Console Emulation Sample..." };
-
-        public string ConsoleInput {
-            get { return consoleInput; }
-            set {
-                consoleInput = value;
-                OnPropertyChanged( "ConsoleInput" );
-            }
-        }
-
-        public ObservableCollection<string> ConsoleOutput {
-            get { return consoleOutput; }
-            set {
-                consoleOutput = value;
-                OnPropertyChanged( "ConsoleOutput" );
-            }
-        }
-
-        public void RunCommand() {
-            //ConsoleOutput.Add( ConsoleInput );
-
-            if ( ConsoleInput.Length >= 4 && ConsoleInput.Substring( 0, 3 ) == "say" ) {
-                ConsoleOutput.Add( ConsoleInput.Substring( string.IsNullOrWhiteSpace( ConsoleInput[3].ToString() ) ? 4 : 3 ) );
-            }
-
-            // do your stuff here.
-            ConsoleInput = String.Empty;
-        }
-
-
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        void OnPropertyChanged(string propertyName) {
-            if ( null != PropertyChanged )
-                PropertyChanged( this, new PropertyChangedEventArgs( propertyName ) );
-        }
-    }*/
-    /*public class NativeMethods
-    {
-        public const int WM_NCHITTEST  = 0x84;
-        public const int HTCAPTION     = 2;
-        public const int HTLEFT        = 10;
-        public const int HTRIGHT       = 11;
-        public const int HTTOP         = 12;
-        public const int HTTOPLEFT     = 13;
-        public const int HTTOPRIGHT    = 14;
-        public const int HTBOTTOM      = 15;
-        public const int HTBOTTOMLEFT  = 16;
-        public const int HTBOTTOMRIGHT = 17;
-    }*/
-
 }
