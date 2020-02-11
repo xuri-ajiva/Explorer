@@ -10,6 +10,18 @@
     x:Class="ExplorerWpf.MainWindow"
     mc:Ignorable="d"
     Title="MainWindow" Height="714.626" Width="1067.07" Background="#1F000000"  ResizeMode="CanResize" Loaded="MainWindow_OnLoaded" AllowsTransparency="True" WindowStyle="None">
+    <Window.Resources>
+        <LinearGradientBrush x:Key="Background" EndPoint="0.5,1" StartPoint="0.5,0">
+            <GradientStop Color="#F3181B28"/>
+            <GradientStop Color="#F3181B28" Offset="1"/>
+        </LinearGradientBrush>
+        <LinearGradientBrush x:Key="Forground" EndPoint="0,0" StartPoint="1,0">
+            <GradientStop Color="#FFAE54F0" Offset="1"/>
+            <GradientStop Color="#FF5A32E6"/>
+        </LinearGradientBrush>
+        <SolidColorBrush x:Key="Border" Color="#FF111421"/>
+        <SolidColorBrush x:Key="Aczent" Color="#FF141721"/>
+    </Window.Resources>
     <WindowChrome.WindowChrome>
         <WindowChrome
             CaptionHeight="0"
@@ -17,52 +29,17 @@
     </WindowChrome.WindowChrome>
 
     <Grid>
-        <Grid MouseDown="MoveWindow" Height="20" VerticalAlignment="Top">
-            <Grid.Background>
-                <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
-                    <GradientStop Color="#E5000000" Offset="1"/>
-                    <GradientStop Color="#CC191919"/>
-                </LinearGradientBrush>
-            </Grid.Background>
-            <Button VerticalAlignment="Top" Height="20" Content="❌" FontSize="10" Foreground="#FFFF1111" Click="CloseClick" HorizontalAlignment="Right" Width="20">
-                <Button.Background>
-                    <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
-                        <GradientStop Color="Black" Offset="0"/>
-                        <GradientStop Color="Black" Offset="1"/>
-                        <GradientStop Color="#FF190000" Offset="0.8"/>
-                        <GradientStop Color="#FF190000" Offset="0.2"/>
-                    </LinearGradientBrush>
-                </Button.Background>
-            </Button>
-            <Button Margin="0,0,20,0" VerticalAlignment="Top" Height="20" Content="🔳" FontSize="10" Foreground="#FF00D1FF" Click="MaxClick" HorizontalAlignment="Right" Width="20">
-                <Button.Background>
-                    <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
-                        <GradientStop Color="#FF2C2A00" Offset="0"/>
-                        <GradientStop Color="Black" Offset="1"/>
-                    </LinearGradientBrush>
-                </Button.Background>
-            </Button>
-            <Button Margin="0,0,40,0" VerticalAlignment="Top" Height="20" Content="📦" FontSize="10" Foreground="Yellow" Click="MinClick" HorizontalAlignment="Right" Width="20">
-                <Button.Background>
-                    <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
-                        <GradientStop Color="Black" Offset="0"/>
-                        <GradientStop Color="#FF474747" Offset="1"/>
-                    </LinearGradientBrush>
-                </Button.Background>
-            </Button>
-            <Button Margin="0,0,60,0" VerticalAlignment="Top" Height="20" Content="📌" FontSize="10" Foreground="Magenta" Click="PingClick" HorizontalAlignment="Right" Width="20">
-                <Button.Background>
-                    <RadialGradientBrush>
-                        <GradientStop Color="Black" Offset="1"/>
-                        <GradientStop Color="#FF1DFF32"/>
-                        <GradientStop Color="#FF07410C"/>
-                        <GradientStop Color="#FF12EA26"/>
-                        <GradientStop Color="#FF032806" Offset="0.69"/>
-                    </RadialGradientBrush>
-                </Button.Background>
-            </Button>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="30"/>
+            <RowDefinition Height="697*"/>
+        </Grid.RowDefinitions>
+        <Grid MouseDown="MoveWindow" Background="{DynamicResource Aczent}">
+            <Button Content="❌" FontSize="17" Foreground="#FFF37F97" Click="CloseClick" Background="{DynamicResource Background}" HorizontalAlignment="Right"/>
+            <Button Margin="0,0,35.343,-0.002" Content="🔳" FontSize="17" Foreground="#FF79E6F3" Click="MaxClick" HorizontalAlignment="Right" Background="{DynamicResource Background}"/>
+            <Button Margin="0,0.002,70.686,-0.003" Content="🔻" FontSize="17" Foreground="#FFD853FF" Click="MinClick" HorizontalAlignment="Right" Background="{DynamicResource Background}"/>
+            <Button Margin="0,0,106.029,0" Content="📌" FontSize="17" Foreground="#FFDCFF00" Click="PingClick" HorizontalAlignment="Right" Background="{DynamicResource Background}"/>
         </Grid>
-        <Grid Margin="0,20,0,0">
+        <Grid Grid.Row="1">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="21*"/>
@@ -75,56 +52,38 @@
                     <RowDefinition Height="40*" />
                 </Grid.RowDefinitions>
                 <Grid x:Name="pt" >
-                    <TreeView x:Name="trvMenu" Margin="0,0,-7.991,0" BorderBrush="Black" MouseDown="trvMenu_MouseDown" MouseDoubleClick="trvMenu_MouseDoubleClick" TreeViewItem.Expanded="trvMenu_Expanded" TreeViewItem.Collapsed="trvMenu_Collapsed" Style="{DynamicResource TreeViewStyle1}">
-                        <TreeView.Background>
-                            <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
-                                <GradientStop Color="Black" Offset="0"/>
-                                <GradientStop Color="#FF360000" Offset="1"/>
-                                <GradientStop Color="#FF4D2300" Offset="0.456"/>
-                                <GradientStop Color="#FF2B2700" Offset="0.257"/>
-                            </LinearGradientBrush>
-                        </TreeView.Background>
+                    <TreeView x:Name="trvMenu" Margin="0,0,-7.991,0" BorderBrush="{DynamicResource Border}" MouseDown="trvMenu_MouseDown" MouseDoubleClick="trvMenu_MouseDoubleClick" TreeViewItem.Expanded="trvMenu_Expanded" TreeViewItem.Collapsed="trvMenu_Collapsed" Style="{DynamicResource {x:Type TreeView}}" Foreground="{DynamicResource Forground}" Background="{DynamicResource Background}">
                         <TreeView.ItemTemplate>
                             <HierarchicalDataTemplate DataType="{x:Type local:TreePathItem}" ItemsSource="{Binding Items}">
-                                <TextBlock Text="{Binding Name}" >
-                                    <TextBlock.Foreground>
-                                        <LinearGradientBrush EndPoint="1,1" StartPoint="0,0">
-                                            <GradientStop Color="Magenta" Offset="0"/>
-                                            <GradientStop Color="Lime" Offset="1"/>
-                                            <GradientStop Color="#FF0013FF" Offset="0.5"/>
-                                        </LinearGradientBrush>
-                                    </TextBlock.Foreground>
-                                </TextBlock>
+                                <TextBlock Text="{Binding Name}" Foreground="{DynamicResource Forground}" />
                             </HierarchicalDataTemplate>
                         </TreeView.ItemTemplate>
                     </TreeView>
                 </Grid>
 
                 <GridSplitter Grid.Column="1" HorizontalAlignment="Stretch"/>
-                <Grid Grid.Column="2"  x:Name="grid1" Background="Black" >
+                <Grid Grid.Column="2"  x:Name="grid1" Background="{DynamicResource Background}" >
                     <Grid.RowDefinitions>
                         <RowDefinition/>
                         <RowDefinition Height="25"/>
                     </Grid.RowDefinitions>
-                    <ListView x:Name="listView1" AutomationProperties.IsColumnHeader="True" MouseDoubleClick="listView1_MouseDoubleClick" BorderBrush="{DynamicResource MouseOverBrush}" Template="{DynamicResource ListViewControlTemplate2}">
-                        <ListView.Foreground>
-                            <LinearGradientBrush EndPoint="0,0" StartPoint="1,0">
-                                <GradientStop Color="Red" Offset="1"/>
-                                <GradientStop Color="#FFFFD100"/>
-                            </LinearGradientBrush>
-                        </ListView.Foreground>
-                        <ListView.Background>
-                            <LinearGradientBrush EndPoint="0.5,0" StartPoint="0.5,1">
-                                <GradientStop Color="#FF0B1123"/>
-                                <GradientStop Color="#FF044716" Offset="1"/>
-                                <GradientStop Color="#FF121E40" Offset="0.276"/>
-                                <GradientStop Color="#FF103334" Offset="0.675"/>
-                                <GradientStop Color="#FF0B2829" Offset="0.52"/>
-                                <GradientStop Color="#FF0D1429" Offset="0.083"/>
-                            </LinearGradientBrush>
-                        </ListView.Background>
+                    <ListView x:Name="listView1" AutomationProperties.IsColumnHeader="True" MouseDoubleClick="listView1_MouseDoubleClick" BorderBrush="{DynamicResource Border}"  Background="{DynamicResource Background}" Foreground="{DynamicResource Forground}">
+                        <ListView.Resources>
+                            <DataTemplate x:Key="Template">
+                                <Image Source="{Binding (local:Item.Icon)}" Width="64" Height="64" />
+                            </DataTemplate>
+                            <DataTemplate x:Key="ManaTemplate">
+                                <StackPanel Orientation="Horizontal" >
+                                    <Image Source="{Binding Image}" />
+                                    <TextBlock Text="{Binding Path}" />
+                                </StackPanel>
+                            </DataTemplate>
+                        </ListView.Resources>
+
+
                         <ListView.View>
-                            <GridView>
+                            <GridView>              
+                                <GridViewColumn Header="Icon" Width="50" CellTemplate="{StaticResource ManaTemplate}"/>
                                 <GridViewColumn Header="Name" Width="200" DisplayMemberBinding="{Binding Name}" />
                                 <GridViewColumn Header="Path" Width="200" DisplayMemberBinding="{Binding Path}" />
                                 <GridViewColumn Header="Size" Width="70" DisplayMemberBinding="{Binding Size}" />
@@ -132,14 +91,17 @@
                             </GridView>
                         </ListView.View>
                     </ListView>
-                    <Label x:Name="StatusLabel" Style="{DynamicResource SimpleLabel}" Background="Black" BorderBrush="Black" OpacityMask="Black" Grid.Row="1"/>
+                    <Label x:Name="StatusLabel" Style="{DynamicResource SimpleLabel}" Background="{DynamicResource Background}" BorderBrush="{DynamicResource Border}" OpacityMask="Black" Grid.Row="1" Foreground="{DynamicResource Forground}"/>
                     <Button Content="LocalDisks" Margin="842.945,0,0,0" Grid.Row="1"/>
                 </Grid>
-                <GridSplitter Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Center" Background="Black"
+                <GridSplitter Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Center" Background="{DynamicResource Aczent}"
                               ShowsPreview="True" Height="6" Grid.ColumnSpan="3" />
 
                 <Grid Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3">
-                    <WPF:ConsoleControl x:Name="consoleX" Background="#99111111" FontWeight="Bold" Foreground="Red" />
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+                    <WPF:ConsoleControl x:Name="consoleX" Background="{DynamicResource Background}" FontWeight="Bold" Foreground="{DynamicResource Forground}" BorderBrush="{DynamicResource Border}" />
                 </Grid>
             </Grid>
         </Grid>

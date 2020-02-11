@@ -12,7 +12,7 @@
                 <RowDefinition Height="*" />
                 <RowDefinition Height="3" />
                 <RowDefinition Height="Auto" />
-            </Grid.RowDefinitions>
+            </Grid.RowDefinitions>                    
             <GridSplitter Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Background="Black"
                         ShowsPreview="True" Height="Auto" RenderTransformOrigin="0.5,0.5" Grid.ColumnSpan="2"
                         Visibility="{TemplateBinding ComputedHorizontalScrollBarVisibility}" />

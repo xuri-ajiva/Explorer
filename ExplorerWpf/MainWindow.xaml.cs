@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -14,7 +15,11 @@ using System.Windows.Media;
 using ConsoleControlAPI;
 using ExplorerBase.Handlers;
 using ExplorerBase.UI;
+using Brushes = System.Windows.Media.Brushes;
+using Color = System.Windows.Media.Color;
 using ContextMenu = System.Windows.Forms.ContextMenu;
+using FontStyle = System.Windows.FontStyle;
+using Image = System.Drawing.Image;
 using MenuItem = System.Windows.Forms.MenuItem;
 using MessageBox = System.Windows.Forms.MessageBox;
 using MouseEventArgs = System.Windows.Forms.MouseEventArgs;
@@ -22,6 +27,8 @@ using Path = System.IO.Path;
 
 namespace ExplorerWpf {
     public class Item {
+
+        public Image Image { get; set; }
         public string Name { get; set; }
 
         public string Path { get; set; }
@@ -34,6 +41,12 @@ namespace ExplorerWpf {
             this.Path = path;
             this.Size = size;
             this.Type = type;
+
+            var bm = new Bitmap( 64, 64 );
+            var g = Graphics.FromImage( bm );
+            g.DrawRectangle( Pens.Aquamarine,0,0,100,40 );
+            g.Flush();
+            Image = bm;
         }
     }
     public enum FileType {
@@ -184,7 +197,7 @@ namespace ExplorerWpf {
             //this.listBrowderView.Nodes.Add( "C:\\" );
             var i = 0;
 
-            foreach ( var dir in "ABCDEFGHIJKLMNOPQRSTUVWXYZ".Select( c => c + ":\\" ).Where( handler.DirectoryExists ) ) {
+            foreach ( var dir in "ABCDEFGHIJKLMNOPQRSTUVWXYZ".Select( c => c + ":" ).Where( handler.DirectoryExists ) ) {
                 TreePathItem node = new TreePathItem() { Name = dir, PathAbs = dir };
                 node.Items.Add( new TreePathItem { Name       = "empty" } );
                 this.trvMenu.Items.Add( node );
@@ -400,7 +413,7 @@ namespace ExplorerWpf {
 
             var i = 0;
 
-            foreach ( var dir in "ABCDEFGHIJKLMNOPQRSTUVWXYZ".Select( c => c + ":\\" ).Where( this._handler.DirectoryExists ) ) {
+            foreach ( var dir in "ABCDEFGHIJKLMNOPQRSTUVWXYZ".Select( c => c + ":" ).Where( this._handler.DirectoryExists ) ) {
                 Item item = new Item( dir.Substring( 0, 2 ), dir, "", FileType.Directory );
 
                 this.listView1.Items.Add( item );
