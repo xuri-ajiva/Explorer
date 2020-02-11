@@ -7,12 +7,12 @@
     
     <!-- NormalBrush is used as the Background for SimpleButton, SimpleRepeatButton -->
     <LinearGradientBrush x:Key="NormalBrush" EndPoint="0,1" StartPoint="0,0">
-        <GradientStop Color="#EEE" Offset="0.0"/>
-        <GradientStop Color="#CCC" Offset="1.0"/>
+        <GradientStop Color="#FF008FE0" Offset="0.0"/>
+        <GradientStop Color="#FF002FAE" Offset="1.0"/>
     </LinearGradientBrush>
     <LinearGradientBrush x:Key="NormalBorderBrush" EndPoint="0,1" StartPoint="0,0">
-        <GradientStop Color="#CCC" Offset="0.0"/>
-        <GradientStop Color="#444" Offset="1.0"/>
+        <GradientStop Color="#FF1F1F1F" Offset="0.0"/>
+        <GradientStop Color="Black" Offset="1.0"/>
     </LinearGradientBrush>
     
     <!-- LightBrush is used for content areas such as Menu, Tab Control background -->
@@ -23,16 +23,16 @@
     
     <!-- MouseOverBrush is used for MouseOver in Button, Radio Button, CheckBox -->
     <LinearGradientBrush x:Key="MouseOverBrush" EndPoint="0,1" StartPoint="0,0">
-        <GradientStop Color="#FFF" Offset="0.0"/>
-        <GradientStop Color="#AAA" Offset="1.0"/>
+        <GradientStop Color="#FF006800" Offset="0.0"/>
+        <GradientStop Color="#FF008579" Offset="1.0"/>
     </LinearGradientBrush>
     
     <!-- PressedBrush is used for Pressed in Button, Radio Button, CheckBox -->
     <LinearGradientBrush x:Key="PressedBrush" EndPoint="0,1" StartPoint="0,0">
-        <GradientStop Color="#BBB" Offset="0.0"/>
-        <GradientStop Color="#EEE" Offset="0.1"/>
-        <GradientStop Color="#EEE" Offset="0.9"/>
-        <GradientStop Color="#FFF" Offset="1.0"/>
+        <GradientStop Color="#FFFFE800" Offset="0.0"/>
+        <GradientStop Color="#FF00C912" Offset="0.1"/>
+        <GradientStop Color="#FF0080FF" Offset="0.9"/>
+        <GradientStop Color="#FF2300FF" Offset="1.0"/>
     </LinearGradientBrush>
     <LinearGradientBrush x:Key="PressedBorderBrush" EndPoint="0,1" StartPoint="0,0">
         <GradientStop Color="#444" Offset="0.0"/>
@@ -44,7 +44,7 @@
 
     <!-- Disabled Brushes are used for the Disabled look of each control -->
     <SolidColorBrush x:Key="DisabledForegroundBrush" Color="#888"/>
-    <SolidColorBrush x:Key="DisabledBackgroundBrush" Color="#EEE"/>
+    <SolidColorBrush x:Key="DisabledBackgroundBrush" Color="#FF1D1C36"/>
     <SolidColorBrush x:Key="DisabledBorderBrush" Color="#AAA"/>
 
     <!-- Used for background of ScrollViewer, TreeView, ListBox, Expander, TextBox, Tab Control -->

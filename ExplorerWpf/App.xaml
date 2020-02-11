@@ -11,6 +11,7 @@
                 <ResourceDictionary Source="Simple Styles.xaml"/>
                 <ResourceDictionary Source="Dictionary1.xaml"/>
             </ResourceDictionary.MergedDictionaries>
+            <Style x:Key="ItemsPresenterStyle1" TargetType="{x:Type ItemsPresenter}"/>
         </ResourceDictionary>
     </Application.Resources>
 </Application>

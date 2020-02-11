@@ -1,10 +1,12 @@
 ﻿using System;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Forms;
 using System.Windows.Input;
 using System.Windows.Interop;
@@ -19,6 +21,36 @@ using MouseEventArgs = System.Windows.Forms.MouseEventArgs;
 using Path = System.IO.Path;
 
 namespace ExplorerWpf {
+    public class Item {
+        public string Name { get; set; }
+
+        public string Path { get; set; }
+
+        public string   Size { get; set; }
+        public FileType Type { get; set; }
+
+        public Item(string name, string path, string size, FileType type) {
+            this.Name = name;
+            this.Path = path;
+            this.Size = size;
+            this.Type = type;
+        }
+    }
+    public enum FileType {
+        Directory, File
+    }
+
+    public class TreePathItem {
+
+        public string PathAbs { get; set; }
+
+        public TreePathItem() { this.Items = new ObservableCollection<TreePathItem>(); }
+
+        public string Name { get; set; }
+
+        public ObservableCollection<TreePathItem> Items { get; set; }
+
+    }
     /// <summary>
     /// Interaktionslogik für MainWindow.xaml
     /// </summary>
@@ -47,24 +79,16 @@ namespace ExplorerWpf {
 
             Init( new LocalHandler( "C:\\" ) );
             EnableBlur();
+
+            //TreePathItem root       = new TreePathItem() { Name = "Menu" };
+            //TreePathItem childItem1 = new TreePathItem() { Name = "Child item #1" };
+            //childItem1.Items.Add(new TreePathItem() { Name = "Child item #1.1" });
+            //childItem1.Items.Add(new TreePathItem() { Name = "Child item #1.2" });
+            //root.Items.Add(childItem1);
+            //root.Items.Add(new TreePathItem() { Name = "Child item #2" });
+            //trvMenu.Items.Add(root);
         }
 
-
-        public class Item {
-            public string Name { get; set; }
-
-            public string Path { get; set; }
-
-            public string   Size { get; set; }
-            public FileType Type { get; set; }
-
-            public Item(string name, string path, string size, FileType type) {
-                this.Name = name;
-                this.Path = path;
-                this.Size = size;
-                this.Type = type;
-            }
-        }
 
         private bool first = false;
 
@@ -139,10 +163,6 @@ namespace ExplorerWpf {
 
         #region Explorer
 
-        public enum FileType {
-            Directory, File
-        }
-
         private ContextMenu _ct;
         private IHandler    _handler;
 
@@ -165,9 +185,9 @@ namespace ExplorerWpf {
             var i = 0;
 
             foreach ( var dir in "ABCDEFGHIJKLMNOPQRSTUVWXYZ".Select( c => c + ":\\" ).Where( handler.DirectoryExists ) ) {
-                //TODO:this.listBrowderView.Nodes.Add( dir );
-                //TODO:
-                //TODO:this.listBrowderView.Nodes[i].Nodes.Add( "empty" );
+                TreePathItem node = new TreePathItem() { Name = dir, PathAbs = dir };
+                node.Items.Add( new TreePathItem { Name       = "empty" } );
+                this.trvMenu.Items.Add( node );
                 //var e = new TreeViewEventArgs( this.listBrowderView.Nodes[i] );
                 //treeView1_AfterExpand( null, e );
                 i++;
@@ -222,8 +242,11 @@ namespace ExplorerWpf {
         }
 
         private void ProcrestreeView(string dirToList) {
+            //TODO:TreePathItem node = new TreePathItem() { Name = dir, PathAbs = dir};
+            //TODO:node.Items.Add( new TreePathItem{Name         = "empty"} );
+            //TODO:this.trvMenu.Items.Add( node );
             //TODO:this.listBrowderView.Nodes.Add( "C:\\" );
-
+            //TODO:
             //TODO:if ( Scan_Dir( dirToList ) is string[] tI )
             //TODO:    for ( var i = 0; i < tI.Length; i++ ) {
             //TODO:        this.listBrowderView.Nodes[0].Nodes.Add( tI[i] );
@@ -342,15 +365,6 @@ namespace ExplorerWpf {
         }
 
 
-        private void treeView1_DoubleClick(object sender, EventArgs e) {
-            try {
-                //TODO:this._handler.SetCurrentPath( this.listBrowderView.SelectedNode.Text + "\\" );
-                //TODO:List( this._handler.GetCurrentPath() );
-            } catch { }
-        }
-
-        private void treeView1_Click(object sender, EventArgs e) { }
-
         private void treeView1_AfterExpand(object sender, TreeViewEventArgs e) {
             try {
                 e.Node.Nodes.Clear();
@@ -464,5 +478,52 @@ namespace ExplorerWpf {
 
 
         private void listView1_MouseDoubleClick(object sender, MouseButtonEventArgs e) { listView1_DoubleClick( sender, e ); }
+
+        private void trvMenu_MouseDown(object sender, MouseButtonEventArgs e) { }
+
+        private void trvMenu_MouseDoubleClick(object sender, MouseButtonEventArgs e) {
+            if ( this.trvMenu.SelectedItem != null )
+                try {
+                    this._handler.SetCurrentPath( ( (TreePathItem) this.trvMenu.SelectedItem ).PathAbs + "\\" );
+                    List( this._handler.GetCurrentPath() );
+                } catch { }
+        }
+
+        private void trvMenu_Expanded(object sender, RoutedEventArgs e) {
+            if ( e.OriginalSource is TreeViewItem tvi ) {
+                var node = tvi.DataContext as TreePathItem;
+
+                //MessageBox.Show( string.Format( "TreeNode '{0}' was expanded", tvi.Header ) );
+                if ( node == null ) return;
+
+                try {
+                    node.Items.Clear();
+                    this._handler.SetCurrentPath( node.PathAbs + "\\" );
+                    var x = Scan_Dir( this._handler.GetCurrentPath() );
+
+                    if ( x != null )
+                        for ( var i = 0; i < x.Length; i++ ) {
+                            var pos  = x[i].LastIndexOf( "\\", StringComparison.Ordinal );
+                            var name = x[i].Substring( pos + 1 );
+                            var n1   = new TreePathItem() { Name = name, PathAbs = x[i] };
+
+                            if ( Scan_Dir( this._handler.GetCurrentPath() ) is string[] xJ ) {
+                                var n2 = new TreePathItem() { Name = "empty", PathAbs = "empty" };
+                                n1.Items.Add( n2 );
+                                //for ( var j = 0; j < xJ.Length; j++ ) {
+                                //    var n2 = new TreePathItem() { Name = xJ[j], PathAbs = xJ[j] };
+                                //    n1.Items.Add( n2 );
+                                //}
+                            }
+
+                            node.Items.Add( n1 );
+                        }
+                } catch { }
+            }
+        }
+
+        private void trvMenu_Collapsed(object sender, RoutedEventArgs e) { }
+
+
     }
 }
