@@ -21,7 +21,7 @@ namespace ExplorerBase.Handlers {
         string[] ListFiles(string     dirToList);
 
         event Action OnGetCurrentPath;
-        event Action OnSetCurrentPath;
+        event Action<string,string> OnSetCurrentPath;
         event Action OnSetRemotePath;
         event Action OnGetRemotePath;
   

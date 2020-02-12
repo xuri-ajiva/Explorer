@@ -70,7 +70,6 @@ namespace ExplorerBase.UI {
             this.consoleX.Visible                                     =  false;
         }
 
-
         private void InternalRichTextBoxOnKeyDown(object sender, KeyEventArgs e) {
             if ( e.KeyCode == Keys.Return ) {
                 this.nextIn = true;

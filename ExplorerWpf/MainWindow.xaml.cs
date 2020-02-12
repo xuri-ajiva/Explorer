@@ -24,6 +24,7 @@ using Color = System.Windows.Media.Color;
 using ContextMenu = System.Windows.Forms.ContextMenu;
 using FontStyle = System.Windows.FontStyle;
 using Image = System.Drawing.Image;
+using ListView = System.Windows.Controls.ListView;
 using MenuItem = System.Windows.Forms.MenuItem;
 using MessageBox = System.Windows.Forms.MessageBox;
 using MouseEventArgs = System.Windows.Forms.MouseEventArgs;
@@ -155,6 +156,10 @@ namespace ExplorerWpf {
     public partial class MainWindow {
         [DllImport( "kernel32" )] private static extern bool AllocConsole();
 
+
+        private ExplorerView currentExplorerView;
+        private IHandler     _handler => this.currentExplorerView.Handler;
+
         /*const int GripSize   = 16;
         const int BorderSize = 7;
 
@@ -175,8 +180,10 @@ namespace ExplorerWpf {
             this.consoleX.Foreground     = Brushes.LimeGreen;
             consoleX.FontStyle           = new FontStyle();
 
-            Init( new LocalHandler( "C:\\" ) );
-            EnableBlur();
+            this.currentExplorerView = new ExplorerView();
+            this.currentExplorerView.Init( new LocalHandler( "C:\\" ) );
+
+            //this._handler = new LocalHandler( "C:\\" );
 
             //TreePathItem root       = new TreePathItem() { Name = "Menu" };
             //TreePathItem childItem1 = new TreePathItem() { Name = "Child item #1" };
@@ -239,287 +246,8 @@ namespace ExplorerWpf {
 
         private void MoveWindow(object sender, MouseButtonEventArgs e) { this.DragMove(); }
 
-        ExplorerClass        c;
-        private LocalHandler le = new LocalHandler( "C:\\" );
-
-        private void MainWindow_OnLoaded(object sender, RoutedEventArgs e) {
-            //System.Windows.Forms.Integration.WindowsFormsHost host =
-            //    new System.Windows.Forms.Integration.WindowsFormsHost();
-            //
-            //c = new ExplorerClass();
-            //
-            //this.le.OnSetCurrentPath += Update;
-            //this.le.OnSetRemotePath  += Update;
-            //
-            //this.c.Init( le );
-            //this.c.Dock = DockStyle.Fill;
-            //host.Child  = this.c;
-            //this.grid1.Children.Add( host );
-        }
-
-        private void Update() { this.consoleX.ProcessInterface.WriteInput( "cd \"" + le.GetCurrentPath() + "\"" ); }
 
         #region Explorer
-
-        private ContextMenu _ct;
-        private IHandler    _handler;
-
-        private bool _abs = true;
-
-        public event Action<string> PathUpdate;
-
-        public void Init(IHandler handler) {
-            if ( handler.GetType() == typeof(NullHandler) ) return;
-
-            this._handler = handler;
-            //InitializeComponent();
-            //(this.listView1.View as GridView)
-            //this.listView1.Columns.Add( "Name", 200, System.Windows.Forms.HorizontalAlignment.Left );
-            //this.listView1.Columns.Add( "Path", 200, System.Windows.Forms.HorizontalAlignment.Left );
-            //this.listView1.Columns.Add( "Size", 70,  System.Windows.Forms.HorizontalAlignment.Left );
-            //this.listView1.Columns.Add( "Type", -2,  System.Windows.Forms.HorizontalAlignment.Left );
-
-            //this.listBrowderView.Nodes.Add( "C:\\" );
-            var i = 0;
-
-            foreach ( var dir in "ABCDEFGHIJKLMNOPQRSTUVWXYZ".Select( c => c + ":" ).Where( handler.DirectoryExists ) ) {
-                TreePathItem node = new TreePathItem() { Name = dir, PathAbs = dir };
-                node.Items.Add( new TreePathItem { Name       = "empty" } );
-                this.trvMenu.Items.Add( node );
-                //var e = new TreeViewEventArgs( this.listBrowderView.Nodes[i] );
-                //treeView1_AfterExpand( null, e );
-                i++;
-            }
-
-            this._ct = new ContextMenu( new[] { NewDialog() } );
-
-            this.button2_Click( null, null );
-        }
-
-
-        private MenuItem NewDialog() {
-            var subitems = new[] { new MenuItem( "Folder", CoreateFolder ), new MenuItem( "File", CreateFile ) };
-            return new MenuItem( "New", subitems );
-        }
-
-        private void CreateFile(object sender, EventArgs e) {
-            var dir = new GetString( "FileName With Extention Name" );
-
-            if ( dir.ShowDialog() == System.Windows.Forms.DialogResult.OK ) {
-                this._handler.CreateFile( this._handler.GetCurrentPath() + dir.outref );
-                List( this._handler.GetCurrentPath() );
-            }
-
-            //MessageBox.Show( "not supported" );
-        }
-
-        private void CoreateFolder(object sender, EventArgs e) {
-            var dir = new GetString( "Directory Name" );
-
-            if ( dir.ShowDialog() == System.Windows.Forms.DialogResult.OK ) {
-                this._handler.CreateDirectory( this._handler.GetCurrentPath() + dir.outref );
-                List( this._handler.GetCurrentPath() );
-            }
-
-            //MessageBox.Show( "not supported" );
-        }
-
-        private void List(string dirToScan, bool noCd = false) {
-            this._handler.ValidatePath();
-            var count = 0;
-            this.listView1.Items.Clear();
-            count = Add_Parent_Dir( count );
-            this._handler.ValidatePath();
-            count = List_Dir( dirToScan, count );
-            count = List_Files( dirToScan, count );
-
-            if ( this.StatusLabel.Foreground == Brushes.DarkGreen ) {
-                if ( !noCd ) this.consoleX.ProcessInterface.WriteInput( "cd \"" + this._handler.GetCurrentPath() + "\"" );
-                this.StatusLabel.Content = ( "CurrentDirectory: " + this._handler.GetCurrentPath() );
-            }
-        }
-
-        private void ProcrestreeView(string dirToList) {
-            //TODO:TreePathItem node = new TreePathItem() { Name = dir, PathAbs = dir};
-            //TODO:node.Items.Add( new TreePathItem{Name         = "empty"} );
-            //TODO:this.trvMenu.Items.Add( node );
-            //TODO:this.listBrowderView.Nodes.Add( "C:\\" );
-            //TODO:
-            //TODO:if ( Scan_Dir( dirToList ) is string[] tI )
-            //TODO:    for ( var i = 0; i < tI.Length; i++ ) {
-            //TODO:        this.listBrowderView.Nodes[0].Nodes.Add( tI[i] );
-            //TODO:        if ( Scan_Dir( tI[i] ) is string[] tJ )
-            //TODO:            for ( var j = 0; j < tJ.Length; j++ )
-            //TODO:                this.listBrowderView.Nodes[0].Nodes[i].Nodes.Add( tJ[j] );
-            //TODO:    }
-        }
-
-        private int Add_Parent_Dir(int count) {
-            var pt = this._handler.GetCurrentPath();
-            this._handler.SetCurrentPath( this._handler.GetCurrentPath() + "\\..\\" );
-            this._handler.ValidatePath();
-            var p = this._handler.GetCurrentPath();
-
-            if ( p[p.Length - 1] == '\\' ) {
-                p = p.Substring( 0, p.Length - 1 );
-            }
-
-            Item item = new Item( "..", p, "", FileType.Directory );
-            this.listView1.Items.Add( item );
-            this._handler.SetCurrentPath( pt );
-            this._handler.ValidatePath();
-            return count + 1;
-        }
-
-        private void listView1_DoubleClick(object sender, EventArgs e) {
-            if ( listView1.SelectedItems.Count > 0 ) {
-                var item = listView1.SelectedItems[0] as Item;
-
-                if ( item.Type == FileType.Directory ) {
-                    //if ( this._abs ) {
-                    //    this._handler.SetCurrentPath( item.Name + @"\" );
-                    //    this._abs = false;
-                    //}
-                    //else {
-                    //    this._handler.SetCurrentPath( item.Path + @"\" );
-                    //    this._handler.ValidatePath();
-                    //}
-                    this._handler.SetCurrentPath( item.Path + @"\" );
-
-                    List( this._handler.GetCurrentPath() );
-                }
-                else {
-                    try {
-                        this._handler.OpenFile( item.Path );
-                    } catch (Exception ex) {
-                        MessageBox.Show( ex.Message );
-                    }
-                }
-            }
-        }
-
-        [DebuggerStepThrough]
-        private string[] Scan_Dir(string dirToScan) {
-            try {
-                Set_Status( "online", true );
-                return this._handler.ListDirectory( dirToScan );
-            } catch (Exception e) {
-                Set_Status( e.Message, false );
-                return null;
-            }
-        }
-
-        private int List_Dir(string dirToList, int count) {
-            if ( Scan_Dir( dirToList ) is string[] dirs ) {
-                for ( var i = count; i < dirs.Length + count; i++ ) {
-                    Item item = new Item( Path.GetFileName( dirs[i - count] ), dirs[i - count], "", FileType.Directory );
-
-                    this.listView1.Items.Add( item );
-                }
-
-                return count + dirs.Length;
-            }
-
-            return count;
-        }
-
-        [DebuggerStepThrough]
-        private string[] Scan_Files(string dirToScan) {
-            try {
-                Set_Status( "online", true );
-                return this._handler.ListFiles( dirToScan );
-            } catch (Exception e) {
-                Set_Status( e.Message, false );
-                return null;
-            }
-        }
-
-        private int List_Files(string dirToList, int count) {
-            if ( Scan_Files( dirToList ) is string[] files ) {
-                for ( var i = count; i < files.Length + count; i++ ) {
-                    Item item = new Item( Path.GetFileName( files[i - count] ), files[i - count], GetFileLenght( files[i - count] ), FileType.File );
-                    this.listView1.Items.Add( item );
-                }
-
-                return count + files.Length;
-            }
-
-            return count;
-        }
-
-        [DebuggerStepThrough]
-        private string GetFileLenght(string fileName) {
-            var length = new FileInfo( fileName ).Length;
-
-            if ( length > Math.Pow( 10, 15 ) ) return ( length / Math.Pow( 10, 15 ) ).ToString( "0.00" ) + "Pb";
-            if ( length > Math.Pow( 10, 12 ) ) return ( length / Math.Pow( 10, 12 ) ).ToString( "0.00" ) + "Tb";
-            if ( length > Math.Pow( 10, 9 ) ) return ( length / Math.Pow( 10, 9 ) ).ToString( "0.00" )   + "Gb";
-            if ( length > Math.Pow( 10, 6 ) ) return ( length / Math.Pow( 10, 6 ) ).ToString( "0.00" )   + "Mb";
-            if ( length > Math.Pow( 10, 3 ) ) return ( length / Math.Pow( 10, 3 ) ).ToString( "0.00" )   + "Kb";
-
-            return length + "b";
-        }
-
-        [DebuggerStepThrough]
-        private void Set_Status(string status, bool state) {
-            this.StatusLabel.Foreground = Brushes.DarkRed;
-            if ( state ) this.StatusLabel.Foreground = Brushes.DarkGreen;
-            this.StatusLabel.Content = status;
-        }
-
-
-        private void treeView1_AfterExpand(object sender, TreeViewEventArgs e) {
-            try {
-                e.Node.Nodes.Clear();
-                this._handler.SetCurrentPath( e.Node.Text + "\\" );
-                var x = Scan_Dir( this._handler.GetCurrentPath() );
-
-                if ( x != null )
-                    for ( var i = 0; i < x.Length; i++ ) {
-                        e.Node.Nodes.Add( x[i] );
-                        if ( Scan_Dir( this._handler.GetCurrentPath() ) is string[] xJ )
-                            for ( var j = 0; j < xJ.Length; j++ )
-                                e.Node.Nodes[i].Nodes.Add( xJ[j] );
-                    }
-
-                e.Node.Expand();
-            } catch { }
-        }
-
-        private void treeView1_AfterCollapse(object sender, TreeViewEventArgs e) {
-            try {
-                e.Node.Nodes.Clear();
-                e.Node.Nodes.Add( "Loding.." );
-            } catch { }
-        }
-
-        private void ListView1_MouseClick(object sender, MouseEventArgs e) {
-            //TODO:if ( e.Button == MouseButtons.Right ) this._ct.Show( this.listView1, e.Location );
-        }
-
-        private void button2_Click(object sender, EventArgs e) {
-            //TODO:this.listView1.Items.Clear();
-            //TODO:this.listBrowderView.Nodes.Clear();
-
-            var i = 0;
-
-            foreach ( var dir in "ABCDEFGHIJKLMNOPQRSTUVWXYZ".Select( c => c + ":" ).Where( this._handler.DirectoryExists ) ) {
-                Item item = new Item( dir.Substring( 0, 2 ), dir, "", FileType.Directory );
-
-                this.listView1.Items.Add( item );
-
-                //TODO:this.listBrowderView.Nodes.Add( dir );
-                //TODO:this.listBrowderView.Nodes[i].Nodes.Add( "empty" );
-                //var e = new TreeViewEventArgs( this.listBrowderView.Nodes[i] );
-                //treeView1_AfterExpand( null, e );
-                i++;
-            }
-
-            this._abs = true;
-            this._handler.SetCurrentPath( "" );
-        }
-
-        protected virtual void OnPathUpdate(string obj) { this.PathUpdate?.Invoke( obj ); }
 
         #endregion
 
@@ -579,16 +307,13 @@ namespace ExplorerWpf {
 
         #endregion
 
-
-        private void listView1_MouseDoubleClick(object sender, MouseButtonEventArgs e) { listView1_DoubleClick( sender, e ); }
-
         private void trvMenu_MouseDown(object sender, MouseButtonEventArgs e) { }
 
         private void trvMenu_MouseDoubleClick(object sender, MouseButtonEventArgs e) {
             if ( this.trvMenu.SelectedItem != null )
                 try {
                     this._handler.SetCurrentPath( ( (TreePathItem) this.trvMenu.SelectedItem ).PathAbs + "\\" );
-                    List( this._handler.GetCurrentPath() );
+                    currentExplorerView.List( this._handler.GetCurrentPath() );
                 } catch { }
         }
 
@@ -602,7 +327,7 @@ namespace ExplorerWpf {
                 try {
                     node.Items.Clear();
                     this._handler.SetCurrentPath( node.PathAbs + "\\" );
-                    var x = Scan_Dir( this._handler.GetCurrentPath() );
+                    var x = currentExplorerView.Scan_Dir( this._handler.GetCurrentPath() );
 
                     if ( x != null )
                         for ( var i = 0; i < x.Length; i++ ) {
@@ -610,7 +335,7 @@ namespace ExplorerWpf {
                             var name = x[i].Substring( pos + 1 );
                             var n1   = new TreePathItem() { Name = name, PathAbs = x[i] };
 
-                            if ( Scan_Dir( this._handler.GetCurrentPath() ) is string[] xJ ) {
+                            if ( currentExplorerView.Scan_Dir( this._handler.GetCurrentPath() ) is string[] xJ ) {
                                 var n2 = new TreePathItem() { Name = "empty", PathAbs = "empty" };
                                 n1.Items.Add( n2 );
                                 //for ( var j = 0; j < xJ.Length; j++ ) {
@@ -628,5 +353,74 @@ namespace ExplorerWpf {
         private void trvMenu_Collapsed(object sender, RoutedEventArgs e) { }
 
 
+        private void MainWindow_OnLoaded(object sender, RoutedEventArgs e) {
+            EnableBlur();
+            //InitializeComponent();
+            //(this.listView1.View as GridView)
+            //this.listView1.Columns.Add( "Name", 200, System.Windows.Forms.HorizontalAlignment.Left );
+            //this.listView1.Columns.Add( "Path", 200, System.Windows.Forms.HorizontalAlignment.Left );
+            //this.listView1.Columns.Add( "Size", 70,  System.Windows.Forms.HorizontalAlignment.Left );
+            //this.listView1.Columns.Add( "Type", -2,  System.Windows.Forms.HorizontalAlignment.Left );
+
+            //this.listBrowderView.Nodes.Add( "C:\\" );
+
+            foreach ( var driveInfo in DriveInfo.GetDrives() ) {
+                TreePathItem node = new TreePathItem() { Name = driveInfo.VolumeLabel, PathAbs = driveInfo.Name };
+                node.Items.Add( new TreePathItem { Name       = "empty" } );
+                this.trvMenu.Items.Add( node );
+            }
+
+
+            ///
+            ///
+            ///  NetworkHandler
+            ///
+            /// 
+            ///var i = 0;
+            ///
+            ///foreach ( var dir in "ABCDEFGHIJKLMNOPQRSTUVWXYZ".Select( c => c + ":" ).Where( this._handler.DirectoryExists ) ) {
+            ///    TreePathItem node = new TreePathItem() { Name = dir, PathAbs = dir };
+            ///    node.Items.Add( new TreePathItem { Name       = "empty" } );
+            ///    this.trvMenu.Items.Add( node );
+            ///    //var e = new TreeViewEventArgs( this.listBrowderView.Nodes[i] );
+            ///    //treeView1_AfterExpand( null, e );
+            ///    i++;
+            ///}
+        }
+
+        private void DCChange(object sender, DependencyPropertyChangedEventArgs e) { Console.WriteLine( e ); }
+
+        private void taps_SelectionChanged(object sender, SelectionChangedEventArgs e) {
+            if ( this.taps.SelectedItem is System.Windows.Controls.TabItem tp ) {
+                this.currentExplorerView = (ExplorerView) tp.Content;
+                this.consoleX.ProcessInterface.WriteInput( "cd \"" + _handler.GetCurrentPath() + "\"" );
+            }
+        }
+
+        void AddTab() {
+            LocalHandler h = new LocalHandler( "C:\\" );
+            ExplorerView x = new ExplorerView();
+            x.Init( h );
+            x.SendDirectoryUpdateAsCmd += XOnSendDirectoryUpdateAsCmd;
+
+            TabItem newTabItem = new TabItem {
+                Header  = "Explorer",
+                Name    = "Explorer",
+                Content = x,
+            };
+
+            taps.Items.Add( newTabItem );
+        }
+
+        private void Button_Click(object sender, RoutedEventArgs e) {
+            AddTab();
+            this.taps.SelectedIndex = this.taps.Items.Count - 1;
+        }
+
+        private void XOnSendDirectoryUpdateAsCmd(object sender, string e) {
+            if ( sender.Equals( this.currentExplorerView ) ) {
+                this.consoleX.ProcessInterface.WriteInput( e );
+            }
+        }
     }
 }

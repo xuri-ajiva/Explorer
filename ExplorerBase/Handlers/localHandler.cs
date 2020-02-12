@@ -13,9 +13,9 @@ namespace ExplorerBase.Handlers {
 
         public string CurrentPath;
 
-        public LocalHandler(string currentPath = "") {
+        public LocalHandler(string currentPath = "") { 
+            this.OnSetCurrentPath?.Invoke("", currentPath);
             this.CurrentPath = currentPath;
-            this.OnSetCurrentPath?.Invoke();
         }
 
         /// <inheritdoc />
@@ -26,8 +26,8 @@ namespace ExplorerBase.Handlers {
 
         /// <inheritdoc />
         public void SetCurrentPath(string path) {
+            this.OnSetCurrentPath?.Invoke(GetCurrentPath(), path);
             this.CurrentPath = path;
-            this.OnSetCurrentPath?.Invoke();
         }
 
         /// <inheritdoc />
@@ -109,7 +109,7 @@ namespace ExplorerBase.Handlers {
         public event Action OnGetCurrentPath;
 
         /// <inheritdoc />
-        public event Action OnSetCurrentPath;
+        public event Action<string, string> OnSetCurrentPath;
 
         /// <inheritdoc />
         public event Action OnSetRemotePath;

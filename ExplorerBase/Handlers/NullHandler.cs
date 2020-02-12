@@ -51,7 +51,7 @@ namespace ExplorerBase.Handlers {
         public event Action OnGetCurrentPath;
 
         /// <inheritdoc />
-        public event Action OnSetCurrentPath;
+        public event Action<string, string> OnSetCurrentPath;
 
         /// <inheritdoc />
         public event Action OnSetRemotePath;

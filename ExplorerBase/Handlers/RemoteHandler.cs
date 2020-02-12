@@ -32,10 +32,10 @@ namespace ExplorerBase.Handlers {
         private readonly TcpClient _cl;
         protected        byte[]    buffer;
 
-        public RemoteHandler(TcpClient cl) {
+        public RemoteHandler(TcpClient cl) {  
             this._cl         = cl;
-            this.CurrentPath = "";
-            this.OnSetCurrentPath?.Invoke();
+            this.CurrentPath = "";          
+            this.OnSetCurrentPath?.Invoke("", "");
         }
 
         public string CurrentPath {
@@ -43,8 +43,8 @@ namespace ExplorerBase.Handlers {
                 this.OnGetCurrentPath?.Invoke();
                 return GetRemotePath();
             }
-            set {
-                this.OnSetCurrentPath?.Invoke();
+            set {                                 
+                this.OnSetCurrentPath?.Invoke(GetCurrentPath(), value);
                 SetRemotePath( value );
             }
         }
@@ -171,8 +171,8 @@ namespace ExplorerBase.Handlers {
 
 
         /// <inheritdoc />
-        public void SetCurrentPath(string path) {
-            this.OnSetCurrentPath?.Invoke();
+        public void SetCurrentPath(string path) {       
+            this.OnSetCurrentPath?.Invoke(GetCurrentPath(), path);
             this.CurrentPath = path;
         }
 
@@ -305,7 +305,7 @@ namespace ExplorerBase.Handlers {
         public event Action OnGetCurrentPath;
 
         /// <inheritdoc />
-        public event Action OnSetCurrentPath;
+        public event Action<string, string> OnSetCurrentPath;
 
         /// <inheritdoc />
         public event Action OnSetRemotePath;
