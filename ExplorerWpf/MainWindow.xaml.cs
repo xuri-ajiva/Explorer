@@ -15,6 +15,10 @@ using System.Windows.Media;
 using ConsoleControlAPI;
 using ExplorerBase.Handlers;
 using ExplorerBase.UI;
+using System.Collections.Generic;
+using System.Drawing.Imaging;
+using System.Windows.Data;
+using System.Windows.Media.Imaging;
 using Brushes = System.Windows.Media.Brushes;
 using Color = System.Windows.Media.Color;
 using ContextMenu = System.Windows.Forms.ContextMenu;
@@ -26,9 +30,28 @@ using MouseEventArgs = System.Windows.Forms.MouseEventArgs;
 using Path = System.IO.Path;
 
 namespace ExplorerWpf {
-    public class Item {
 
-        public Image Image { get; set; }
+    public class ImageConverter : IValueConverter {
+        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture) {
+            if ( value is Bitmap ) {
+                var stream = new MemoryStream();
+                ( (Bitmap) value ).Save( stream, ImageFormat.Png );
+
+                BitmapImage bitmap = new BitmapImage();
+                bitmap.BeginInit();
+                bitmap.StreamSource = stream;
+                bitmap.EndInit();
+
+                return bitmap;
+            }
+
+            return value;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture) { throw new NotImplementedException(); }
+    }
+    public class Item {
+        public Bitmap Icon { get; }
         public string Name { get; set; }
 
         public string Path { get; set; }
@@ -36,17 +59,78 @@ namespace ExplorerWpf {
         public string   Size { get; set; }
         public FileType Type { get; set; }
 
+
         public Item(string name, string path, string size, FileType type) {
             this.Name = name;
-            this.Path = path;
+            this.Path = path.Replace( "\\\\", "\\" );
             this.Size = size;
             this.Type = type;
 
-            var bm = new Bitmap( 64, 64 );
-            var g = Graphics.FromImage( bm );
-            g.DrawRectangle( Pens.Aquamarine,0,0,100,40 );
-            g.Flush();
-            Image = bm;
+            if ( type == FileType.File ) {
+                try {
+                    Icon = GetFileIconCashed( Path, IconSize.SHGFI_SMALLICON );
+                } catch (Exception e) {
+                    Console.WriteLine( e.Message );
+                }
+            }
+        }
+
+        private const Int32 MAX_PATH                = 260;
+        private const Int32 SHGFI_ICON              = 0x100;
+        private const Int32 SHGFI_USEFILEATTRIBUTES = 0x10;
+        private const Int32 FILE_ATTRIBUTE_NORMAL   = 0x80;
+
+        private struct SHFILEINFO {
+            public IntPtr hIcon;
+            public Int32  iIcon;
+            public Int32  dwAttributes;
+
+            [MarshalAs( UnmanagedType.ByValTStr, SizeConst = MAX_PATH )]
+            public string szDisplayName;
+
+            [MarshalAs( UnmanagedType.ByValTStr, SizeConst = 80 )]
+            public string szTypeName;
+        }
+
+        public enum IconSize {
+            SHGFI_LARGEICON = 0,
+            SHGFI_SMALLICON = 1
+        }
+
+        [DllImport( "shell32.dll", CharSet = CharSet.Auto )]
+        private static extern IntPtr SHGetFileInfo(string pszPath, Int32 dwFileAttributes, ref SHFILEINFO psfi, Int32 cbFileInfo, Int32 uFlags);
+
+        [DllImport( "user32.dll", SetLastError = true )]
+        private static extern bool DestroyIcon(IntPtr hIcon);
+
+        // get associated icon (as bitmap).
+        private Bitmap GetFileIcon(string fileExt, IconSize ICOsize = IconSize.SHGFI_SMALLICON) {
+            SHFILEINFO shinfo = new SHFILEINFO();
+            shinfo.szDisplayName = new string( (char) 0, MAX_PATH );
+            shinfo.szTypeName    = new string( (char) 0, 80 );
+            SHGetFileInfo( fileExt, FILE_ATTRIBUTE_NORMAL, ref shinfo, Marshal.SizeOf( shinfo ), SHGFI_ICON | (int) ICOsize | SHGFI_USEFILEATTRIBUTES );
+            Bitmap bmp = System.Drawing.Icon.FromHandle( shinfo.hIcon ).ToBitmap();
+            DestroyIcon( shinfo.hIcon ); // must destroy icon to avoid GDI leak!
+            return bmp;                  // return icon as a bitmap
+        }
+
+        private static readonly Dictionary<string, Bitmap> _smallIconCache = new Dictionary<string, Bitmap>();
+        private static readonly Dictionary<string, Bitmap> _largeIconCache = new Dictionary<string, Bitmap>();
+
+        public Bitmap GetFileIconCashed(string fileName, IconSize ICOsize = IconSize.SHGFI_SMALLICON) {
+            var extension = System.IO.Path.GetExtension( fileName );
+            if ( extension == null )
+                return null;
+
+            var cache = ICOsize == IconSize.SHGFI_LARGEICON ? _largeIconCache : _smallIconCache;
+
+            Bitmap icon;
+            if ( cache.TryGetValue( extension, out icon ) )
+                return icon;
+
+            icon = GetFileIcon( fileName, ICOsize );
+            cache.Add( extension, icon );
+            return icon;
         }
     }
     public enum FileType {
@@ -62,6 +146,7 @@ namespace ExplorerWpf {
         public string Name { get; set; }
 
         public ObservableCollection<TreePathItem> Items { get; set; }
+
 
     }
     /// <summary>
@@ -273,7 +358,12 @@ namespace ExplorerWpf {
             var pt = this._handler.GetCurrentPath();
             this._handler.SetCurrentPath( this._handler.GetCurrentPath() + "\\..\\" );
             this._handler.ValidatePath();
-            var  p    = this._handler.GetCurrentPath();
+            var p = this._handler.GetCurrentPath();
+
+            if ( p[p.Length - 1] == '\\' ) {
+                p = p.Substring( 0, p.Length - 1 );
+            }
+
             Item item = new Item( "..", p, "", FileType.Directory );
             this.listView1.Items.Add( item );
             this._handler.SetCurrentPath( pt );

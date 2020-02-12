@@ -11,25 +11,21 @@
     <Color x:Key="DisabledForegroundColor">#212650</Color>
 
     <Color x:Key="SelectedBackgroundColor">#212650</Color>
-    <Color x:Key="SelectedUnfocusedColor">#212650</Color>
+    <Color x:Key="SelectedUnfocusedColor">#1A1F48</Color>
 
     <Color x:Key="ControlLightColor">#F3181B28</Color>
     <Color x:Key="ControlMediumColor">#F3181B29</Color>
-    <Color x:Key="ControlDarkColor">#F3181B28</Color>
+    <Color x:Key="ControlDarkColor">#EB00FF</Color>
 
     <Color x:Key="ControlMouseOverColor">#F31E2234</Color>
     <Color x:Key="ControlPressedColor">#F31D2132</Color>
 
 
-    <Color x:Key="GlyphColor">#180F38</Color>
+    <Color x:Key="GlyphColor">#FF186884</Color>
     <Color x:Key="GlyphMouseOver">sc#1, 0.004391443, 0.002428215, 0.242281124</Color>
-
-    <!--Control-specific resources.-->
-    <Color x:Key="HeaderTopColor">#1C2353</Color>
-    <Color x:Key="DatagridCurrentCellBorderColor">Black</Color>
-    <Color x:Key="SliderTrackDarkColor">#151938</Color>
-
-    <Color x:Key="NavButtonFrameColor">#141953</Color>
+    
+    <SolidColorBrush x:Key="ScrolBarbackground" Color="#FF303651"/>
+    <SolidColorBrush x:Key="DefBack" Color="#FF181B28"/>
 
     <LinearGradientBrush x:Key="MenuPopupBrush"
                          EndPoint="0.5,1"
@@ -342,14 +338,14 @@
                                    Maximum="{TemplateBinding ScrollableWidth}"
                                    ViewportSize="{TemplateBinding ViewportWidth}"
                                    Value="{TemplateBinding HorizontalOffset}"
-                                   Visibility="{TemplateBinding ComputedHorizontalScrollBarVisibility}" />
+                                   Visibility="{TemplateBinding ComputedHorizontalScrollBarVisibility}" Background="{DynamicResource DefBack}" />
 
                         <ScrollBar Name="PART_VerticalScrollBar"
                                    Grid.Column="1"
                                    Maximum="{TemplateBinding ScrollableHeight}"
                                    ViewportSize="{TemplateBinding ViewportHeight}"
                                    Value="{TemplateBinding VerticalOffset}"
-                                   Visibility="{TemplateBinding ComputedVerticalScrollBarVisibility}" />
+                                   Visibility="{TemplateBinding ComputedVerticalScrollBarVisibility}" Background="{DynamicResource DefBack}"  />
 
                     </Grid>
                 </ControlTemplate>

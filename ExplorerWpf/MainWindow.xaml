@@ -6,21 +6,24 @@
     xmlns:local="clr-namespace:ExplorerWpf"
     xmlns:WPF="clr-namespace:ConsoleControl.WPF;assembly=ConsoleControl.WPF"
     xmlns:forms="clr-namespace:System.Windows.Forms;assembly=System.Windows.Forms"
-    xmlns:wf="clr-namespace:System.Windows.Forms;assembly=System.Windows.Forms" xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit" x:Name="WindowX"
+    xmlns:wf="clr-namespace:System.Windows.Forms;assembly=System.Windows.Forms"
+    xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit" x:Name="WindowX"
     x:Class="ExplorerWpf.MainWindow"
     mc:Ignorable="d"
-    Title="MainWindow" Height="714.626" Width="1067.07" Background="#1F000000"  ResizeMode="CanResize" Loaded="MainWindow_OnLoaded" AllowsTransparency="True" WindowStyle="None">
-    <Window.Resources>
+    Title="MainWindow" Height="714.626" Width="1067.07" Background="#1F000000" ResizeMode="CanResize"
+    Loaded="MainWindow_OnLoaded" AllowsTransparency="True" WindowStyle="None">
+    <Window.Resources>    
+        <local:ImageConverter x:Key="Conv" />
         <LinearGradientBrush x:Key="Background" EndPoint="0.5,1" StartPoint="0.5,0">
-            <GradientStop Color="#F3181B28"/>
-            <GradientStop Color="#F3181B28" Offset="1"/>
+            <GradientStop Color="#F3181B28" />
+            <GradientStop Color="#F3181B28" Offset="1" />
         </LinearGradientBrush>
         <LinearGradientBrush x:Key="Forground" EndPoint="0,0" StartPoint="1,0">
-            <GradientStop Color="#FFAE54F0" Offset="1"/>
-            <GradientStop Color="#FF5A32E6"/>
+            <GradientStop Color="#FFAE54F0" Offset="1" />
+            <GradientStop Color="#FF5A32E6" />
         </LinearGradientBrush>
-        <SolidColorBrush x:Key="Border" Color="#FF111421"/>
-        <SolidColorBrush x:Key="Aczent" Color="#FF141721"/>
+        <SolidColorBrush x:Key="Border" Color="#FF111421" />
+        <SolidColorBrush x:Key="Aczent" Color="#FF141721" />
     </Window.Resources>
     <WindowChrome.WindowChrome>
         <WindowChrome
@@ -30,60 +33,65 @@
 
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="30"/>
-            <RowDefinition Height="697*"/>
+            <RowDefinition Height="30" />
+            <RowDefinition Height="697*" />
         </Grid.RowDefinitions>
         <Grid MouseDown="MoveWindow" Background="{DynamicResource Aczent}">
-            <Button Content="❌" FontSize="17" Foreground="#FFF37F97" Click="CloseClick" Background="{DynamicResource Background}" HorizontalAlignment="Right"/>
-            <Button Margin="0,0,35.343,-0.002" Content="🔳" FontSize="17" Foreground="#FF79E6F3" Click="MaxClick" HorizontalAlignment="Right" Background="{DynamicResource Background}"/>
-            <Button Margin="0,0.002,70.686,-0.003" Content="🔻" FontSize="17" Foreground="#FFD853FF" Click="MinClick" HorizontalAlignment="Right" Background="{DynamicResource Background}"/>
-            <Button Margin="0,0,106.029,0" Content="📌" FontSize="17" Foreground="#FFDCFF00" Click="PingClick" HorizontalAlignment="Right" Background="{DynamicResource Background}"/>
+            <Button Content="❌" FontSize="17" Foreground="#FFF37F97" Click="CloseClick"
+                    Background="{DynamicResource Background}" HorizontalAlignment="Right" />
+            <Button Margin="0,0,35.343,-0.002" Content="🔳" FontSize="17" Foreground="#FF79E6F3" Click="MaxClick"
+                    HorizontalAlignment="Right" Background="{DynamicResource Background}" />
+            <Button Margin="0,0.002,70.686,-0.003" Content="🔻" FontSize="17" Foreground="#FFD853FF" Click="MinClick"
+                    HorizontalAlignment="Right" Background="{DynamicResource Background}" />
+            <Button Margin="0,0,106.029,0" Content="📌" FontSize="17" Foreground="#FFDCFF00" Click="PingClick"
+                    HorizontalAlignment="Right" Background="{DynamicResource Background}" />
         </Grid>
         <Grid Grid.Row="1">
             <Grid>
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="21*"/>
-                    <ColumnDefinition/>
-                    <ColumnDefinition Width="138*"/>
+                    <ColumnDefinition Width="21*" />
+                    <ColumnDefinition />
+                    <ColumnDefinition Width="138*" />
                 </Grid.ColumnDefinitions>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="90*" />
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="40*" />
                 </Grid.RowDefinitions>
-                <Grid x:Name="pt" >
-                    <TreeView x:Name="trvMenu" Margin="0,0,-7.991,0" BorderBrush="{DynamicResource Border}" MouseDown="trvMenu_MouseDown" MouseDoubleClick="trvMenu_MouseDoubleClick" TreeViewItem.Expanded="trvMenu_Expanded" TreeViewItem.Collapsed="trvMenu_Collapsed" Style="{DynamicResource {x:Type TreeView}}" Foreground="{DynamicResource Forground}" Background="{DynamicResource Background}">
+                <Grid x:Name="pt">
+                    <TreeView x:Name="trvMenu" Margin="0,0,-7.991,0" BorderBrush="{DynamicResource Border}"
+                              MouseDown="trvMenu_MouseDown" MouseDoubleClick="trvMenu_MouseDoubleClick"
+                              TreeViewItem.Expanded="trvMenu_Expanded" TreeViewItem.Collapsed="trvMenu_Collapsed"
+                              Style="{DynamicResource {x:Type TreeView}}" Foreground="{DynamicResource Forground}"
+                              Background="{DynamicResource Background}">
                         <TreeView.ItemTemplate>
-                            <HierarchicalDataTemplate DataType="{x:Type local:TreePathItem}" ItemsSource="{Binding Items}">
+                            <HierarchicalDataTemplate DataType="{x:Type local:TreePathItem}"
+                                                      ItemsSource="{Binding Items}">
                                 <TextBlock Text="{Binding Name}" Foreground="{DynamicResource Forground}" />
                             </HierarchicalDataTemplate>
                         </TreeView.ItemTemplate>
                     </TreeView>
                 </Grid>
 
-                <GridSplitter Grid.Column="1" HorizontalAlignment="Stretch"/>
-                <Grid Grid.Column="2"  x:Name="grid1" Background="{DynamicResource Background}" >
+                <GridSplitter Grid.Column="1" HorizontalAlignment="Stretch" />
+                <Grid Grid.Column="2" x:Name="grid1" Background="{DynamicResource Background}">
                     <Grid.RowDefinitions>
-                        <RowDefinition/>
-                        <RowDefinition Height="25"/>
+                        <RowDefinition />
+                        <RowDefinition Height="25" />
                     </Grid.RowDefinitions>
-                    <ListView x:Name="listView1" AutomationProperties.IsColumnHeader="True" MouseDoubleClick="listView1_MouseDoubleClick" BorderBrush="{DynamicResource Border}"  Background="{DynamicResource Background}" Foreground="{DynamicResource Forground}">
-                        <ListView.Resources>
+                    <ListView x:Name="listView1" AutomationProperties.IsColumnHeader="True"
+                              MouseDoubleClick="listView1_MouseDoubleClick" BorderBrush="{DynamicResource Border}"
+                              Background="{DynamicResource Background}" Foreground="{DynamicResource Forground}">
+                        <ListView.Resources>      
                             <DataTemplate x:Key="Template">
-                                <Image Source="{Binding (local:Item.Icon)}" Width="64" Height="64" />
-                            </DataTemplate>
-                            <DataTemplate x:Key="ManaTemplate">
-                                <StackPanel Orientation="Horizontal" >
-                                    <Image Source="{Binding Image}" />
-                                    <TextBlock Text="{Binding Path}" />
-                                </StackPanel>
+                                <Image Source="{Binding Path=Icon, Converter={StaticResource Conv}}" Width="16" Height="16"/>
                             </DataTemplate>
                         </ListView.Resources>
 
 
                         <ListView.View>
-                            <GridView>              
-                                <GridViewColumn Header="Icon" Width="50" CellTemplate="{StaticResource ManaTemplate}"/>
+                            <GridView>
+                                <GridViewColumn Header="Icon" CellTemplate="{StaticResource Template}"/>
                                 <GridViewColumn Header="Name" Width="200" DisplayMemberBinding="{Binding Name}" />
                                 <GridViewColumn Header="Path" Width="200" DisplayMemberBinding="{Binding Path}" />
                                 <GridViewColumn Header="Size" Width="70" DisplayMemberBinding="{Binding Size}" />
@@ -91,17 +99,21 @@
                             </GridView>
                         </ListView.View>
                     </ListView>
-                    <Label x:Name="StatusLabel" Style="{DynamicResource SimpleLabel}" Background="{DynamicResource Background}" BorderBrush="{DynamicResource Border}" OpacityMask="Black" Grid.Row="1" Foreground="{DynamicResource Forground}"/>
-                    <Button Content="LocalDisks" Margin="842.945,0,0,0" Grid.Row="1"/>
+                    <Label x:Name="StatusLabel" Style="{DynamicResource SimpleLabel}"
+                           Background="{DynamicResource Background}" BorderBrush="{DynamicResource Border}"
+                           OpacityMask="Black" Grid.Row="1" Foreground="{DynamicResource Forground}" />
+                    <Button Content="LocalDisks" Margin="842.945,0,0,0" Grid.Row="1" />
                 </Grid>
-                <GridSplitter Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Center" Background="{DynamicResource Aczent}"
+                <GridSplitter Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Center"
+                              Background="{DynamicResource Aczent}"
                               ShowsPreview="True" Height="6" Grid.ColumnSpan="3" />
 
                 <Grid Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition/>
+                        <ColumnDefinition />
                     </Grid.ColumnDefinitions>
-                    <WPF:ConsoleControl x:Name="consoleX" Background="{DynamicResource Background}" FontWeight="Bold" Foreground="{DynamicResource Forground}" BorderBrush="{DynamicResource Border}" />
+                    <WPF:ConsoleControl x:Name="consoleX" Background="{DynamicResource Background}" FontWeight="Bold"
+                                        Foreground="{DynamicResource Forground}" BorderBrush="{DynamicResource Border}" />
                 </Grid>
             </Grid>
         </Grid>
