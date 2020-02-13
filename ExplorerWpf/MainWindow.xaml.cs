@@ -17,8 +17,10 @@ using ExplorerBase.Handlers;
 using ExplorerBase.UI;
 using System.Collections.Generic;
 using System.Drawing.Imaging;
+using System.Text.RegularExpressions;
 using System.Windows.Data;
 using System.Windows.Media.Imaging;
+using Application = System.Windows.Application;
 using Brushes = System.Windows.Media.Brushes;
 using Color = System.Windows.Media.Color;
 using ContextMenu = System.Windows.Forms.ContextMenu;
@@ -67,71 +69,122 @@ namespace ExplorerWpf {
             this.Size = size;
             this.Type = type;
 
-            if ( type == FileType.File ) {
-                try {
-                    Icon = GetFileIconCashed( Path, IconSize.SHGFI_SMALLICON );
-                } catch (Exception e) {
-                    Console.WriteLine( e.Message );
+            try {
+                if ( path != "/" )
+                    Icon = DefaultIcons1.GetFileIconCashed( Path ).ToBitmap();
+                else {
+                    Icon = SystemIcons.Shield.ToBitmap();
                 }
+            } catch (Exception e) {
+                try {
+                    Icon = SystemIcons.Error.ToBitmap();
+                } catch (Exception exception) {
+                    Console.WriteLine( exception );
+                }
+
+                Console.WriteLine( e.Message );
             }
         }
 
-        private const Int32 MAX_PATH                = 260;
-        private const Int32 SHGFI_ICON              = 0x100;
-        private const Int32 SHGFI_USEFILEATTRIBUTES = 0x10;
-        private const Int32 FILE_ATTRIBUTE_NORMAL   = 0x80;
+        public static class DefaultIcons1 {
+            private static readonly Dictionary<string, Icon> cache = new Dictionary<string, Icon>();
 
-        private struct SHFILEINFO {
-            public IntPtr hIcon;
-            public Int32  iIcon;
-            public Int32  dwAttributes;
+            public static Icon GetFileIconCashed(string path) {
+                string ext = path;
 
-            [MarshalAs( UnmanagedType.ByValTStr, SizeConst = MAX_PATH )]
-            public string szDisplayName;
+                if ( File.Exists( path ) ) {
+                    ext = System.IO.Path.GetExtension( path );
+                }
 
-            [MarshalAs( UnmanagedType.ByValTStr, SizeConst = 80 )]
-            public string szTypeName;
-        }
+                if ( ext == null )
+                    return null;
 
-        public enum IconSize {
-            SHGFI_LARGEICON = 0,
-            SHGFI_SMALLICON = 1
-        }
+                Icon icon;
+                if ( cache.TryGetValue( ext, out icon ) )
+                    return icon;
 
-        [DllImport( "shell32.dll", CharSet = CharSet.Auto )]
-        private static extern IntPtr SHGetFileInfo(string pszPath, Int32 dwFileAttributes, ref SHFILEINFO psfi, Int32 cbFileInfo, Int32 uFlags);
-
-        [DllImport( "user32.dll", SetLastError = true )]
-        private static extern bool DestroyIcon(IntPtr hIcon);
-
-        // get associated icon (as bitmap).
-        private Bitmap GetFileIcon(string fileExt, IconSize ICOsize = IconSize.SHGFI_SMALLICON) {
-            SHFILEINFO shinfo = new SHFILEINFO();
-            shinfo.szDisplayName = new string( (char) 0, MAX_PATH );
-            shinfo.szTypeName    = new string( (char) 0, 80 );
-            SHGetFileInfo( fileExt, FILE_ATTRIBUTE_NORMAL, ref shinfo, Marshal.SizeOf( shinfo ), SHGFI_ICON | (int) ICOsize | SHGFI_USEFILEATTRIBUTES );
-            Bitmap bmp = System.Drawing.Icon.FromHandle( shinfo.hIcon ).ToBitmap();
-            DestroyIcon( shinfo.hIcon ); // must destroy icon to avoid GDI leak!
-            return bmp;                  // return icon as a bitmap
-        }
-
-        private static readonly Dictionary<string, Bitmap> _smallIconCache = new Dictionary<string, Bitmap>();
-        private static readonly Dictionary<string, Bitmap> _largeIconCache = new Dictionary<string, Bitmap>();
-
-        public Bitmap GetFileIconCashed(string fileName, IconSize ICOsize = IconSize.SHGFI_SMALLICON) {
-            var extension = System.IO.Path.GetExtension( fileName );
-            if ( extension == null )
-                return null;
-
-            var cache = ICOsize == IconSize.SHGFI_LARGEICON ? _largeIconCache : _smallIconCache;
-
-            Bitmap icon;
-            if ( cache.TryGetValue( extension, out icon ) )
+                icon = ExtractFromPath( path );
+                cache.Add( ext, icon );
                 return icon;
+            }
 
-            icon = GetFileIcon( fileName, ICOsize );
-            cache.Add( extension, icon );
-            return icon;
+            private static readonly Lazy<Icon> _lazyFolderIcon = new Lazy<Icon>( FetchIcon, true );
+
+            public static Icon FolderLarge { get { return _lazyFolderIcon.Value; } }
+
+            private static Icon FetchIcon() {
+                var tmpDir = Directory.CreateDirectory( System.IO.Path.Combine( System.IO.Path.GetTempPath(), Guid.NewGuid().ToString() ) ).FullName;
+                var icon   = ExtractFromPath( tmpDir );
+                Directory.Delete( tmpDir );
+                return icon;
+            }
+
+            private static Icon ExtractFromPath(string path) {
+                SHFILEINFO shinfo = new SHFILEINFO();
+                SHGetFileInfo( path, 0, ref shinfo, (uint) Marshal.SizeOf( shinfo ), SHGFI_ICON | SHGFI_LARGEICON );
+                return System.Drawing.Icon.FromHandle( shinfo.hIcon );
+            }
+
+            //Struct used by SHGetFileInfo function
+            [StructLayout( LayoutKind.Sequential )]
+            private struct SHFILEINFO {
+                public IntPtr hIcon;
+                public int    iIcon;
+                public uint   dwAttributes;
+
+                [MarshalAs( UnmanagedType.ByValTStr, SizeConst = 260 )]
+                public string szDisplayName;
+
+                [MarshalAs( UnmanagedType.ByValTStr, SizeConst = 80 )]
+                public string szTypeName;
+            };
+
+            [DllImport( "shell32.dll" )]
+            private static extern IntPtr SHGetFileInfo(string pszPath, uint dwFileAttributes, ref SHFILEINFO psfi, uint cbSizeFileInfo, uint uFlags);
+
+            private const uint SHGFI_ICON      = 0x100;
+            private const uint SHGFI_LARGEICON = 0x0;
+            private const uint SHGFI_SMALLICON = 0x000000001;
+        }
+
+        public static class DefaultIcons {
+            private static Icon folderIcon;
+
+            public static Icon FolderLarge => folderIcon ?? ( folderIcon = GetStockIcon( SHSIID_FOLDER, SHGSI_LARGEICON ) );
+
+            private static Icon GetStockIcon(uint type, uint size) {
+                var info = new SHSTOCKICONINFO();
+                info.cbSize = (uint) Marshal.SizeOf( info );
+
+                SHGetStockIconInfo( type, SHGSI_ICON | size, ref info );
+
+                var icon = (Icon) System.Drawing.Icon.FromHandle( info.hIcon ).Clone(); // Get a copy that doesn't use the original handle
+                DestroyIcon( info.hIcon );                                              // Clean up native icon to prevent resource leak
+
+                return icon;
+            }
+
+            [StructLayout( LayoutKind.Sequential, CharSet = CharSet.Unicode )]
+            public struct SHSTOCKICONINFO {
+                public uint   cbSize;
+                public IntPtr hIcon;
+                public int    iSysIconIndex;
+                public int    iIcon;
+
+                [MarshalAs( UnmanagedType.ByValTStr, SizeConst = 260 )]
+                public string szPath;
+            }
+
+            [DllImport( "shell32.dll" )]
+            public static extern int SHGetStockIconInfo(uint siid, uint uFlags, ref SHSTOCKICONINFO psii);
+
+            [DllImport( "user32.dll" )]
+            public static extern bool DestroyIcon(IntPtr handle);
+
+            private const uint SHSIID_FOLDER   = 0x3;
+            private const uint SHGSI_ICON      = 0x100;
+            private const uint SHGSI_LARGEICON = 0x0;
+            private const uint SHGSI_SMALLICON = 0x1;
         }
     }
     public enum FileType {
@@ -180,8 +233,7 @@ namespace ExplorerWpf {
             this.consoleX.Foreground     = Brushes.LimeGreen;
             consoleX.FontStyle           = new FontStyle();
 
-            this.currentExplorerView = new ExplorerView();
-            this.currentExplorerView.Init( new LocalHandler( "C:\\" ) );
+            AddTab( Path.GetDirectoryName( System.Windows.Forms.Application.ExecutablePath ) );
 
             //this._handler = new LocalHandler( "C:\\" );
 
@@ -244,7 +296,12 @@ namespace ExplorerWpf {
 
         private void PingClick(object sender, RoutedEventArgs e) { this.Topmost = !Topmost; }
 
-        private void MoveWindow(object sender, MouseButtonEventArgs e) { this.DragMove(); }
+        private void MoveWindow(object sender, MouseButtonEventArgs e) {
+            if ( this.WindowState == WindowState.Maximized ) {
+                WindowState = WindowState.Normal;
+            }
+            this.DragMove();
+        }
 
 
         #region Explorer
@@ -290,7 +347,7 @@ namespace ExplorerWpf {
 
             var accent           = new AccentPolicy();
             var accentStructSize = Marshal.SizeOf( accent );
-            accent.AccentState = AccentState.ACCENT_ENABLE_GRADIENT;
+            accent.AccentState = AccentState.ACCENT_ENABLE_BLURBEHIND;
 
             var accentPtr = Marshal.AllocHGlobal( accentStructSize );
             Marshal.StructureToPtr( accent, accentPtr, false );
@@ -370,7 +427,6 @@ namespace ExplorerWpf {
                 this.trvMenu.Items.Add( node );
             }
 
-
             ///
             ///
             ///  NetworkHandler
@@ -392,21 +448,33 @@ namespace ExplorerWpf {
 
         private void taps_SelectionChanged(object sender, SelectionChangedEventArgs e) {
             if ( this.taps.SelectedItem is System.Windows.Controls.TabItem tp ) {
-                this.currentExplorerView = (ExplorerView) tp.Content;
-                this.consoleX.ProcessInterface.WriteInput( "cd \"" + _handler.GetCurrentPath() + "\"" );
+                if ( !tp.Content.Equals( this.currentExplorerView ) ) {
+                    this.currentExplorerView = (ExplorerView) tp.Content;
+                    var p = _handler.GetCurrentPath();
+
+                    if ( Regex.IsMatch( p, @"[A-Za-z]:\\" ) ) {
+                        this.consoleX.ProcessInterface.WriteInput( p.Substring( 0, 2 ) );
+                    }
+
+                    if ( ( p.Length > 3 ) )
+                        this.consoleX.ProcessInterface.WriteInput( "cd \"" + p + "\"" );
+                }
             }
         }
 
-        void AddTab() {
-            LocalHandler h = new LocalHandler( "C:\\" );
+        void AddTab(string path = "/") {
+            LocalHandler h = new LocalHandler( path );
             ExplorerView x = new ExplorerView();
             x.Init( h );
             x.SendDirectoryUpdateAsCmd += XOnSendDirectoryUpdateAsCmd;
 
             TabItem newTabItem = new TabItem {
-                Header  = "Explorer",
-                Name    = "Explorer",
-                Content = x,
+                Header      = "Explorer",
+                Name        = "Explorer",
+                Content     = x,
+                Background  = this.ColorExample.Background,
+                Foreground  = this.ColorExample.Foreground,
+                BorderBrush = this.ColorExample.BorderBrush,
             };
 
             taps.Items.Add( newTabItem );

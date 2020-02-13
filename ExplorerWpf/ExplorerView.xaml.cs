@@ -8,6 +8,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -29,7 +30,6 @@ namespace ExplorerWpf {
     /// Interaktionslogik für ExplorerView.xaml
     /// </summary>
     public partial class ExplorerView : UserControl {
-
         private ContextMenu _ct;
         private IHandler    _handler;
 
@@ -47,7 +47,7 @@ namespace ExplorerWpf {
 
             this._ct = new ContextMenu( new[] { NewDialog() } );
 
-            ListDiscs();
+            List( this._handler.GetCurrentPath(), false );
         }
 
         private void HandlerOnOnSetCurrentPath(string arg1, string arg2) {
@@ -114,7 +114,7 @@ namespace ExplorerWpf {
                             OnDirectoryUpdate( item.Path.Substring( 0, 2 ) );
                     }
 
-                    this._handler.SetCurrentPath( item.Path + @"\" );
+                    this._handler.SetCurrentPath( item.Path + ( item.Path == "/" ? "" : @"\" ) );
 
                     List( this._handler.GetCurrentPath() );
                 }
@@ -127,7 +127,6 @@ namespace ExplorerWpf {
                 }
             }
         }
-
 
         #region List
 
@@ -183,15 +182,24 @@ namespace ExplorerWpf {
 
         private int Add_Parent_Dir(int count) {
             var pt = this._handler.GetCurrentPath();
-            this._handler.SetCurrentPath( this._handler.GetCurrentPath() + "\\..\\" );
-            this._handler.ValidatePath();
-            var p = this._handler.GetCurrentPath();
 
-            if ( p[p.Length - 1] == '\\' ) {
-                p = p.Substring( 0, p.Length - 1 );
+
+
+
+            if ( pt.Length <= 3 && Regex.IsMatch( pt, @"[A-Za-z]:" ) ) {
+                pt = "/";
+            }
+            else {
+                this._handler.SetCurrentPath( this._handler.GetCurrentPath() + "\\..\\" );
+                this._handler.ValidatePath();
+                pt = this._handler.GetCurrentPath();
+
+                if ( pt[pt.Length - 1] == '\\' ) {
+                    pt = pt.Substring( 0, pt.Length - 1 );
+                }
             }
 
-            Item item = new Item( "..", p, "", FileType.Directory );
+            Item item = new Item( "..", pt, "", FileType.Directory );
             this.MainView.Items.Add( item );
             this._handler.SetCurrentPath( pt );
             this._handler.ValidatePath();
@@ -200,6 +208,11 @@ namespace ExplorerWpf {
 
 
         public void List(string dirToScan, bool noCd = false) {
+            if ( dirToScan == "/" ) {
+                ListDiscs();
+                return;
+            }
+
             this._handler.ValidatePath();
             var count = 0;
             this.MainView.Items.Clear();
@@ -209,11 +222,12 @@ namespace ExplorerWpf {
             count = List_Files( dirToScan, count );
 
             if ( this.StatusLabel.Foreground == Brushes.DarkGreen ) {
-                if ( !noCd )
-                    OnDirectoryUpdate( "cd \"" + this._handler.GetCurrentPath() + "\"" );
+                var p = this._handler.GetCurrentPath();
+                if ( !noCd && ( p.Length > 3 ) )
+                    OnDirectoryUpdate( "cd \"" + p + "\"" );
 
                 //TODO:!if ( !noCd ) this.consoleX.ProcessInterface.WriteInput( "cd \"" + this._handler.GetCurrentPath() + "\"" );
-                this.StatusLabel.Content = ( "CurrentDirectory: " + this._handler.GetCurrentPath() );
+                this.StatusLabel.Content = ( "CurrentDirectory: " + p );
             }
         }
 
