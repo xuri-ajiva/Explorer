@@ -1,35 +1,28 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Drawing;
-using System.Drawing.Imaging;
-using System.Globalization;
 using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using ExplorerBase.Handlers;
 using ExplorerBase.UI;
+using Peter;
 using Brushes = System.Windows.Media.Brushes;
 using ContextMenu = System.Windows.Forms.ContextMenu;
 using MenuItem = System.Windows.Forms.MenuItem;
+using MessageBox = System.Windows.MessageBox;
 using Path = System.IO.Path;
+using UserControl = System.Windows.Controls.UserControl;
 
 namespace ExplorerWpf {
     /// <summary>
     /// Interaktionslogik für ExplorerView.xaml
     /// </summary>
-    public partial class ExplorerView : UserControl {
+    public partial class ExplorerView : UserControl, IDisposable {
+        private readonly IntPtr _hWnd;
+
+        public  bool        InitDone = false;
         private ContextMenu _ct;
         private IHandler    _handler;
 
@@ -37,8 +30,16 @@ namespace ExplorerWpf {
             [DebuggerStepThrough] get => this._handler;
         }
 
-        public ExplorerView() { InitializeComponent(); }
+        public ExplorerView(IntPtr hWnd) {
+            this._hWnd = hWnd;
+            InitializeComponent();
+        }
+    #if DEBUG
+        ~ExplorerView() { Console.WriteLine( "Destroyed Items: " + DestroyCount++ ); }
 
+        public static int DestroyCount = 0;
+
+    #endif
         public void Init(IHandler handler) {
             if ( handler.GetType() == typeof(NullHandler) ) return;
 
@@ -47,7 +48,18 @@ namespace ExplorerWpf {
 
             this._ct = new ContextMenu( new[] { NewDialog() } );
 
-            List( this._handler.GetCurrentPath(), false );
+            if ( this.Dispatcher != null )
+                Dispatcher.Invoke( () => {
+                    List( this._handler.GetCurrentPath(), false );
+                    this.InitDone = true;
+                } );
+            else {
+                try {
+                    List( this._handler.GetCurrentPath(), false );
+                } catch { }
+
+                this.InitDone = true;
+            }
         }
 
         private void HandlerOnOnSetCurrentPath(string arg1, string arg2) {
@@ -96,6 +108,10 @@ namespace ExplorerWpf {
         #endregion
 
         private void BrowseAction(object sender, MouseButtonEventArgs e) {
+            if ( e.RightButton == MouseButtonState.Pressed ) {
+                return;
+            }
+
             if ( this.MainView.SelectedItems.Count > 0 ) {
                 var item = this.MainView.SelectedItems[0] as Item;
 
@@ -182,9 +198,6 @@ namespace ExplorerWpf {
 
         private int Add_Parent_Dir(int count) {
             var pt = this._handler.GetCurrentPath();
-
-
-
 
             if ( pt.Length <= 3 && Regex.IsMatch( pt, @"[A-Za-z]:" ) ) {
                 pt = "/";
@@ -289,5 +302,90 @@ namespace ExplorerWpf {
         protected virtual void OnDirectoryUpdate(string e) { this.SendDirectoryUpdateAsCmd?.Invoke( this, e ); }
 
         private void Button_Click(object sender, RoutedEventArgs e) { ListDiscs(); }
+
+        #region IDisposable
+
+        /// <inheritdoc />
+        public void Dispose() {
+            this.Root.Children.Clear();
+            this.Root = null;
+            //this._handler?.Close();
+            this._handler = null;
+            this._ct?.Dispose();
+        }
+
+        #endregion
+
+
+        private void MainView_OnMouseDown(object sender, MouseButtonEventArgs e) {
+            if ( e.RightButton != MouseButtonState.Pressed ) return;
+        }
+
+
+
+        private void MainView_OnMouseRightButtonUp(object sender, MouseButtonEventArgs e) {
+            if ( this.MainView.SelectedItems.Count == 0 ) return;
+
+            //var itemX = (Item) this.MainView.SelectedItem;
+            
+            var wpfP = PointToScreen( e.GetPosition( this ) );
+
+            var p = new System.Drawing.Point( (int) wpfP.X, (int) wpfP.Y );
+
+            ShellContextMenu ctxMnu = new ShellContextMenu();
+
+            bool                       oneFile = false;
+            Dictionary<FileType, bool> test    = new Dictionary<FileType, bool>();
+
+            List<Item> list = new List<Item>();
+
+            foreach ( Item yi in this.MainView.SelectedItems ) {
+                if ( test.ContainsKey( yi.Type ) ) {
+                    continue;
+                }
+
+                if ( test.Keys.Count > 0 ) {
+                    oneFile = true;
+                    //break;
+                }
+
+                if ( yi.Path.Length > 3 ) {
+                    list.Add( yi );
+                }
+            }
+
+            if ( oneFile ) {
+                list = new List<Item>();
+                list.Add( ( (Item) this.MainView.SelectedItems[0] ) );
+            }
+
+            //var list = oneFile ? new[] { this.MainView.SelectedItems[0] } : this.MainView.SelectedItems;
+            if ( list.Count <= 0 ) return;
+
+            switch (( (Item) list[0] ).Type) {
+                case FileType.File: {
+                    FileInfo[] arrFI = new FileInfo[list.Count];
+
+                    for ( var i = 0; i < list.Count; i++ ) {
+                        arrFI[i] = new FileInfo( ( (Item) list[i] ).Path );
+                    }
+
+                    ctxMnu.ShowContextMenu( arrFI, p );
+                    break;
+                }
+                case FileType.Directory: {
+                    DirectoryInfo[] arrFI = new DirectoryInfo[list.Count];
+
+                    for ( var i = 0; i < list.Count; i++ ) {
+                        arrFI[i] = new DirectoryInfo( ( (Item) list[i] ).Path );
+                    }
+
+                    ctxMnu.ShowContextMenu( arrFI, p );
+                    break;
+                }
+                default: throw new ArgumentOutOfRangeException();
+            }
+        }
     }
+
 }

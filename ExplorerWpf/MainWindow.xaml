@@ -19,18 +19,18 @@
             <GradientStop Color="#F3181B28" />
             <GradientStop Color="#F2181B28" Offset="1" />
         </LinearGradientBrush>
-        <LinearGradientBrush x:Key="Forground" EndPoint="0,0" StartPoint="1,0">
+        <LinearGradientBrush x:Key="Foreground" EndPoint="0,0" StartPoint="1,0">
             <GradientStop Color="#FFAE54F0" Offset="1" />
             <GradientStop Color="#FF5A32E6" />
         </LinearGradientBrush>
         <SolidColorBrush x:Key="Border" Color="#FF111421" />
         <SolidColorBrush x:Key="Aczent" Color="#FF141721" />
     </Window.Resources>
-<WindowChrome.WindowChrome>
-    <WindowChrome 
+    <WindowChrome.WindowChrome>
+        <WindowChrome 
         CaptionHeight="0"
         ResizeBorderThickness="10" />
-</WindowChrome.WindowChrome>
+    </WindowChrome.WindowChrome>
 
     <Grid Margin="1">
         <Grid.RowDefinitions>
@@ -48,49 +48,60 @@
                     HorizontalAlignment="Right" Background="{DynamicResource Background}" />
         </Grid>
         <Grid Grid.Row="1">
-            <Grid Background="{DynamicResource Background}">
+            <Grid>
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="21*" />
-                    <ColumnDefinition />
-                    <ColumnDefinition Width="138*" />
+                    <ColumnDefinition Width="105*" />
+                    <ColumnDefinition Width="6" />
+                    <ColumnDefinition Width="688*" />
                 </Grid.ColumnDefinitions>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="90*" />
                     <RowDefinition Height="6" />
                     <RowDefinition Height="40*" />
                 </Grid.RowDefinitions>
-                <Grid x:Name="pt">
-                    <TreeView x:Name="trvMenu" BorderBrush="{DynamicResource Border}"
-                            MouseDown="trvMenu_MouseDown" MouseDoubleClick="trvMenu_MouseDoubleClick"
-                            TreeViewItem.Expanded="trvMenu_Expanded" TreeViewItem.Collapsed="trvMenu_Collapsed"
-                            Style="{DynamicResource {x:Type TreeView}}" Foreground="{DynamicResource Forground}" Background="{DynamicResource Background}">
+                <Grid>
+                    <TreeView x:Name="TreeControl" BorderBrush="{DynamicResource Border}"
+                              MouseDown="trvMenu_MouseDown" MouseDoubleClick="trvMenu_MouseDoubleClick"
+                              TreeViewItem.Expanded="trvMenu_Expanded" TreeViewItem.Collapsed="trvMenu_Collapsed"
+                              Style="{DynamicResource {x:Type TreeView}}" Foreground="{DynamicResource Foreground}" Background="{DynamicResource Background}">
                         <TreeView.ItemTemplate>
                             <HierarchicalDataTemplate DataType="{x:Type local:TreePathItem}"
                                     ItemsSource="{Binding Items}">
-                                <TextBlock Text="{Binding Name}" Foreground="{DynamicResource Forground}" />
+                                <TextBlock Text="{Binding Name}" Foreground="{DynamicResource Foreground}" />
                             </HierarchicalDataTemplate>
                         </TreeView.ItemTemplate>
                     </TreeView>
                 </Grid>
 
-                <GridSplitter x:Name="ColorExample" Grid.Column="1" HorizontalAlignment="Stretch" Background="{DynamicResource Background}" BorderBrush="{DynamicResource Border}" BorderThickness="1,0,1,1" Foreground="{DynamicResource Forground}" />
-                <Grid Grid.Column="2">
+                <GridSplitter x:Name="ColorExample" Grid.Row="0" Grid.Column="1" HorizontalAlignment="Stretch" Background="{DynamicResource Background}" BorderBrush="{DynamicResource Border}" BorderThickness="1,0,1,1" Foreground="{DynamicResource Foreground}" />
+                <Grid Grid.Column="2" Background="{DynamicResource Aczent}">
                     <Grid.RowDefinitions>
                         <RowDefinition />
                     </Grid.RowDefinitions>
-                    <TabControl x:Name="taps" DataContextChanged="DCChange"  SelectionChanged="taps_SelectionChanged" Background="{DynamicResource Background}" Foreground="{DynamicResource Forground}" Style="{DynamicResource TabControlStyle1}"/>
+                    <TabControl x:Name="TabControl" DataContextChanged="DCChange"  SelectionChanged="taps_SelectionChanged" Background="{DynamicResource Background}" Foreground="{DynamicResource Foreground}" Style="{DynamicResource TabControlStyle1}" BorderBrush="{DynamicResource Border}">
+                        <TabItem x:Name="PlusTabItem" Margin="0" Foreground="{DynamicResource Foreground}" BorderBrush="{DynamicResource Border}" Background="{DynamicResource Background}" TextOptions.TextFormattingMode="Display" Style="{DynamicResource TabItemStyle1}">
+                            <TabItem.ContextMenu>
+                                <ContextMenu>
+                                    <MenuItem Header="_LocalExplorer" Click="MenuItem_OnClick" TabIndex="1"/>
+                                    <MenuItem Header="_Test" IsCheckable="True" IsChecked="False" Click="MenuItem_OnClick" TabIndex="2" />
+                                </ContextMenu>
+                            </TabItem.ContextMenu>
+                            <TabItem.Header>
+                                <Label Content="➕" MouseLeftButtonDown="TabItem_MouseLeftButtonDown" Margin="-10,0,-10,0" Background="{DynamicResource Background}" BorderBrush="{DynamicResource Border}" Foreground="{DynamicResource Foreground}"   />
+                            </TabItem.Header>
+                        </TabItem>
+                    </TabControl>
                 </Grid>
-                <Button Content="Button" HorizontalAlignment="Right" VerticalAlignment="Top" Width="75" Margin="845,0,0,0" Grid.Column="2" Click="Button_Click" Background="{DynamicResource Background}"/>
                 <GridSplitter Grid.Row="1" HorizontalAlignment="Stretch"
                         Background="{DynamicResource Background}"
                         ShowsPreview="True" Grid.ColumnSpan="3" BorderBrush="{DynamicResource Border}" BorderThickness="1" />
 
-                <Grid Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3">
+                <Grid Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3" Background="{DynamicResource Background}">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition />
                     </Grid.ColumnDefinitions>
                     <WPF:ConsoleControl x:Name="consoleX" Background="{x:Null}" FontWeight="Bold"
-                            Foreground="{DynamicResource Forground}" BorderBrush="{DynamicResource Border}" />
+                            Foreground="{DynamicResource Foreground}" BorderBrush="{DynamicResource Border}" />
                 </Grid>
             </Grid>
         </Grid>

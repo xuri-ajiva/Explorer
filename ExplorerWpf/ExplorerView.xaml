@@ -1,10 +1,10 @@
 ﻿<UserControl x:Class="ExplorerWpf.ExplorerView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:local="clr-namespace:ExplorerWpf"
-             mc:Ignorable="d" 
+             mc:Ignorable="d"
              d:DesignHeight="450" d:DesignWidth="800">
     <UserControl.Resources>
         <SolidColorBrush x:Key="Border" Color="#FF111421" />
@@ -14,17 +14,17 @@
         </LinearGradientBrush>
         <local:ImageConverter x:Key="Conv" />
     </UserControl.Resources>
-    <Grid>
+    <Grid x:Name="Root">
         <Grid.RowDefinitions>
-            <RowDefinition Height="71*"/>
-            <RowDefinition Height="4*"/>
+            <RowDefinition Height="71*" />
+            <RowDefinition Height="4*" />
         </Grid.RowDefinitions>
         <ListView x:Name="MainView" AutomationProperties.IsColumnHeader="True"
-            MouseDoubleClick="BrowseAction" BorderBrush="{DynamicResource Border}" Foreground="{DynamicResource Forground}">
+                  MouseDoubleClick="BrowseAction" MouseDown="MainView_OnMouseDown" MouseRightButtonUp="MainView_OnMouseRightButtonUp" BorderBrush="{DynamicResource Border}"
+                  Foreground="{DynamicResource Forground}">
             <ListView.Resources>
                 <DataTemplate x:Key="Template">
-                    <Image Source="{Binding Icon, Converter={StaticResource Conv}}" Width="16"
-                        Height="16" />
+                    <Image Source="{Binding Icon, Converter={StaticResource Conv}}" Width="16" Height="16" />
                 </DataTemplate>
             </ListView.Resources>
 
@@ -40,8 +40,8 @@
             </ListView.View>
         </ListView>
         <Label x:Name="StatusLabel"
-            Background="{x:Null}" BorderBrush="{DynamicResource Border}"
-            OpacityMask="Black" Foreground="{DynamicResource Forground}" Grid.Row="1" />
+               Background="{x:Null}" BorderBrush="{DynamicResource Border}"
+               OpacityMask="Black" Foreground="{DynamicResource Forground}" Grid.Row="1" />
         <Button Content="LocalDisks" HorizontalAlignment="Right" Width="67" Grid.Row="1" Click="Button_Click" />
 
     </Grid>

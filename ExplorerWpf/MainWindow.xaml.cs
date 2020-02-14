@@ -1,36 +1,24 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Diagnostics;
 using System.Drawing;
+using System.Drawing.Imaging;
 using System.IO;
-using System.Linq;
 using System.Runtime.InteropServices;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Forms;
+using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using ConsoleControlAPI;
 using ExplorerBase.Handlers;
-using ExplorerBase.UI;
-using System.Collections.Generic;
-using System.Drawing.Imaging;
-using System.Text.RegularExpressions;
-using System.Windows.Data;
-using System.Windows.Media.Imaging;
-using Application = System.Windows.Application;
 using Brushes = System.Windows.Media.Brushes;
 using Color = System.Windows.Media.Color;
-using ContextMenu = System.Windows.Forms.ContextMenu;
-using FontStyle = System.Windows.FontStyle;
-using Image = System.Drawing.Image;
-using ListView = System.Windows.Controls.ListView;
-using MenuItem = System.Windows.Forms.MenuItem;
 using MessageBox = System.Windows.Forms.MessageBox;
-using MouseEventArgs = System.Windows.Forms.MouseEventArgs;
-using Path = System.IO.Path;
 
 namespace ExplorerWpf {
 
@@ -70,14 +58,13 @@ namespace ExplorerWpf {
             this.Type = type;
 
             try {
-                if ( path != "/" )
-                    Icon = DefaultIcons1.GetFileIconCashed( Path ).ToBitmap();
+                if ( path != "/" ) this.Icon = DefaultIcons1.GetFileIconCashed( this.Path ).ToBitmap();
                 else {
-                    Icon = SystemIcons.Shield.ToBitmap();
+                    this.Icon = SystemIcons.Shield.ToBitmap();
                 }
             } catch (Exception e) {
                 try {
-                    Icon = SystemIcons.Error.ToBitmap();
+                    this.Icon = SystemIcons.Error.ToBitmap();
                 } catch (Exception exception) {
                     Console.WriteLine( exception );
                 }
@@ -186,6 +173,8 @@ namespace ExplorerWpf {
             private const uint SHGSI_LARGEICON = 0x0;
             private const uint SHGSI_SMALLICON = 0x1;
         }
+
+        ~Item() { Icon.Dispose(); }
     }
     public enum FileType {
         Directory, File
@@ -231,9 +220,6 @@ namespace ExplorerWpf {
             this.consoleX.IsInputEnabled = true;
             this.consoleX.Visibility     = Visibility.Collapsed;
             this.consoleX.Foreground     = Brushes.LimeGreen;
-            consoleX.FontStyle           = new FontStyle();
-
-            AddTab( Path.GetDirectoryName( System.Windows.Forms.Application.ExecutablePath ) );
 
             //this._handler = new LocalHandler( "C:\\" );
 
@@ -285,22 +271,23 @@ namespace ExplorerWpf {
             //}
         }
 
-        private void CloseClick(object sender, RoutedEventArgs e) { this.Close(); }
+        private void CloseClick(object sender, RoutedEventArgs e) { Close(); }
 
         private void MaxClick(object sender, RoutedEventArgs e) { this.WindowState = this.WindowState == WindowState.Normal ? WindowState.Maximized : WindowState.Normal; }
 
         private void MinClick(object sender, RoutedEventArgs e) {
             //if ( WindowState == WindowState.Normal ) 
-            WindowState = WindowState.Minimized;
+            this.WindowState = WindowState.Minimized;
         }
 
-        private void PingClick(object sender, RoutedEventArgs e) { this.Topmost = !Topmost; }
+        private void PingClick(object sender, RoutedEventArgs e) { this.Topmost = !this.Topmost; }
 
         private void MoveWindow(object sender, MouseButtonEventArgs e) {
             if ( this.WindowState == WindowState.Maximized ) {
-                WindowState = WindowState.Normal;
+                this.WindowState = WindowState.Normal;
             }
-            this.DragMove();
+
+            DragMove();
         }
 
 
@@ -367,10 +354,10 @@ namespace ExplorerWpf {
         private void trvMenu_MouseDown(object sender, MouseButtonEventArgs e) { }
 
         private void trvMenu_MouseDoubleClick(object sender, MouseButtonEventArgs e) {
-            if ( this.trvMenu.SelectedItem != null )
+            if ( this.TreeControl.SelectedItem != null )
                 try {
-                    this._handler.SetCurrentPath( ( (TreePathItem) this.trvMenu.SelectedItem ).PathAbs + "\\" );
-                    currentExplorerView.List( this._handler.GetCurrentPath() );
+                    this._handler.SetCurrentPath( ( (TreePathItem) this.TreeControl.SelectedItem ).PathAbs + "\\" );
+                    this.currentExplorerView.List( this._handler.GetCurrentPath() );
                 } catch { }
         }
 
@@ -384,7 +371,7 @@ namespace ExplorerWpf {
                 try {
                     node.Items.Clear();
                     this._handler.SetCurrentPath( node.PathAbs + "\\" );
-                    var x = currentExplorerView.Scan_Dir( this._handler.GetCurrentPath() );
+                    var x = this.currentExplorerView.Scan_Dir( this._handler.GetCurrentPath() );
 
                     if ( x != null )
                         for ( var i = 0; i < x.Length; i++ ) {
@@ -392,7 +379,7 @@ namespace ExplorerWpf {
                             var name = x[i].Substring( pos + 1 );
                             var n1   = new TreePathItem() { Name = name, PathAbs = x[i] };
 
-                            if ( currentExplorerView.Scan_Dir( this._handler.GetCurrentPath() ) is string[] xJ ) {
+                            if ( this.currentExplorerView.Scan_Dir( this._handler.GetCurrentPath() ) is string[] xJ ) {
                                 var n2 = new TreePathItem() { Name = "empty", PathAbs = "empty" };
                                 n1.Items.Add( n2 );
                                 //for ( var j = 0; j < xJ.Length; j++ ) {
@@ -424,7 +411,7 @@ namespace ExplorerWpf {
             foreach ( var driveInfo in DriveInfo.GetDrives() ) {
                 TreePathItem node = new TreePathItem() { Name = driveInfo.VolumeLabel, PathAbs = driveInfo.Name };
                 node.Items.Add( new TreePathItem { Name       = "empty" } );
-                this.trvMenu.Items.Add( node );
+                this.TreeControl.Items.Add( node );
             }
 
             ///
@@ -442,53 +429,195 @@ namespace ExplorerWpf {
             ///    //treeView1_AfterExpand( null, e );
             ///    i++;
             ///}
+            ///
+
+            CreateContextMenu();
+            var t = new Thread( () => {
+                const int MaxTaps = 100;
+
+                while ( true ) {
+                    Thread.Sleep( 2000 );
+
+                    for ( int i = 0; i < MaxTaps; i++ ) {
+                        this.Dispatcher?.Invoke( () => { AddTabToTabControl( CreateExplorerTab( CreateExplorer( Path.GetDirectoryName( System.Windows.Forms.Application.ExecutablePath ) ) ) ); } );
+
+                        Thread.Sleep( 50 );
+                    }
+
+                    Thread.Sleep( 1000 );
+
+                    //for ( int i = 0; i < MaxTaps; i++ ) {
+                    //    var fg = i;
+                    //    this.Dispatcher?.Invoke( () => { this.TabControl.SelectedIndex = fg; } );
+                    //    Thread.Sleep( 5 );
+                    //}
+                    //
+                    //Thread.Sleep( 1000 );
+
+                    for ( int i = 0; i < MaxTaps; i++ ) {
+                        this.Dispatcher?.Invoke( () => { CloseTap( (TabItem) this.TabControl.Items[0] ); } );
+                        Thread.Sleep( 50 );
+                    }
+
+                    Thread.Sleep( 1000 );
+                    this.currentExplorerView = null;
+
+                    GC.Collect( 1, GCCollectionMode.Forced, true );
+                }
+            } );
+
+            t.SetApartmentState( ApartmentState.STA );
+            //t.Start();
         }
 
         private void DCChange(object sender, DependencyPropertyChangedEventArgs e) { Console.WriteLine( e ); }
 
         private void taps_SelectionChanged(object sender, SelectionChangedEventArgs e) {
-            if ( this.taps.SelectedItem is System.Windows.Controls.TabItem tp ) {
-                if ( !tp.Content.Equals( this.currentExplorerView ) ) {
-                    this.currentExplorerView = (ExplorerView) tp.Content;
-                    var p = _handler.GetCurrentPath();
+            if ( this.TabControl.SelectedItem is TabItem tp ) {
+                if ( tp.Content != null ) {
+                    if ( this.currentExplorerView == null || !this.currentExplorerView.Equals( tp.Content ) ) {
+                        if ( tp.Content is ExplorerView explorer && explorer.InitDone ) {
+                            this.currentExplorerView = explorer;
+                            var p = this._handler.GetCurrentPath();
 
-                    if ( Regex.IsMatch( p, @"[A-Za-z]:\\" ) ) {
-                        this.consoleX.ProcessInterface.WriteInput( p.Substring( 0, 2 ) );
+                            if ( Regex.IsMatch( p, @"[A-Za-z]:\\" ) ) {
+                                this.consoleX.ProcessInterface.WriteInput( p.Substring( 0, 2 ) );
+                            }
+
+                            if ( ( p.Length > 3 ) )
+                                this.consoleX.ProcessInterface.WriteInput( "cd \"" + p + "\"" );
+                        }
                     }
-
-                    if ( ( p.Length > 3 ) )
-                        this.consoleX.ProcessInterface.WriteInput( "cd \"" + p + "\"" );
+                }
+                else {
+                    if ( this.TabControl.Items.Count > 1 ) {
+                        this.TabControl.SelectedIndex = this.TabControl.Items.Count - 2;
+                    }
                 }
             }
         }
 
-        void AddTab(string path = "/") {
+
+        private ContextMenu contextMenu;
+
+        void CreateContextMenu() {
+            if ( this.contextMenu == null ) {
+                ContextMenu m = new ContextMenu();
+
+                var me1 = new MenuItem { TabIndex = 100, Header = "_Close" };
+                me1.Click += MenuItem_OnClick;
+
+                m.Items.Add( me1 );
+                this.contextMenu = m;
+            }
+        }
+
+        ExplorerView CreateExplorer(string path = "/") {
             LocalHandler h = new LocalHandler( path );
-            ExplorerView x = new ExplorerView();
-            x.Init( h );
-            x.SendDirectoryUpdateAsCmd += XOnSendDirectoryUpdateAsCmd;
+            ExplorerView x = new ExplorerView(new WindowInteropHelper(this).Handle);
+            new Thread( () => {
+                x.Init( h );
 
+                x.SendDirectoryUpdateAsCmd += XOnSendDirectoryUpdateAsCmd;
+            } ).Start();
+            return x;
+        }
+
+        TabItem CreateExplorerTab(ExplorerView explorerView) {
             TabItem newTabItem = new TabItem {
-                Header      = "Explorer",
+                Header      = new Label(){Content =  "Explorer", ContextMenu = this.contextMenu},
                 Name        = "Explorer",
-                Content     = x,
-                Background  = this.ColorExample.Background,
-                Foreground  = this.ColorExample.Foreground,
-                BorderBrush = this.ColorExample.BorderBrush,
+                Content     = explorerView,
+                //Background  = this.ColorExample.Background,
+                //Foreground  = this.ColorExample.Foreground,
+                //BorderBrush = this.ColorExample.BorderBrush,
+               Style =  this.PlusTabItem.Style
             };
-
-            taps.Items.Add( newTabItem );
+            return newTabItem;
         }
 
-        private void Button_Click(object sender, RoutedEventArgs e) {
-            AddTab();
-            this.taps.SelectedIndex = this.taps.Items.Count - 1;
+        void AddTabToTabControl(TabItem newTabItem) {
+            this.TabControl.Items.Add( new TabItem() { Header = "Temp" } );
+            var p = this.TabControl.Items[this.TabControl.Items.Count - 2];
+            this.TabControl.Items[this.TabControl.Items.Count - 2] = newTabItem;
+            this.TabControl.Items[this.TabControl.Items.Count - 1] = p;
+
+            this.TabControl.SelectedIndex = this.TabControl.Items.Count - 2;
         }
+
+        void AddTab(string path = "/") {
+            if ( this.contextMenu == null ) {
+                CreateContextMenu();
+            }
+
+            AddTabToTabControl( CreateExplorerTab( CreateExplorer( path ) ) );
+        }
+
+        void CloseTap(TabItem tp) {
+            if ( tp.Content is ExplorerView explorer ) {
+                explorer.Dispose();
+                tp.Content = null;
+                this.TabControl.Items.Remove( tp );
+                tp = null;
+                GC.Collect( 0, GCCollectionMode.Forced );
+            }
+        }
+
 
         private void XOnSendDirectoryUpdateAsCmd(object sender, string e) {
             if ( sender.Equals( this.currentExplorerView ) ) {
                 this.consoleX.ProcessInterface.WriteInput( e );
             }
         }
+
+        //private void TabItem_MouseDown(object sender, MouseButtonEventArgs e) {
+        //    if ( this.c == null ) {
+        //        MenuItem[] items = new MenuItem[2];
+        //        items[0] = new MenuItem( "Local Explorer", (o, args) => { AddTab(); } );
+        //        items[1] = new MenuItem( "Test",           (o, args) => { MessageBox.Show( "Test" ); } );
+        //
+        //        c = new ContextMenu( items );
+        //    }
+        //
+        //    var ctr = (Control) sender;
+        //
+        //    var wpfP = ( ctr.TransformToAncestor( this ).Transform( new Point( 10, 10 ) ) );
+        //    var p    = new System.Drawing.Point( Convert.ToInt32( wpfP.X ), Convert.ToInt32( wpfP.Y ) );
+        //    this.c.Show( (System.Windows.Forms.Control) sender, p );
+        //}
+
+        private void UIElement_OnMouseEnter(object sender, MouseEventArgs e) {
+            //MenuS.Visibility = Visibility.Visible; 
+        }
+
+        private void MenuItem_OnClick(object sender, RoutedEventArgs e) {
+            var me = (MenuItem) sender;
+
+            switch (( (MenuItem) sender ).TabIndex) {
+                case 1:
+                    AddTab();
+                    break;
+
+                case 2:
+                    if ( me.IsChecked )
+                        MessageBox.Show( "Test" );
+                    break;
+
+                case 100:
+                    if ( ((ContextMenu) me.Parent ).PlacementTarget is Control parent ) {
+                        if ( parent.Parent is TabItem tp && tp.Content != null ) {
+                            CloseTap( tp );
+                        }
+                    }
+
+                    break;
+                default:
+                    break;
+            }
+        }
+
+
+        private void TabItem_MouseLeftButtonDown(object sender, MouseButtonEventArgs e) { AddTab(); }
+
     }
 }
