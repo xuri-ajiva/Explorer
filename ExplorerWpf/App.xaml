@@ -3,15 +3,22 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="clr-namespace:ExplorerWpf"
     xmlns:Themes="clr-namespace:Microsoft.Windows.Themes;assembly=PresentationFramework.Classic"
+    xmlns:system="clr-namespace:System;assembly=mscorlib"
     x:Class="ExplorerWpf.App"
     StartupUri="MainWindow.xaml">
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="Dictionary1.xaml"/>
-                <ResourceDictionary Source="Dictionary2.xaml"/>
+                <ResourceDictionary Source="Dictionary1.xaml" />
+                <ResourceDictionary Source="Dictionary2.xaml" />
             </ResourceDictionary.MergedDictionaries>
-            <Style x:Key="ItemsPresenterStyle1" TargetType="{x:Type ItemsPresenter}"/>
+            <Style x:Key="ItemsPresenterStyle1" TargetType="{x:Type ItemsPresenter}" />
+            <Color x:Key="DynamicResourceControlDarkDarkBrushKey">#00000000</Color>
+            <Brush x:Key="DynamicResourceControlTextBrushKey">#474B8F</Brush>
+            <Color x:Key="DynamicResourceControlLightBrushKey">#00000000</Color>
+            <Brush x:Key="DynamicResourceControlBrushKey">#00000000</Brush>
+            <Color x:Key="DynamicResourceControlDarkBrushKey">#00000000</Color>
+            
         </ResourceDictionary>
     </Application.Resources>
 </Application>

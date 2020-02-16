@@ -1,9 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Text.RegularExpressions;
 using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Data;
 using System.Windows.Input;
 using ExplorerBase.Handlers;
 using ExplorerBase.UI;
@@ -33,6 +38,8 @@ namespace ExplorerWpf {
         public ExplorerView(IntPtr hWnd) {
             this._hWnd = hWnd;
             InitializeComponent();
+
+            // this.MainView.DataContext = this;
         }
     #if DEBUG
         ~ExplorerView() { Console.WriteLine( "Destroyed Items: " + DestroyCount++ ); }
@@ -51,6 +58,7 @@ namespace ExplorerWpf {
             if ( this.Dispatcher != null )
                 Dispatcher.Invoke( () => {
                     List( this._handler.GetCurrentPath(), false );
+
                     this.InitDone = true;
                 } );
             else {
@@ -61,6 +69,9 @@ namespace ExplorerWpf {
                 this.InitDone = true;
             }
         }
+
+        public ObservableCollection<Item> DataCollection => new ObservableCollection<Item>( this.MainView.Items.Cast<Item>() );
+
 
         private void HandlerOnOnSetCurrentPath(string arg1, string arg2) {
             if ( arg1 == "" ) {
@@ -274,7 +285,11 @@ namespace ExplorerWpf {
         public void ListDiscs() {
             //TODO:this.listView1.Items.Clear();
             //TODO:this.listBrowderView.Nodes.Clear();
-            MainView.Items.Clear();
+            try {
+                MainView.Items.Clear();
+            } catch (Exception e) {
+                Console.WriteLine( e );
+            }
 
             foreach ( var driveInfo in DriveInfo.GetDrives() ) {
                 Item item = new Item( string.IsNullOrEmpty( driveInfo.VolumeLabel ) ? "Local Disk(Not Named)" : driveInfo.VolumeLabel, driveInfo.Name, GetLenght( driveInfo.AvailableFreeSpace ) + " / " + GetLenght( driveInfo.TotalSize ), FileType.Directory );
@@ -322,12 +337,11 @@ namespace ExplorerWpf {
         }
 
 
-
         private void MainView_OnMouseRightButtonUp(object sender, MouseButtonEventArgs e) {
             if ( this.MainView.SelectedItems.Count == 0 ) return;
 
             //var itemX = (Item) this.MainView.SelectedItem;
-            
+
             var wpfP = PointToScreen( e.GetPosition( this ) );
 
             var p = new System.Drawing.Point( (int) wpfP.X, (int) wpfP.Y );
@@ -385,6 +399,52 @@ namespace ExplorerWpf {
                 }
                 default: throw new ArgumentOutOfRangeException();
             }
+        }
+
+        private void SortableListViewColumnHeaderClicked(object sender, RoutedEventArgs e) {
+            var sl = ( sender as SortableListView );
+            sl.GridViewColumnHeaderClicked( e.OriginalSource as GridViewColumnHeader );
+        }
+    }
+
+    public partial class SortableListView : System.Windows.Controls.ListView {
+        private GridViewColumnHeader lastHeaderClicked = null;
+        private ListSortDirection    lastDirection     = ListSortDirection.Ascending;
+
+        public void GridViewColumnHeaderClicked(GridViewColumnHeader clickedHeader) {
+            ListSortDirection direction;
+
+            if ( clickedHeader != null ) {
+                if ( clickedHeader.Role != GridViewColumnHeaderRole.Padding ) {
+                    if ( clickedHeader != lastHeaderClicked ) {
+                        direction = ListSortDirection.Ascending;
+                    }
+                    else {
+                        if ( lastDirection == ListSortDirection.Ascending ) {
+                            direction = ListSortDirection.Descending;
+                        }
+                        else {
+                            direction = ListSortDirection.Ascending;
+                        }
+                    }
+
+                    string sortString = ( (Binding) clickedHeader.Column.DisplayMemberBinding ).Path.Path;
+
+                    Sort( sortString, direction );
+
+                    lastHeaderClicked = clickedHeader;
+                    lastDirection     = direction;
+                }
+            }
+        }
+
+        private void Sort(string sortBy, ListSortDirection direction) {
+            ICollectionView dataView = CollectionViewSource.GetDefaultView( this.ItemsSource != null ? this.ItemsSource : this.Items );
+
+            dataView.SortDescriptions.Clear();
+            SortDescription sD = new SortDescription( sortBy, direction );
+            dataView.SortDescriptions.Add( sD );
+            dataView.Refresh();
         }
     }
 

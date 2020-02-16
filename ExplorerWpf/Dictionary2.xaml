@@ -165,7 +165,7 @@
         <Setter Property="Padding"
                 Value="1,0,0,0" />
         <Setter Property="Foreground"
-                Value="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}" />
+                Value="{DynamicResource DynamicResourceControlTextBrushKey}" />
         <Setter Property="FocusVisualStyle"
                 Value="{StaticResource TreeViewItemFocusVisual}" />
         <Setter Property="Template">
@@ -384,7 +384,7 @@
         <Setter Property="VerticalContentAlignment"
                 Value="Center" />
         <Setter Property="Foreground"
-                Value="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}" />
+                Value="{DynamicResource DynamicResourceControlTextBrushKey}" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type GridViewColumnHeader}">
@@ -598,8 +598,8 @@
     <Style x:Key="ScrollBarStyleV" TargetType="{x:Type ScrollBar}">
         <Setter Property="Stylus.IsPressAndHoldEnabled" Value="False"/>
         <Setter Property="Stylus.IsFlicksEnabled" Value="False"/>
-        <Setter Property="Background" Value="{DynamicResource {x:Static SystemColors.ControlLightBrushKey}}"/>
-        <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"/>
+        <Setter Property="Background" Value="{DynamicResource DynamicResourceControlLightBrushKey}"/>
+        <Setter Property="Foreground" Value="{DynamicResource DynamicResourceControlTextBrushKey}"/>
         <Setter Property="BorderThickness" Value="0"/>
         <Setter Property="Width" Value="{DynamicResource {x:Static SystemParameters.VerticalScrollBarWidthKey}}"/>
         <Setter Property="MinWidth" Value="{DynamicResource {x:Static SystemParameters.VerticalScrollBarWidthKey}}"/>
@@ -613,12 +613,12 @@
                             <RowDefinition MaxHeight="{DynamicResource {x:Static SystemParameters.VerticalScrollBarButtonHeightKey}}"/>
                         </Grid.RowDefinitions>
                         <Viewbox Stretch="Fill">
-                            <RepeatButton Content="M 0 4 L 7 4 L 3.5 0 Z" Command="ScrollBar.LineUpCommand" Height="{DynamicResource {x:Static SystemParameters.VerticalScrollBarButtonHeightKey}}" MinWidth="{DynamicResource {x:Static SystemParameters.VerticalScrollBarWidthKey}}" Background="{TemplateBinding Foreground}" Foreground="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}">
+                            <RepeatButton Content="M 0 4 L 7 4 L 3.5 0 Z" Command="ScrollBar.LineUpCommand" Height="{DynamicResource x:Static SystemParameters.VerticalScrollBarButtonHeightKey}" MinWidth="{DynamicResource x:Static SystemParameters.VerticalScrollBarWidthKey}" Background="{TemplateBinding Foreground}" Foreground="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}">
                                 <RepeatButton.Style>
                                     <Style TargetType="{x:Type RepeatButton}">
                                         <Setter Property="OverridesDefaultStyle" Value="True"/>
-                                        <Setter Property="Background" Value="{DynamicResource {x:Static SystemColors.ControlBrushKey}}"/>
-                                        <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"/>
+                                        <Setter Property="Background" Value="{DynamicResource DynamicResourceControlBrushKey}"/>
+                                        <Setter Property="Foreground" Value="{DynamicResource DynamicResourceControlTextBrushKey}"/>
                                         <Setter Property="BorderBrush" Value="#00000000"/>
                                         <Setter Property="BorderThickness" Value="2"/>
                                         <Setter Property="MinWidth" Value="0"/>
@@ -636,7 +636,7 @@
                                                             <Setter Property="BorderStyle" TargetName="ClassicBorder" Value="AltPressed"/>
                                                         </Trigger>
                                                         <Trigger Property="IsEnabled" Value="False">
-                                                            <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.ControlDarkDarkBrushKey}}"/>
+                                                            <Setter Property="Foreground" Value="{DynamicResource DynamicResourceControlDarkDarkBrushKey}"/>
                                                         </Trigger>
                                                     </ControlTemplate.Triggers>
                                                 </ControlTemplate>
@@ -663,7 +663,7 @@
                                                         <Rectangle x:Name="PageButtonBackground" Fill="Transparent"/>
                                                         <ControlTemplate.Triggers>
                                                             <Trigger Property="IsPressed" Value="True">
-                                                                <Setter Property="Fill" TargetName="PageButtonBackground" Value="{DynamicResource {x:Static SystemColors.ControlDarkDarkBrushKey}}"/>
+                                                                <Setter Property="Fill" TargetName="PageButtonBackground" Value="{DynamicResource DynamicResourceControlDarkDarkBrushKey}"/>
                                                             </Trigger>
                                                         </ControlTemplate.Triggers>
                                                     </ControlTemplate>
@@ -688,7 +688,7 @@
                                                         <Rectangle x:Name="PageButtonBackground" Fill="Transparent"/>
                                                         <ControlTemplate.Triggers>
                                                             <Trigger Property="IsPressed" Value="True">
-                                                                <Setter Property="Fill" TargetName="PageButtonBackground" Value="{DynamicResource {x:Static SystemColors.ControlDarkDarkBrushKey}}"/>
+                                                                <Setter Property="Fill" TargetName="PageButtonBackground" Value="{DynamicResource DynamicResourceControlDarkDarkBrushKey}"/>
                                                             </Trigger>
                                                         </ControlTemplate.Triggers>
                                                     </ControlTemplate>
@@ -715,12 +715,12 @@
                             </Track.Thumb>
                         </Track>
                         <Viewbox Grid.Row="2" Stretch="Fill">
-                            <RepeatButton Content="M 0 0 L 3.5 4 L 7 0 Z" Command="ScrollBar.LineDownCommand" Height="{DynamicResource {x:Static SystemParameters.VerticalScrollBarButtonHeightKey}}" MinWidth="{DynamicResource {x:Static SystemParameters.VerticalScrollBarWidthKey}}" Background="{TemplateBinding Foreground}" Foreground="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}">
+                            <RepeatButton Content="M 0 0 L 3.5 4 L 7 0 Z" Command="ScrollBar.LineDownCommand" Height="{DynamicResource x:Static SystemParameters.VerticalScrollBarButtonHeightKey}" MinWidth="{DynamicResource x:Static SystemParameters.VerticalScrollBarWidthKey}" Background="{TemplateBinding Foreground}" Foreground="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}">
                                 <RepeatButton.Style>
                                     <Style TargetType="{x:Type RepeatButton}">
                                         <Setter Property="OverridesDefaultStyle" Value="True"/>
-                                        <Setter Property="Background" Value="{DynamicResource {x:Static SystemColors.ControlBrushKey}}"/>
-                                        <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"/>
+                                        <Setter Property="Background" Value="{DynamicResource DynamicResourceControlBrushKey}"/>
+                                        <Setter Property="Foreground" Value="{DynamicResource DynamicResourceControlTextBrushKey}"/>
                                         <Setter Property="BorderBrush" Value="#00000000"/>
                                         <Setter Property="BorderThickness" Value="2"/>
                                         <Setter Property="MinWidth" Value="0"/>
@@ -738,7 +738,7 @@
                                                             <Setter Property="BorderStyle" TargetName="ClassicBorder" Value="AltPressed"/>
                                                         </Trigger>
                                                         <Trigger Property="IsEnabled" Value="False">
-                                                            <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}"/>
+                                                            <Setter Property="Foreground" Value="{DynamicResource DynamicResourceControlDarkBrushKey}"/>
                                                         </Trigger>
                                                     </ControlTemplate.Triggers>
                                                 </ControlTemplate>
@@ -768,12 +768,12 @@
                                     <ColumnDefinition MaxWidth="{DynamicResource {x:Static SystemParameters.HorizontalScrollBarButtonWidthKey}}"/>
                                 </Grid.ColumnDefinitions>
                                 <Viewbox Stretch="Fill">
-                                    <RepeatButton Content="M 0 4 L 4 8 L 4 0 Z" Command="ScrollBar.LineLeftCommand" MinHeight="{DynamicResource {x:Static SystemParameters.HorizontalScrollBarHeightKey}}" Width="{DynamicResource {x:Static SystemParameters.HorizontalScrollBarButtonWidthKey}}">
+                                    <RepeatButton Content="M 0 4 L 4 8 L 4 0 Z" Command="ScrollBar.LineLeftCommand" MinHeight="{DynamicResource x:Static SystemParameters.HorizontalScrollBarHeightKey}" Width="{DynamicResource x:Static SystemParameters.HorizontalScrollBarButtonWidthKey}">
                                         <RepeatButton.Style>
                                             <Style TargetType="{x:Type RepeatButton}">
                                                 <Setter Property="OverridesDefaultStyle" Value="True"/>
-                                                <Setter Property="Background" Value="{DynamicResource {x:Static SystemColors.ControlBrushKey}}"/>
-                                                <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"/>
+                                                <Setter Property="Background" Value="{DynamicResource DynamicResourceControlBrushKey}"/>
+                                                <Setter Property="Foreground" Value="{DynamicResource DynamicResourceControlTextBrushKey}"/>
                                                 <Setter Property="BorderBrush" Value="#00000000"/>
                                                 <Setter Property="BorderThickness" Value="2"/>
                                                 <Setter Property="MinWidth" Value="0"/>
@@ -791,7 +791,7 @@
                                                                     <Setter Property="BorderStyle" TargetName="ClassicBorder" Value="AltPressed"/>
                                                                 </Trigger>
                                                                 <Trigger Property="IsEnabled" Value="False">
-                                                                    <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}"/>
+                                                                    <Setter Property="Foreground" Value="{DynamicResource DynamicResourceControlDarkBrushKey}"/>
                                                                 </Trigger>
                                                             </ControlTemplate.Triggers>
                                                         </ControlTemplate>
@@ -822,7 +822,7 @@
                                                                 <Rectangle x:Name="PageButtonBackground" Fill="Transparent"/>
                                                                 <ControlTemplate.Triggers>
                                                                     <Trigger Property="IsPressed" Value="True">
-                                                                        <Setter Property="Fill" TargetName="PageButtonBackground" Value="{DynamicResource {x:Static SystemColors.ControlDarkDarkBrushKey}}"/>
+                                                                        <Setter Property="Fill" TargetName="PageButtonBackground" Value="{DynamicResource DynamicResourceControlDarkDarkBrushKey}"/>
                                                                     </Trigger>
                                                                 </ControlTemplate.Triggers>
                                                             </ControlTemplate>
@@ -847,7 +847,7 @@
                                                                 <Rectangle x:Name="PageButtonBackground" Fill="Transparent"/>
                                                                 <ControlTemplate.Triggers>
                                                                     <Trigger Property="IsPressed" Value="True">
-                                                                        <Setter Property="Fill" TargetName="PageButtonBackground" Value="{DynamicResource {x:Static SystemColors.ControlDarkDarkBrushKey}}"/>
+                                                                        <Setter Property="Fill" TargetName="PageButtonBackground" Value="{DynamicResource DynamicResourceControlDarkDarkBrushKey}"/>
                                                                     </Trigger>
                                                                 </ControlTemplate.Triggers>
                                                             </ControlTemplate>
@@ -864,7 +864,7 @@
                                                     <Setter Property="Template">
                                                         <Setter.Value>
                                                             <ControlTemplate TargetType="{x:Type Thumb}">
-                                                                <Themes:ClassicBorderDecorator BorderBrush="#00000000" BorderThickness="3" BorderStyle="Raised" Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}"/>
+                                                                <Themes:ClassicBorderDecorator BorderBrush="#00000000" BorderThickness="3" BorderStyle="Raised" Background="{DynamicResource DynamicResourceControlBrushKey}"/>
                                                             </ControlTemplate>
                                                         </Setter.Value>
                                                     </Setter>
@@ -874,12 +874,12 @@
                                     </Track.Thumb>
                                 </Track>
                                 <Viewbox Grid.Column="2" Stretch="Fill">
-                                    <RepeatButton Content="M 0 0 L 0 8 L 4 4 Z" Command="ScrollBar.LineRightCommand" MinHeight="{DynamicResource {x:Static SystemParameters.HorizontalScrollBarHeightKey}}" Width="{DynamicResource {x:Static SystemParameters.HorizontalScrollBarButtonWidthKey}}">
+                                    <RepeatButton Content="M 0 0 L 0 8 L 4 4 Z" Command="ScrollBar.LineRightCommand" MinHeight="{DynamicResource x:Static SystemParameters.HorizontalScrollBarHeightKey}" Width="{DynamicResource x:Static SystemParameters.HorizontalScrollBarButtonWidthKey}">
                                         <RepeatButton.Style>
                                             <Style TargetType="{x:Type RepeatButton}">
                                                 <Setter Property="OverridesDefaultStyle" Value="True"/>
-                                                <Setter Property="Background" Value="{DynamicResource {x:Static SystemColors.ControlBrushKey}}"/>
-                                                <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"/>
+                                                <Setter Property="Background" Value="{DynamicResource DynamicResourceControlBrushKey}"/>
+                                                <Setter Property="Foreground" Value="{DynamicResource DynamicResourceControlTextBrushKey}"/>
                                                 <Setter Property="BorderBrush" Value="#00000000"/>
                                                 <Setter Property="BorderThickness" Value="2"/>
                                                 <Setter Property="MinWidth" Value="0"/>
@@ -897,7 +897,7 @@
                                                                     <Setter Property="BorderStyle" TargetName="ClassicBorder" Value="AltPressed"/>
                                                                 </Trigger>
                                                                 <Trigger Property="IsEnabled" Value="False">
-                                                                    <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}"/>
+                                                                    <Setter Property="Foreground" Value="{DynamicResource DynamicResourceControlDarkBrushKey}"/>
                                                                 </Trigger>
                                                             </ControlTemplate.Triggers>
                                                         </ControlTemplate>
@@ -915,8 +915,8 @@
         </Style.Triggers>
     </Style>
     <Style x:Key="TabControlStyle1" TargetType="{x:Type TabControl}">
-        <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"/>
-        <Setter Property="Background" Value="{DynamicResource {x:Static SystemColors.ControlBrushKey}}"/>
+        <Setter Property="Foreground" Value="{DynamicResource DynamicResourceControlTextBrushKey}"/>
+        <Setter Property="Background" Value="{DynamicResource DynamicResourceControlBrushKe}"/>
         <Setter Property="BorderBrush" Value="#00000000"/>
         <Setter Property="BorderThickness" Value="3"/>
         <Setter Property="Margin" Value="0"/>
@@ -928,17 +928,18 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type TabControl}">
+
                     <Grid ClipToBounds="True" SnapsToDevicePixels="True" KeyboardNavigation.TabNavigation="Local">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition x:Name="ColumnDefinition0"/>
                             <ColumnDefinition x:Name="ColumnDefinition1" Width="0"/>
                         </Grid.ColumnDefinitions>
                         <Grid.RowDefinitions>
-                            <RowDefinition x:Name="RowDefinition0" Height="Auto"/>
-                            <RowDefinition x:Name="RowDefinition1" Height="*"/>
+                            <RowDefinition x:Name="RowDefinition0" Height="Auto" MinHeight="30"/>
+                            <RowDefinition x:Name="RowDefinition1"/>
                         </Grid.RowDefinitions>
-                        <TabPanel x:Name="HeaderPanel" Background="Transparent" Grid.Column="0" IsItemsHost="True" Margin="2,2,2,0" Grid.Row="0" KeyboardNavigation.TabIndex="1" Panel.ZIndex="1"/>
-                        <Grid x:Name="ContentPanel" Grid.Column="0" KeyboardNavigation.DirectionalNavigation="Contained" Grid.Row="1" KeyboardNavigation.TabIndex="2" KeyboardNavigation.TabNavigation="Local">
+                        <TabPanel x:Name="HeaderPanel" Background="{x:Null}" Grid.Column="0" IsItemsHost="True" Margin="0,0,132,0" Grid.Row="0" KeyboardNavigation.TabIndex="1" Panel.ZIndex="1"/>
+                        <Grid x:Name="ContentPanel" Grid.Column="0" KeyboardNavigation.DirectionalNavigation="Contained" Grid.Row="1" KeyboardNavigation.TabIndex="2" KeyboardNavigation.TabNavigation="Local" Grid.ColumnSpan="1">
                             <Themes:ClassicBorderDecorator BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" BorderStyle="Raised" Background="{TemplateBinding Background}">
                                 <ContentPresenter x:Name="PART_SelectedContentHost" ContentTemplate="{TemplateBinding SelectedContentTemplate}" Content="{TemplateBinding SelectedContent}" ContentStringFormat="{TemplateBinding SelectedContentStringFormat}" ContentSource="SelectedContent" Margin="2" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"/>
                             </Themes:ClassicBorderDecorator>
@@ -975,7 +976,7 @@
                             <Setter Property="Margin" TargetName="HeaderPanel" Value="0,2,2,2"/>
                         </Trigger>
                         <Trigger Property="IsEnabled" Value="False">
-                            <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"/>
+                            <Setter Property="Foreground" Value="{DynamicResource DynamicResourceGrayTextBrushKey}"/>
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -989,7 +990,7 @@
                     <Setter Property="Control.Template">
                         <Setter.Value>
                             <ControlTemplate>
-                                <Rectangle Margin="4,4,4,2" SnapsToDevicePixels="True" Stroke="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}" StrokeThickness="1" StrokeDashArray="1 2"/>
+                                <Rectangle Margin="4,4,4,2" SnapsToDevicePixels="True" Stroke="{DynamicResource DynamicResourceControlTextBrushKey}" StrokeThickness="1" StrokeDashArray="1 2"/>
                             </ControlTemplate>
                         </Setter.Value>
                     </Setter>
@@ -997,8 +998,8 @@
             </Setter.Value>
         </Setter>
         <Setter Property="Padding" Value="12,2"/>
-        <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"/>
-        <Setter Property="Background" Value="{DynamicResource {x:Static SystemColors.ControlBrushKey}}"/>
+        <Setter Property="Foreground" Value="{DynamicResource DynamicResourceControlTextBrushKey}"/>
+        <Setter Property="Background" Value="{DynamicResource DynamicResourceControlBrushKey}"/>
         <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
         <Setter Property="VerticalContentAlignment" Value="Stretch"/>
         <Setter Property="Template">
@@ -1008,33 +1009,25 @@
                         <Storyboard x:Key="Storyboard1">
                             <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleY)" Storyboard.TargetName="ClassicBorder">
                                 <EasingDoubleKeyFrame KeyTime="0" Value=".95"/>
-                                <EasingDoubleKeyFrame KeyTime="0:0:0.2" Value="0.8"/>
+                                <EasingDoubleKeyFrame KeyTime="0:0:0.2" Value="0.9"/>
                             </DoubleAnimationUsingKeyFrames>
                         </Storyboard>
                         <Storyboard x:Key="Storyboard2">
-                            <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleY)" Storyboard.TargetName="ClassicBorder">
-                                <EasingDoubleKeyFrame KeyTime="0" Value="0.8"/>
-                                <EasingDoubleKeyFrame KeyTime="0:0:0.2" Value=".95"/>
-                            </DoubleAnimationUsingKeyFrames>
-                            <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[3].(TranslateTransform.Y)" Storyboard.TargetName="ClassicBorder">
-                                <EasingDoubleKeyFrame KeyTime="0" Value="-0.8"/>
-                                <EasingDoubleKeyFrame KeyTime="0:0:0.2" Value=".95"/>
-                            </DoubleAnimationUsingKeyFrames>
                         </Storyboard>
                         <Storyboard x:Key="OnMouseEnter1">
                             <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.Opacity)" Storyboard.TargetName="contentPresenter" RepeatBehavior="0:0:4">
-                                <EasingDoubleKeyFrame KeyTime="0" Value="1"/>         
+                                <EasingDoubleKeyFrame KeyTime="0" Value="1"/>
                                 <EasingDoubleKeyFrame KeyTime="0:0:0.6" Value=".5"/>
                                 <EasingDoubleKeyFrame KeyTime="0:0:1.4" Value="1"/>
                             </DoubleAnimationUsingKeyFrames>
                             <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.Opacity)" Storyboard.TargetName="ClassicBorder" RepeatBehavior="0:0:2">
-                                <EasingDoubleKeyFrame KeyTime="0" Value=".8"/>  
+                                <EasingDoubleKeyFrame KeyTime="0" Value=".8"/>
                                 <EasingDoubleKeyFrame KeyTime="0:0:0.6" Value="1"/>
                                 <EasingDoubleKeyFrame KeyTime="0:0:1.4" Value=".8"/>
                             </DoubleAnimationUsingKeyFrames>
                         </Storyboard>
                     </ControlTemplate.Resources>
-                    <Themes:ClassicBorderDecorator x:Name="ClassicBorder" BorderBrush="#00000000" BorderThickness="2" BorderStyle="TabTop" Background="{TemplateBinding Background}" SnapsToDevicePixels="True" UseLayoutRounding="False" RenderTransformOrigin="0.5,0.5">
+                    <Themes:ClassicBorderDecorator x:Name="ClassicBorder" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="2" BorderStyle="TabTop" SnapsToDevicePixels="True" UseLayoutRounding="False" RenderTransformOrigin="0.5,0.5" Background="{TemplateBinding Background}">
                         <Themes:ClassicBorderDecorator.RenderTransform>
                             <TransformGroup>
                                 <ScaleTransform/>
@@ -1043,7 +1036,7 @@
                                 <TranslateTransform/>
                             </TransformGroup>
                         </Themes:ClassicBorderDecorator.RenderTransform>
-                        <ContentPresenter x:Name="contentPresenter" ContentTemplate="{TemplateBinding HeaderTemplate}" Content="{TemplateBinding Header}" ContentStringFormat="{TemplateBinding HeaderStringFormat}" ContentSource="Header" HorizontalAlignment="{Binding HorizontalContentAlignment, RelativeSource={RelativeSource FindAncestor, AncestorLevel=1, AncestorType={x:Type ItemsControl}}}" Margin="{TemplateBinding Padding}" RecognizesAccessKey="True" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" VerticalAlignment="{Binding VerticalContentAlignment, RelativeSource={RelativeSource FindAncestor, AncestorLevel=1, AncestorType={x:Type ItemsControl}}}" RenderTransformOrigin="0.5,0.5">
+                        <ContentPresenter x:Name="contentPresenter" ContentTemplate="{TemplateBinding HeaderTemplate}" Content="{TemplateBinding Header}" ContentStringFormat="{TemplateBinding HeaderStringFormat}" ContentSource="Header" Margin="{TemplateBinding Padding}" RecognizesAccessKey="True" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" RenderTransformOrigin="0.5,0.5" VerticalAlignment="Stretch" OverridesDefaultStyle="False">
                             <ContentPresenter.RenderTransform>
                                 <TransformGroup>
                                     <ScaleTransform/>
@@ -1109,7 +1102,7 @@
                             <Setter Property="Margin" Value="-2"/>
                         </MultiTrigger>
                         <Trigger Property="IsEnabled" Value="False">
-                            <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"/>
+                            <Setter Property="Foreground" Value="{DynamicResource DynamicResourceGrayTextBrushKey}"/>
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>

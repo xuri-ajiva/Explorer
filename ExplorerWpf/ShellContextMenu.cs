@@ -90,6 +90,7 @@ namespace Peter
         /// </summary>
         /// <param name="m">the Message of the Browser's WndProc</param>
         /// <returns>true if the message has been handled, false otherwise</returns>
+        
         protected override void WndProc(ref Message m)
         {
             #region IContextMenu

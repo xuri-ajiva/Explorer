@@ -514,24 +514,28 @@ namespace ExplorerWpf {
 
         ExplorerView CreateExplorer(string path = "/") {
             LocalHandler h = new LocalHandler( path );
-            ExplorerView x = new ExplorerView(new WindowInteropHelper(this).Handle);
+            ExplorerView x = new ExplorerView( new WindowInteropHelper( this ).Handle );
             new Thread( () => {
                 x.Init( h );
 
                 x.SendDirectoryUpdateAsCmd += XOnSendDirectoryUpdateAsCmd;
             } ).Start();
+            x.Margin = new Thickness(0,0,0,0);
             return x;
         }
 
         TabItem CreateExplorerTab(ExplorerView explorerView) {
+            var   ex = (Label) this.PlusTabItem.Header;
+            Label l  = new Label { Content = "Explorer", Style = ex.Style, Margin = ex.Margin, FontSize = ex.FontSize, Effect =  ex.Effect, Foreground = ex.Foreground, Background = ex.Background, BorderBrush = ex.BorderBrush, BorderThickness = ex.BorderThickness, ContextMenu = this.contextMenu };
+
             TabItem newTabItem = new TabItem {
-                Header      = new Label(){Content =  "Explorer", ContextMenu = this.contextMenu},
-                Name        = "Explorer",
-                Content     = explorerView,
+                Header  = l,
+                Name    = "explorer",
+                Content = explorerView,
                 //Background  = this.ColorExample.Background,
                 //Foreground  = this.ColorExample.Foreground,
                 //BorderBrush = this.ColorExample.BorderBrush,
-               Style =  this.PlusTabItem.Style
+                Style = this.PlusTabItem.Style
             };
             return newTabItem;
         }
@@ -604,7 +608,7 @@ namespace ExplorerWpf {
                     break;
 
                 case 100:
-                    if ( ((ContextMenu) me.Parent ).PlacementTarget is Control parent ) {
+                    if ( ( (ContextMenu) me.Parent ).PlacementTarget is Control parent ) {
                         if ( parent.Parent is TabItem tp && tp.Content != null ) {
                             CloseTap( tp );
                         }
@@ -619,5 +623,6 @@ namespace ExplorerWpf {
 
         private void TabItem_MouseLeftButtonDown(object sender, MouseButtonEventArgs e) { AddTab(); }
 
+        private void DragmoveX(object sender, MouseButtonEventArgs e) { this.DragMove(); }
     }
 }

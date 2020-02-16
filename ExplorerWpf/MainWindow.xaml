@@ -10,21 +10,21 @@
     x:Class="ExplorerWpf.MainWindow"
     mc:Ignorable="d"
     Title="MainWindow" Background="{x:Null}"
-    Loaded="MainWindow_OnLoaded" Width="800" Height="550"
+    Loaded="MainWindow_OnLoaded" Width="923" Height="774.175"
     WindowState="Normal" 
     ResizeMode="CanResize" WindowStyle="None" AllowsTransparency="True" WindowStartupLocation="CenterScreen" Icon="8788.png">
     <Window.Resources>
         <local:ImageConverter x:Key="Conv" />
         <LinearGradientBrush x:Key="Background" EndPoint="0.5,1" StartPoint="0.5,0">
             <GradientStop Color="#F3181B28" />
-            <GradientStop Color="#F2181B28" Offset="1" />
+            <GradientStop Color="#E5181B28" Offset="1" />
         </LinearGradientBrush>
         <LinearGradientBrush x:Key="Foreground" EndPoint="0,0" StartPoint="1,0">
             <GradientStop Color="#FFAE54F0" Offset="1" />
             <GradientStop Color="#FF5A32E6" />
         </LinearGradientBrush>
         <SolidColorBrush x:Key="Border" Color="#FF111421" />
-        <SolidColorBrush x:Key="Aczent" Color="#FF141721" />
+        <SolidColorBrush x:Key="Aczent" Color="#E6141721" />
     </Window.Resources>
     <WindowChrome.WindowChrome>
         <WindowChrome 
@@ -39,13 +39,17 @@
         </Grid.RowDefinitions>
         <Grid MouseDown="MoveWindow" Background="{DynamicResource Aczent}">
             <Button Content="❌" FontSize="17" Foreground="#FFF37F97" Click="CloseClick"
-                    Background="{DynamicResource Background}" HorizontalAlignment="Right" />
+                    Background="{DynamicResource Background}" HorizontalAlignment="Right" BorderBrush="{DynamicResource Border}" />
             <Button Margin="0,0,35.343,-0.002" Content="🔳" FontSize="17" Foreground="#FF79E6F3" Click="MaxClick"
                     HorizontalAlignment="Right" Background="{DynamicResource Background}" />
             <Button Margin="0,0.002,70.686,-0.003" Content="🔻" FontSize="17" Foreground="#FFD853FF" Click="MinClick"
                     HorizontalAlignment="Right" Background="{DynamicResource Background}" />
+            <Button Margin="0,0,35.343,-0.002" Content="🔳" FontSize="17" Foreground="#FF79E6F3" Click="MaxClick"
+                HorizontalAlignment="Right" Background="{DynamicResource Background}" BorderBrush="{DynamicResource Border}" />
+            <Button Margin="0,0.002,70.686,-0.003" Content="🔻" FontSize="17" Foreground="#FFD853FF" Click="MinClick"
+                HorizontalAlignment="Right" Background="{DynamicResource Background}" BorderBrush="{DynamicResource Border}" />
             <Button Margin="0,0,106.029,0" Content="📌" FontSize="17" Foreground="#FFDCFF00" Click="PingClick"
-                    HorizontalAlignment="Right" Background="{DynamicResource Background}" />
+                    HorizontalAlignment="Right" Background="{DynamicResource Background}" BorderBrush="{DynamicResource Border}" />
         </Grid>
         <Grid Grid.Row="1">
             <Grid>
@@ -74,12 +78,12 @@
                 </Grid>
 
                 <GridSplitter x:Name="ColorExample" Grid.Row="0" Grid.Column="1" HorizontalAlignment="Stretch" Background="{DynamicResource Background}" BorderBrush="{DynamicResource Border}" BorderThickness="1,0,1,1" Foreground="{DynamicResource Foreground}" />
-                <Grid Grid.Column="2" Background="{DynamicResource Aczent}">
+                <Grid Grid.Column="2">
                     <Grid.RowDefinitions>
                         <RowDefinition />
                     </Grid.RowDefinitions>
-                    <TabControl x:Name="TabControl" DataContextChanged="DCChange"  SelectionChanged="taps_SelectionChanged" Background="{DynamicResource Background}" Foreground="{DynamicResource Foreground}" Style="{DynamicResource TabControlStyle1}" BorderBrush="{DynamicResource Border}">
-                        <TabItem x:Name="PlusTabItem" Margin="0" Foreground="{DynamicResource Foreground}" BorderBrush="{DynamicResource Border}" Background="{DynamicResource Background}" TextOptions.TextFormattingMode="Display" Style="{DynamicResource TabItemStyle1}">
+                    <TabControl x:Name="TabControl" DataContextChanged="DCChange" SelectionChanged="taps_SelectionChanged" Background="{DynamicResource Background}" Foreground="{DynamicResource Foreground}" Style="{DynamicResource TabControlStyle1}" BorderBrush="{DynamicResource Border}" Margin="0,-30,0,0" FontSize="14">
+                        <TabItem x:Name="PlusTabItem" Margin="0,0,0,-2.813" Foreground="{DynamicResource Foreground}" BorderBrush="{DynamicResource Border}" Background="{DynamicResource Background}" TextOptions.TextFormattingMode="Display" Style="{DynamicResource TabItemStyle1}">
                             <TabItem.ContextMenu>
                                 <ContextMenu>
                                     <MenuItem Header="_LocalExplorer" Click="MenuItem_OnClick" TabIndex="1"/>
@@ -87,7 +91,7 @@
                                 </ContextMenu>
                             </TabItem.ContextMenu>
                             <TabItem.Header>
-                                <Label Content="➕" MouseLeftButtonDown="TabItem_MouseLeftButtonDown" Margin="-10,0,-10,0" Background="{DynamicResource Background}" BorderBrush="{DynamicResource Border}" Foreground="{DynamicResource Foreground}"   />
+                                <Label Content="➕" MouseLeftButtonDown="TabItem_MouseLeftButtonDown" Margin="-14,-4" Background="{DynamicResource Background}" BorderBrush="{DynamicResource Border}" Foreground="{DynamicResource Foreground}" FontSize="11" BorderThickness="1"   />
                             </TabItem.Header>
                         </TabItem>
                     </TabControl>
@@ -101,7 +105,8 @@
                         <ColumnDefinition />
                     </Grid.ColumnDefinitions>
                     <WPF:ConsoleControl x:Name="consoleX" Background="{x:Null}" FontWeight="Bold"
-                            Foreground="{DynamicResource Foreground}" BorderBrush="{DynamicResource Border}" />
+                            Foreground="{DynamicResource Foreground}" BorderBrush="{DynamicResource Border}" >
+                    </WPF:ConsoleControl>
                 </Grid>
             </Grid>
         </Grid>
