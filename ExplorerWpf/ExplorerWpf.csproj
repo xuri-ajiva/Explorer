@@ -90,6 +90,8 @@
     <Compile Include="ExplorerView.xaml.cs">
       <DependentUpon>ExplorerView.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Handler\IHandler.cs" />
+    <Compile Include="Handler\localHandler.cs" />
     <Compile Include="ShellContextMenu.cs" />
     <Page Include="Dictionary1.xaml">
       <SubType>Designer</SubType>
@@ -145,13 +147,8 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\ExplorerBase\ExplorerBase.csproj">
-      <Project>{6ec7b9e5-c196-4e31-b5bb-a84be017e164}</Project>
-      <Name>ExplorerBase</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <Resource Include="8788.png" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -18,7 +18,7 @@
             <Color x:Key="DynamicResourceControlLightBrushKey">#00000000</Color>
             <Brush x:Key="DynamicResourceControlBrushKey">#00000000</Brush>
             <Color x:Key="DynamicResourceControlDarkBrushKey">#00000000</Color>
-            
+
         </ResourceDictionary>
     </Application.Resources>
 </Application>

@@ -16,8 +16,8 @@
     </UserControl.Resources>
     <Grid x:Name="Root">
         <Grid.Resources>
-            <DataTemplate x:Key="Template">
-                <Image Source="{Binding Icon, Converter={StaticResource Conv}}" Width="16" Height="16" />
+            <DataTemplate x:Key="IconTemplate">
+                <Image Source="{Binding Icon, Converter={StaticResource Conv}}" Width="16" Height="16"/>
             </DataTemplate>
         </Grid.Resources>
 
@@ -26,17 +26,26 @@
             <RowDefinition Height="20" />
         </Grid.RowDefinitions>
         <local:SortableListView x:Name="MainView" AutomationProperties.IsColumnHeader="True"
-                          MouseDoubleClick="BrowseAction" MouseDown="MainView_OnMouseDown"
-                          MouseRightButtonUp="MainView_OnMouseRightButtonUp" BorderBrush="{DynamicResource Border}"
-                          Foreground="{DynamicResource Foreground}" ItemsSource="{Binding Item}" GridViewColumnHeader.Click="SortableListViewColumnHeaderClicked" Style="{DynamicResource {x:Type ListView}}">
+                                MouseDoubleClick="BrowseAction" MouseDown="MainView_OnMouseDown"
+                                MouseRightButtonUp="MainView_OnMouseRightButtonUp"
+                                BorderBrush="{DynamicResource Border}"
+                                Foreground="{DynamicResource Foreground}" ItemsSource="{Binding Item}"
+                                GridViewColumnHeader.Click="SortableListViewColumnHeaderClicked"
+                                Style="{DynamicResource {x:Type ListView}}">
 
             <ListView.View>
                 <GridView>
-                    <GridViewColumn Header="Icon" CellTemplate="{StaticResource Template}" />
-                    <GridViewColumn Header="Name" Width="200" DisplayMemberBinding="{Binding Name}" />
+                    <GridViewColumn Header="Icon" CellTemplate="{StaticResource IconTemplate}"/>
+                    <GridViewColumn Header="Name" Width="200" DisplayMemberBinding="{Binding Name}"/>
                     <GridViewColumn Header="Path" Width="200" DisplayMemberBinding="{Binding Path}" />
                     <GridViewColumn Header="Size" Width="70" DisplayMemberBinding="{Binding Size}" />
                     <GridViewColumn Header="Type" Width="Auto" DisplayMemberBinding="{Binding Type}" />
+                    <GridViewColumn Header="Extension" Width="Auto" DisplayMemberBinding="{Binding Extension}" />
+                    <GridViewColumn Header="Exists" Width="Auto" DisplayMemberBinding="{Binding Exists}" />
+                    <GridViewColumn Header="IsReadOnly" Width="Auto" DisplayMemberBinding="{Binding IsReadOnly}" />
+                    <GridViewColumn Header="CreationTime" Width="Auto" DisplayMemberBinding="{Binding CreationTime}" />
+                    <GridViewColumn Header="LastAccessTime" Width="Auto" DisplayMemberBinding="{Binding LastAccessTime}" />
+                    <GridViewColumn Header="LastWriteTime" Width="Auto" DisplayMemberBinding="{Binding LastWriteTime}" />
                 </GridView>
             </ListView.View>
         </local:SortableListView>
