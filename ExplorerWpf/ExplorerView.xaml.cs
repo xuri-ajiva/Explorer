@@ -132,7 +132,7 @@ namespace ExplorerWpf {
                 }
                 else {
                     try {
-                        this._consoleControl.ProcessInterface.WriteInput( item.Path );
+                        this._consoleControl.ProcessInterface.WriteInput("\""+ item.Path +"\"");
                         //var p = (Process)this.Handler.OpenFile( item.Path );
                         //p.StartInfo.RedirectStandardOutput = true;
                         //p.OutputDataReceived += POnOutputDataReceived;
