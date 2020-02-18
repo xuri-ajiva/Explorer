@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -22,6 +23,7 @@ using Point = System.Drawing.Point;
 #endregion
 
 namespace ExplorerWpf {
+
     /// <summary>
     ///     Interaktionslogik für ExplorerView.xaml
     /// </summary>
@@ -40,13 +42,15 @@ namespace ExplorerWpf {
             this._hWnd           = hWnd;
             this._consoleControl = consoleControl;
             InitializeComponent();
+            if ( this.UseListOnly ) this.DataContext          = this._list;
+            if ( this.UseListOnly ) this.MainView.DataContext = this._list;
 
             // this.MainView.DataContext = this;
         }
 
         public IHandler Handler { [DebuggerStepThrough] get; private set; }
 
-        public ObservableCollection<Item> DataCollection => new ObservableCollection<Item>( this.MainView.Items.Cast<Item>() );
+        public ObservableCollection<Item> DataCollection => new ObservableCollection<Item>( GetList() );
 
         #region IDisposable
 
@@ -262,7 +266,7 @@ namespace ExplorerWpf {
                 for ( var i = count; i < dirs.Length + count; i++ ) {
                     var item = new Item( new DirectoryInfo( dirs[i - count] ) );
 
-                    this.MainView.Items.Add( item );
+                    AddList( item );
                 }
 
                 return count + dirs.Length;
@@ -286,7 +290,7 @@ namespace ExplorerWpf {
             if ( Scan_Files( dirToList ) is string[] files ) {
                 for ( var i = count; i < files.Length + count; i++ ) {
                     var item = new Item( new FileInfo( files[i - count] ) );
-                    this.MainView.Items.Add( item );
+                    AddList( item );
                 }
 
                 return count + files.Length;
@@ -298,6 +302,7 @@ namespace ExplorerWpf {
 
         private int Add_Parent_Dir(int count) {
             var pt = this.Handler.GetCurrentPath();
+            var p  = pt;
 
             if ( pt.Length <= 3 && Regex.IsMatch( pt, @"[A-Za-z]:" ) ) {
                 pt = "/";
@@ -312,9 +317,8 @@ namespace ExplorerWpf {
                 //}
             }
 
-            this.MainView.Items.Add( pt == "/" ? Item.Root : new Item( new DirectoryInfo( pt ) ) );
-            this.Handler.SetCurrentPath( pt );
-            this.Handler.ValidatePath();
+            AddList( pt == "/" ? Item.Root : new Item( new DirectoryInfo( pt ) ) );
+            this.Handler.SetCurrentPath( p );
             return count + 1;
         }
 
@@ -325,20 +329,34 @@ namespace ExplorerWpf {
                 return;
             }
 
-            this.Handler.ValidatePath();
-            var count = 0;
-            this.MainView.Items.Clear();
-            count = Add_Parent_Dir( count );
-            this.Handler.ValidatePath();
-            count = List_Dir( dirToScan, count );
-            count = List_Files( dirToScan, count );
+            if ( this.PB ) {
+                ( (GridView) this.MainView.View ).Columns[3].Width = 75;
+                ( (GridView) this.MainView.View ).Columns[4].Width = 0;
 
-            if ( this.StatusLabel.Foreground == Brushes.DarkGreen ) {
-                var p = this.Handler.GetCurrentPath();
-                if ( !noCd && p.Length > 3 )
-                    OnDirectoryUpdate( "cd \"" + p + "\"" );
+                this.PB = false;
+            }
 
-                this.StatusLabel.Content = "CurrentDirectory: " + p;
+            this.Handler.ValidatePath();
+
+            try {
+                var count = 0;
+                ClearList();
+                count = Add_Parent_Dir( count );
+                this.Handler.ValidatePath();
+                count = List_Dir( dirToScan, count );
+                count = List_Files( dirToScan, count );
+
+                if ( this.StatusLabel.Foreground == Brushes.DarkGreen ) {
+                    var p = this.Handler.GetCurrentPath();
+                    if ( !noCd && p.Length > 3 )
+                        OnDirectoryUpdate( "cd \"" + p + "\"" );
+
+                    this.StatusLabel.Content = "CurrentDirectory: " + p;
+                    SetPath( p );
+                }
+            } catch (Exception e) {
+                Console.WriteLine( e );
+                this.StatusLabel.Content = "Error: " + e.Message;
             }
         }
 
@@ -353,9 +371,12 @@ namespace ExplorerWpf {
             this.StatusLabel.Content = status;
         }
 
+
+        private bool PB = false;
+
         public void ListDiscs() {
             try {
-                this.MainView.Items.Clear();
+                ClearList();
             } catch (Exception e) {
                 Console.WriteLine( e );
             }
@@ -364,16 +385,62 @@ namespace ExplorerWpf {
                 //Item item = new Item( string.IsNullOrEmpty( driveInfo.VolumeLabel ) ? "Local Disk(Not Named)" : driveInfo.VolumeLabel, driveInfo.Name, GetLenght( driveInfo.AvailableFreeSpace ) + " / " + GetLenght( driveInfo.TotalSize ), FileType.Directory );
 
                 var i = new Item( new DirectoryInfo( driveInfo.Name ) );
-                i.Size = ( (double) ( driveInfo.TotalSize - driveInfo.AvailableFreeSpace ) / driveInfo.TotalSize * 100D ).ToString( "00.000" ) + $" % ({Item.GetLenght( driveInfo.TotalSize )})";
+                i.Size   = ( (double) ( driveInfo.TotalSize - driveInfo.AvailableFreeSpace ) / driveInfo.TotalSize * 100D ).ToString( "00.000" ) + $" % ({Item.GetLenght( driveInfo.TotalSize )})";
+                i.SizePb = ( (double) ( driveInfo.TotalSize - driveInfo.AvailableFreeSpace ) / driveInfo.TotalSize * 100D );
 
-                this.MainView.Items.Add( i );
+                i.SizeIsPB    = true;
+                i.SizeIsNotPB = false;
+                AddList( i );
+                ( (GridView) this.MainView.View ).Columns[3].Width = 0;
+                ( (GridView) this.MainView.View ).Columns[4].Width = 100;
+
+                this.PB = true;
             }
+
+            SetPath( "/" );
 
             this.Handler.SetCurrentPath( "" );
         }
 
+        void SetPath(string path) {
+            this.PathBar.Text = path;
+            if ( this.PathBar.Popup != null )
+                this.PathBar.Popup.IsOpen = false;
+        }
+
         #endregion
 
+        private bool UseListOnly = false;
+
+        private readonly List<Item> _list = new List<Item>();
+
+        private void AddList(Item item) {
+            if ( this.UseListOnly )
+                this._list.Add( item );
+            else
+                this.MainView.Items.Add( item );
+        }
+
+        private void ClearList() {
+            if ( this.UseListOnly )
+                this._list.Clear();
+            else
+                this.MainView.Items.Clear();
+        }
+
+        private List<Item> GetList() {
+            if ( this.UseListOnly )
+                return this._list;
+            else
+                return this.MainView.Items.Cast<Item>().ToList();
+        }
+
+        private void PathBar_OnKeyDown(object sender, KeyEventArgs e) {
+            if ( e.Key != Key.Enter ) return;
+
+            this.Handler.SetCurrentPath( ( sender as TextBox ).Text );
+            List( this.Handler.GetCurrentPath() );
+        }
     }
 
     public class SortableListView : ListView {
@@ -393,7 +460,7 @@ namespace ExplorerWpf {
                         else direction                                                     = ListSortDirection.Ascending;
                     }
 
-                    if(clickedHeader.Column.DisplayMemberBinding == null) return;
+                    if ( clickedHeader.Column.DisplayMemberBinding == null ) return;
 
                     var sortString = ( (Binding) clickedHeader.Column.DisplayMemberBinding ).Path.Path;
 

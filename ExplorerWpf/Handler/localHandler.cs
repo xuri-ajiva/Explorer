@@ -8,6 +8,7 @@ using System.IO;
 
 namespace ExplorerBase.Handlers {
     public class LocalHandler : IHandler {
+        public const string ROOT_FOLDER = "/";
 
         #region Implementation of IHandler
 
@@ -21,7 +22,7 @@ namespace ExplorerBase.Handlers {
         /// <inheritdoc />
         public string GetCurrentPath() {
             this.OnGetCurrentPath?.Invoke();
-            return string.IsNullOrEmpty( this.CurrentPath ) ? "/" : this.CurrentPath;
+            return string.IsNullOrEmpty( this.CurrentPath ) ? ROOT_FOLDER : this.CurrentPath;
         }
 
         /// <inheritdoc />
@@ -75,7 +76,10 @@ namespace ExplorerBase.Handlers {
         /// <inheritdoc />
         public void ValidatePath() {
             this.OnValidatePath?.Invoke();
-            this.CurrentPath = Path.GetFullPath( string.IsNullOrEmpty( this.CurrentPath ) ? "." : this.CurrentPath );
+            if ( this.CurrentPath == "/" )
+                return;
+
+            this.CurrentPath = Path.GetFullPath( string.IsNullOrEmpty( this.CurrentPath ) ? ROOT_FOLDER : this.CurrentPath );
         }
 
         /// <inheritdoc />

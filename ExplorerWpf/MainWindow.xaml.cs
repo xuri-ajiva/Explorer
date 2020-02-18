@@ -31,7 +31,21 @@ using MessageBox = System.Windows.Forms.MessageBox;
 
 
 namespace ExplorerWpf {
+    public class BooleanToWidthConverter : IValueConverter {
+        private const double Column_Width = 40.0;
 
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture) {
+            if ( value != null && value != DependencyProperty.UnsetValue ) {
+                bool isVisible = (bool) value;
+
+                return isVisible ? Column_Width : 0;
+            }
+
+            return Column_Width;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture) { throw new NotImplementedException(); }
+    }
     public class ImageConverter : IValueConverter {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture) {
             if ( value is Bitmap bitmap1 ) {
@@ -101,7 +115,7 @@ namespace ExplorerWpf {
             this.Icon           = SystemIcons.Hand.ToBitmap();
             this.Name           = "empty";
             this.Path           = "empty";
-            this.Size           = int.MaxValue.ToString();
+            this.Size           = "-1";
             this.Type           = FileType.NONE;
             this.Exists         = false;
             this.IsReadOnly     = true;
@@ -158,7 +172,7 @@ namespace ExplorerWpf {
 
         public Bitmap   Icon           { get; private set; }
         public string   Name           { get; set; }
-        public string   Path           { get; private set; }
+        public string   Path           { get;  set; }
         public string   Size           { get; set; }
         public FileType Type           { get; private set; }
         public string   Extension      { get; }
@@ -167,6 +181,9 @@ namespace ExplorerWpf {
         public DateTime CreationTime   { get; }
         public DateTime LastAccessTime { get; }
         public DateTime LastWriteTime  { get; }
+        public Double SizePb { get; set; }
+        public bool SizeIsNotPB { get; set; }
+        public bool SizeIsPB { get; set; }
 
         // ReSharper restore UnusedAutoPropertyAccessor.Global
     }

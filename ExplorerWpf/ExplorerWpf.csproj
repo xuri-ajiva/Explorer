@@ -93,6 +93,11 @@
     <Compile Include="Handler\IHandler.cs" />
     <Compile Include="Handler\localHandler.cs" />
     <Compile Include="ShellContextMenu.cs" />
+    <Compile Include="TexTBox\DirectoryExistsRule.cs" />
+    <Compile Include="TexTBox\InvertSign.cs" />
+    <Compile Include="TexTBox\SelectFolderTextBox.xaml.cs">
+      <DependentUpon>SelectFolderTextBox.xaml</DependentUpon>
+    </Compile>
     <Page Include="Dictionary1.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -116,6 +121,10 @@
     <Page Include="ExplorerView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="TexTBox\SelectFolderTextBox.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
   </ItemGroup>
   <ItemGroup>
@@ -149,6 +158,5 @@
   <ItemGroup>
     <Resource Include="8788.png" />
   </ItemGroup>
-  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
