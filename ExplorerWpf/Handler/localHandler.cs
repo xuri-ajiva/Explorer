@@ -79,7 +79,14 @@ namespace ExplorerBase.Handlers {
             if ( this.CurrentPath == "/" )
                 return;
 
-            this.CurrentPath = Path.GetFullPath( string.IsNullOrEmpty( this.CurrentPath ) ? ROOT_FOLDER : this.CurrentPath );
+            var Cp = this.CurrentPath;
+
+            try {
+                this.CurrentPath = Path.GetFullPath( string.IsNullOrEmpty( this.CurrentPath ) ? ROOT_FOLDER : this.CurrentPath );
+            } catch (Exception e) {
+                Console.WriteLine( e );
+                this.CurrentPath = Cp;
+            }
         }
 
         /// <inheritdoc />

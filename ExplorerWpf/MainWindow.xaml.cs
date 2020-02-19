@@ -31,21 +31,6 @@ using MessageBox = System.Windows.Forms.MessageBox;
 
 
 namespace ExplorerWpf {
-    public class BooleanToWidthConverter : IValueConverter {
-        private const double Column_Width = 40.0;
-
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture) {
-            if ( value != null && value != DependencyProperty.UnsetValue ) {
-                bool isVisible = (bool) value;
-
-                return isVisible ? Column_Width : 0;
-            }
-
-            return Column_Width;
-        }
-
-        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture) { throw new NotImplementedException(); }
-    }
     public class ImageConverter : IValueConverter {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture) {
             if ( value is Bitmap bitmap1 ) {
@@ -172,7 +157,7 @@ namespace ExplorerWpf {
 
         public Bitmap   Icon           { get; private set; }
         public string   Name           { get; set; }
-        public string   Path           { get;  set; }
+        public string   Path           { get; set; }
         public string   Size           { get; set; }
         public FileType Type           { get; private set; }
         public string   Extension      { get; }
@@ -181,9 +166,9 @@ namespace ExplorerWpf {
         public DateTime CreationTime   { get; }
         public DateTime LastAccessTime { get; }
         public DateTime LastWriteTime  { get; }
-        public Double SizePb { get; set; }
-        public bool SizeIsNotPB { get; set; }
-        public bool SizeIsPB { get; set; }
+        public Double   SizePb         { get; set; }
+        public bool     SizeIsNotPB    { get; set; }
+        public bool     SizeIsPB       { get; set; }
 
         // ReSharper restore UnusedAutoPropertyAccessor.Global
     }
@@ -349,84 +334,85 @@ namespace ExplorerWpf {
         private void PingClick(object sender, RoutedEventArgs e) { this.Topmost = !this.Topmost; }
 
         private void MoveWindow(object sender, MouseButtonEventArgs e) {
-            if ( e.LeftButton == MouseButtonState.Pressed ) {
-                if ( this.WindowState == WindowState.Maximized ) this.WindowState = WindowState.Normal;
+            if ( e.LeftButton != MouseButtonState.Pressed ) return;
 
-                try {
-                    DragMove();
-                } catch (Exception exception) {
-                    Console.WriteLine( exception );
-                }
+            if ( this.WindowState == WindowState.Maximized ) this.WindowState = WindowState.Normal;
+
+            try {
+                DragMove();
+            } catch (Exception exception) {
+                Console.WriteLine( exception );
             }
         }
 
         private void trvMenu_MouseDown(object sender, MouseButtonEventArgs e) { }
 
         private void trvMenu_MouseDoubleClick(object sender, MouseButtonEventArgs e) {
-            if ( this.TreeControl.SelectedItem != null )
-                try {
-                    this.Handler.SetCurrentPath( ( (TreePathItem) this.TreeControl.SelectedItem ).Path + "\\" );
-                    this._currentExplorerView.List( this.Handler.GetCurrentPath() );
-                } catch {
-                    // ignored
-                }
+            if ( this.TreeControl.SelectedItem == null ) return;
+
+            try {
+                this.Handler.SetCurrentPath( ( (TreePathItem) this.TreeControl.SelectedItem ).Path + "\\" );
+                this._currentExplorerView.List( this.Handler.GetCurrentPath() );
+            } catch {
+                // ignored
+            }
         }
 
         private void trvMenu_Expanded(object sender, RoutedEventArgs e) {
-            if ( e.OriginalSource is TreeViewItem tvi ) {
-                var node = tvi.DataContext as TreePathItem;
-                //var node = tvi;
+            if ( !( e.OriginalSource is TreeViewItem tvi ) ) return;
 
-                //MessageBox.Show( string.Format( "TreeNode '{0}' was expanded", tvi.Header ) );
-                if ( node == null ) return;
+            //var node = tvi;
+
+            //MessageBox.Show( string.Format( "TreeNode '{0}' was expanded", tvi.Header ) );
+            if ( !( tvi.DataContext is TreePathItem node ) ) return;
+
+            try {
+                node.Items.Clear();
+                string[] x;
 
                 try {
-                    node.Items.Clear();
-                    string[] x;
+                    this.Handler.SetCurrentPath( node.Path + "\\" );
+
+                    x = this.Handler.ListDirectory( this.Handler.GetCurrentPath() );
+                } catch (Exception exception) {
+                    x = new[] { exception.Message };
+                }
+
+                if ( x == null ) return;
+
+                foreach ( var t in x ) {
+                    //var  pos  = x[i].LastIndexOf( "\\", StringComparison.Ordinal );
+                    //var  name = x[i].Substring( pos + 1 );
+                    //Item item = new Item( Path.GetFileName( x[i].Substring( pos + 1 ) ), , "", FileType.Directory );
+
+                    TreePathItem n1;
 
                     try {
-                        this.Handler.SetCurrentPath( node.Path + "\\" );
+                        n1 = new TreePathItem( new DirectoryInfo( t ) );
 
-                        x = this.Handler.ListDirectory( this.Handler.GetCurrentPath() );
-                    } catch (Exception exception) {
-                        x = new[] { exception.Message };
+                        try {
+                            if ( this.Handler.ListDirectory( this.Handler.GetCurrentPath() ) is string[] xJ )
+                                if ( xJ.Length > 0 )
+                                    n1.Items.Add( TreePathItem.Empty );
+                            //for ( var j = 0; j < xJ.Length; j++ ) {
+                            //    var n2 = new TreePathItem() { Name = xJ[j], PathAbs = xJ[j] };
+                            //    n1.Items.Add( n2 );
+                            //}
+                        } catch (Exception exception) {
+                            var tcs = TreePathItem.Empty;
+                            tcs.Name = exception.Message;
+
+                            n1.Items.Add( tcs );
+                        }
+                    } catch {
+                        n1      = TreePathItem.Empty;
+                        n1.Name = t;
                     }
 
-                    if ( x != null )
-                        for ( var i = 0; i < x.Length; i++ ) {
-                            //var  pos  = x[i].LastIndexOf( "\\", StringComparison.Ordinal );
-                            //var  name = x[i].Substring( pos + 1 );
-                            //Item item = new Item( Path.GetFileName( x[i].Substring( pos + 1 ) ), , "", FileType.Directory );
-
-                            TreePathItem n1;
-
-                            try {
-                                n1 = new TreePathItem( new DirectoryInfo( x[i] ) );
-
-                                try {
-                                    if ( this.Handler.ListDirectory( this.Handler.GetCurrentPath() ) is string[] xJ )
-                                        if ( xJ.Length > 0 )
-                                            n1.Items.Add( TreePathItem.Empty );
-                                    //for ( var j = 0; j < xJ.Length; j++ ) {
-                                    //    var n2 = new TreePathItem() { Name = xJ[j], PathAbs = xJ[j] };
-                                    //    n1.Items.Add( n2 );
-                                    //}
-                                } catch (Exception exception) {
-                                    var tcs = TreePathItem.Empty;
-                                    tcs.Name = exception.Message;
-
-                                    n1.Items.Add( tcs );
-                                }
-                            } catch {
-                                n1      = TreePathItem.Empty;
-                                n1.Name = x[i];
-                            }
-
-                            node.Items.Add( n1 );
-                        }
-                } catch {
-                    // ignored
+                    node.Items.Add( n1 );
                 }
+            } catch {
+                // ignored
             }
         }
 
@@ -466,7 +452,6 @@ namespace ExplorerWpf {
             //    i++;
             //}
             //
-
         #if PerformanceTest
             CreateContextMenu();
             var t = new Thread( () => {
@@ -506,6 +491,8 @@ namespace ExplorerWpf {
             t.SetApartmentState( ApartmentState.STA );
             t.Start();
         #endif
+
+            AddTab();
         }
 
         private void DcChange(object sender, DependencyPropertyChangedEventArgs e) { Console.WriteLine( e ); }

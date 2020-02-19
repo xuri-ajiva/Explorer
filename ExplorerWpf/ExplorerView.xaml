@@ -4,7 +4,8 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:local="clr-namespace:ExplorerWpf"
-             xmlns:Controls="clr-namespace:QuickZip.Controls" x:Name="userControl" x:Class="ExplorerWpf.ExplorerView"
+             xmlns:texTBox="clr-namespace:ExplorerWpf.TexTBox"
+             x:Name="userControl" x:Class="ExplorerWpf.ExplorerView"
              mc:Ignorable="d"
              d:DesignHeight="450" d:DesignWidth="800">
     <UserControl.Resources>
@@ -14,7 +15,6 @@
             <GradientStop Color="#FF5A32E6" />
         </LinearGradientBrush>
         <local:ImageConverter x:Key="ImageConverter" />
-        <local:BooleanToWidthConverter x:Key="BooleanToWidthConverter" />
     </UserControl.Resources>
     <Grid x:Name="Root">
         <Grid.Resources>
@@ -44,8 +44,8 @@
                     <GridViewColumn Header="Icon" CellTemplate="{StaticResource IconTemplate}" />
                     <GridViewColumn Header="Name" Width="200" DisplayMemberBinding="{Binding Name}" />
                     <GridViewColumn Header="Path" Width="200" DisplayMemberBinding="{Binding Path}" />
-                    <GridViewColumn Header="Size" DisplayMemberBinding="{Binding Size}" Width="{Binding SizeIsPB, Converter={StaticResource BooleanToWidthConverter}}"/>
-                    <GridViewColumn Header="Free Space" CellTemplate="{StaticResource Pb}" Width="{Binding SizeIsNotPB, Converter={StaticResource BooleanToWidthConverter}}"/>
+                    <GridViewColumn Header="Size" DisplayMemberBinding="{Binding Size}" />
+                    <GridViewColumn Header="Free Space" CellTemplate="{StaticResource Pb}"/>
                     <GridViewColumn Header="Type" Width="Auto" DisplayMemberBinding="{Binding Type}" />
                     <GridViewColumn Header="Extension" Width="Auto" DisplayMemberBinding="{Binding Extension}" />
                     <GridViewColumn Header="Exists" Width="Auto" DisplayMemberBinding="{Binding Exists}" />
@@ -57,7 +57,7 @@
                 </GridView>
             </local:SortableListView.View>
         </local:SortableListView>
-        <Controls:SelectFolderTextBox Grid.Row="0" x:Name="PathBar" Margin="0,0,60,0" Background="{x:Null}" BorderBrush="{DynamicResource Border}"
+        <texTBox:SelectFolderTextBox Grid.Row="0" x:Name="PathBar" Margin="0,0,60,0" Background="{x:Null}" BorderBrush="{DynamicResource Border}"
                                       OpacityMask="Black" Foreground="{DynamicResource Foreground}" RenderTransformOrigin="0.5,0.5" FontSize="14" Text="/" Height="Auto" KeyDown="PathBar_OnKeyDown"/>
         <Label Grid.Row="2" x:Name="StatusLabel"
                Background="{x:Null}" BorderBrush="{DynamicResource Border}"
