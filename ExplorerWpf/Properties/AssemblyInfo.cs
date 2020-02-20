@@ -14,7 +14,7 @@ using System.Windows;
 [assembly: AssemblyConfiguration( "" )]
 [assembly: AssemblyCompany( "" )]
 [assembly: AssemblyProduct( "ExplorerWpf" )]
-[assembly: AssemblyCopyright( "Copyright ©  2020" )]
+[assembly: AssemblyCopyright( "Copyright ©  2020 Xuri" )]
 [assembly: AssemblyTrademark( "" )]
 [assembly: AssemblyCulture( "" )]
 

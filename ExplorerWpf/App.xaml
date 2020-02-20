@@ -32,7 +32,8 @@
         </LinearGradientBrush>
         <SolidColorBrush x:Key="Border" Color="#FF111421" />
         <SolidColorBrush x:Key="Aczent" Color="#E6141721" />
-            
+            <SolidColorBrush x:Key="WindowBorder" Color="#A4090E1D" />
+
         </ResourceDictionary>
     </Application.Resources>
 </Application>

@@ -6,7 +6,6 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Globalization;
@@ -22,7 +21,8 @@ using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using ConsoleControlAPI;
-using ExplorerBase.Handlers;
+using ExplorerWpf.Handler;
+using Brush = System.Windows.Media.Brush;
 using Brushes = System.Windows.Media.Brushes;
 using Color = System.Windows.Media.Color;
 using MessageBox = System.Windows.Forms.MessageBox;
@@ -50,197 +50,7 @@ namespace ExplorerWpf {
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture) => throw new NotImplementedException();
     }
-    public class Item {
-
-
-        [Obsolete( "User File or Directory Info!", true )]
-        public Item(string name, string path, string size, FileType type) {
-            this.Name = name;
-            this.Path = path.Replace( "\\\\", "\\" );
-            this.Size = size;
-            this.Type = type;
-
-            CreateIcon();
-        }
-
-        public Item(FileInfo f) {
-            this.Path           = f.FullName.Replace( "\\\\", "\\" );
-            this.Name           = f.Name;
-            this.Size           = f.Length + $" ({GetLenght( f.Length )})";
-            this.Exists         = f.Exists;
-            this.IsReadOnly     = f.IsReadOnly;
-            this.Extension      = f.Extension;
-            this.CreationTime   = f.CreationTime;
-            this.LastAccessTime = f.LastAccessTime;
-            this.LastWriteTime  = f.LastWriteTime;
-
-            this.Type = FileType.FILE;
-
-            CreateIcon();
-        }
-
-        public Item(DirectoryInfo d) {
-            this.Path           = d.FullName.Replace( "\\\\", "\\" );
-            this.Name           = d.Name;
-            this.Size           = "0";
-            this.Exists         = d.Exists;
-            this.IsReadOnly     = false;
-            this.Extension      = d.Extension;
-            this.CreationTime   = d.CreationTime;
-            this.LastAccessTime = d.LastAccessTime;
-            this.LastWriteTime  = d.LastWriteTime;
-
-            this.Type = FileType.DIRECTORY;
-
-            CreateIcon();
-        }
-
-
-        protected Item() {
-            this.Icon           = SystemIcons.Hand.ToBitmap();
-            this.Name           = "empty";
-            this.Path           = "empty";
-            this.Size           = "-1";
-            this.Type           = FileType.NONE;
-            this.Exists         = false;
-            this.IsReadOnly     = true;
-            this.Extension      = "*";
-            this.CreationTime   = DateTime.MaxValue;
-            this.LastAccessTime = DateTime.MaxValue;
-            this.LastWriteTime  = DateTime.MaxValue;
-        }
-
-
-        public static Item Empty => new Item();
-
-        public static Item Root {
-            get {
-                var i = new Item { Path = "/", Name = "/", Type = FileType.DIRECTORY, Size = long.MaxValue + $" ({GetLenght( long.MaxValue )})" };
-                i.Icon.Dispose();
-                i.Icon = SystemIcons.Shield.ToBitmap();
-                return i;
-            }
-        }
-
-        [DebuggerStepThrough]
-        public static string GetFileLenght(string fileName) => GetLenght( new FileInfo( fileName ).Length );
-
-        [DebuggerStepThrough]
-        public static string GetLenght(long length) {
-            if ( length > Math.Pow( 10, 15 ) ) return ( length / Math.Pow( 10, 15 ) ).ToString( "0.00" ) + "Pb";
-            if ( length > Math.Pow( 10, 12 ) ) return ( length / Math.Pow( 10, 12 ) ).ToString( "0.00" ) + "Tb";
-            if ( length > Math.Pow( 10, 9 ) ) return ( length / Math.Pow( 10, 9 ) ).ToString( "0.00" )   + "Gb";
-            if ( length > Math.Pow( 10, 6 ) ) return ( length / Math.Pow( 10, 6 ) ).ToString( "0.00" )   + "Mb";
-            if ( length > Math.Pow( 10, 3 ) ) return ( length / Math.Pow( 10, 3 ) ).ToString( "0.00" )   + "Kb";
-
-            return length + "b";
-        }
-
-        private void CreateIcon() {
-            try {
-                this.Icon = this.Path != "/" ? DefaultIcons.GetFileIconCashed( this.Path ).ToBitmap() : SystemIcons.Shield.ToBitmap();
-            } catch (Exception e) {
-                try {
-                    this.Icon = SystemIcons.Error.ToBitmap();
-                } catch (Exception exception) {
-                    Console.WriteLine( exception );
-                }
-
-                Console.WriteLine( e.Message );
-            }
-        }
-
-        ~Item() { this.Icon.Dispose(); }
-
-
-        // ReSharper disable UnusedAutoPropertyAccessor.Global
-
-        public Bitmap   Icon           { get; private set; }
-        public string   Name           { get; set; }
-        public string   Path           { get; set; }
-        public string   Size           { get; set; }
-        public FileType Type           { get; private set; }
-        public string   Extension      { get; }
-        public bool     Exists         { get; }
-        public bool     IsReadOnly     { get; }
-        public DateTime CreationTime   { get; }
-        public DateTime LastAccessTime { get; }
-        public DateTime LastWriteTime  { get; }
-        public Double   SizePb         { get; set; }
-        public bool     SizeIsNotPB    { get; set; }
-        public bool     SizeIsPB       { get; set; }
-
-        // ReSharper restore UnusedAutoPropertyAccessor.Global
-    }
-    public static class DefaultIcons {
-
-        private const uint SHGFI_ICON      = 0x100;
-        private const uint SHGFI_LARGEICON = 0x0;
-
-        // ReSharper disable once UnusedMember.Local
-        private const           uint                     SHGFI_SMALLICON = 0x000000001;
-        private static readonly Dictionary<string, Icon> Cache           = new Dictionary<string, Icon>();
-
-        public static Icon GetFileIconCashed(string path) {
-            var ext = path;
-
-            if ( File.Exists( path ) ) ext = Path.GetExtension( path );
-
-            if ( ext == null )
-                return null;
-
-            Icon icon;
-            if ( Cache.TryGetValue( ext, out icon ) )
-                return icon;
-
-            icon = ExtractFromPath( path );
-            Cache.Add( ext, icon );
-            return icon;
-        }
-
-
-        private static Icon ExtractFromPath(string path) {
-            var shinfo = new SHFILEINFO();
-            SHGetFileInfo( path, 0, ref shinfo, (uint) Marshal.SizeOf( shinfo ), SHGFI_ICON | SHGFI_LARGEICON );
-            return Icon.FromHandle( shinfo.hIcon );
-        }
-
-        [DllImport( "shell32.dll" )]
-        private static extern IntPtr SHGetFileInfo(string pszPath, uint dwFileAttributes, ref SHFILEINFO psfi, uint cbSizeFileInfo, uint uFlags);
-
-        //Struct used by SHGetFileInfo function
-        [StructLayout( LayoutKind.Sequential )]
-        // ReSharper disable once InconsistentNaming
-        private struct SHFILEINFO {
-            public readonly IntPtr hIcon;
-            public readonly int    iIcon;
-            public readonly uint   dwAttributes;
-
-            [MarshalAs( UnmanagedType.ByValTStr, SizeConst = 260 )]
-            public readonly string szDisplayName;
-
-            [MarshalAs( UnmanagedType.ByValTStr, SizeConst = 80 )]
-            public readonly string szTypeName;
-        }
-    }
-
-    public enum FileType {
-        DIRECTORY, FILE, NONE
-    }
-
-    public class TreePathItem : Item {
-
-        public TreePathItem(DirectoryInfo d) : base( d ) { Init(); }
-        public TreePathItem(FileInfo      f) : base( f ) { Init(); }
-
-        // ReSharper disable once RedundantBaseConstructorCall
-        protected TreePathItem() : base() { }
-
-        public new static TreePathItem Empty => new TreePathItem();
-
-        public  ObservableCollection<TreePathItem> Items  { get; set; }
-        private void                               Init() { this.Items = new ObservableCollection<TreePathItem>(); }
-    }
+          
 
     /// <summary>
     ///     Interaktionslogik für MainWindow.xaml
@@ -260,27 +70,15 @@ namespace ExplorerWpf {
 
         public MainWindow() {
             //AllocConsole();
-            InitializeComponent();
-            /*DataContext =  dc;
-            Loaded      += MainWindow_Loaded;*/
-            //this.consoleX.ShowDiagnostics = true;   
+            InitializeComponent(); 
             this.consoleX.InitializeComponent();
             this.consoleX.OnProcessOutput += ConsoleXOnOnProcessOutput;
             this.consoleX.OnProcessInput  += ConsoleXOnOnProcessInput;
             this.consoleX.StartProcess( "cmd.exe", "" );
             this.consoleX.IsInputEnabled = true;
             this.consoleX.Visibility     = Visibility.Collapsed;
-            this.consoleX.Foreground     = Brushes.LimeGreen;
 
-            //this._handler = new LocalHandler( "C:\\" );
-
-            //TreePathItem root       = new TreePathItem() { Name = "Menu" };
-            //TreePathItem childItem1 = new TreePathItem() { Name = "Child item #1" };
-            //childItem1.Items.Add(new TreePathItem() { Name = "Child item #1.1" });
-            //childItem1.Items.Add(new TreePathItem() { Name = "Child item #1.2" });
-            //root.Items.Add(childItem1);
-            //root.Items.Add(new TreePathItem() { Name = "Child item #2" });
-            //trvMenu.Items.Add(root);
+            this.coppyRightTextBox.Text =Program.Version + "  "+ Program.CopyRight;
         }
 
         private IHandler Handler => this._currentExplorerView.Handler;
@@ -293,23 +91,8 @@ namespace ExplorerWpf {
 
         private void ConsoleXOnOnProcessOutput(object sender, ProcessEventArgs args) {
             if ( !this._first ) {
-                //new Thread( () => {
-                //    Thread.Sleep( 1000 );
-                //
-                //    var dispatcher = this.Dispatcher;
-                //
-                //    if ( dispatcher != null ) {
-                //        dispatcher.Invoke( () => { this.consoleX.ProcessInterface.WriteInput( "@echo off" ); } );
-                //        Thread.Sleep( 100 );
-                //        dispatcher.Invoke( () => {
-                //            this.consoleX.ClearOutput();
-                //            this.consoleX.WriteOutput( "Console Support Enabled!\n", Color.FromRgb( 0, 129, 255 ) );
-                //            this.consoleX.Visibility = Visibility.Visible;
-                //        } );
-                //    }
-                //    else { }
-                //} ); //.Start();
-                this.consoleX.WriteOutput( "Console Support Enabled!\n", Color.FromRgb( 0, 129, 255 ) );
+
+                this.consoleX.WriteOutput( "\nConsole Support Enabled!\n", Color.FromRgb( 0, 129, 255 ) );
                 this.consoleX.Visibility = Visibility.Visible;
                 this._first              = true;
             }
@@ -332,6 +115,13 @@ namespace ExplorerWpf {
         }
 
         private void PingClick(object sender, RoutedEventArgs e) { this.Topmost = !this.Topmost; }
+
+        private void UpClick(object sender, RoutedEventArgs e) { }
+
+        private void RootClick(object sender, RoutedEventArgs e) {
+            this.Handler.SetCurrentPath( LocalHandler.ROOT_FOLDER );
+            this._currentExplorerView.List( this.Handler.GetCurrentPath() );
+        }
 
         private void MoveWindow(object sender, MouseButtonEventArgs e) {
             if ( e.LeftButton != MouseButtonState.Pressed ) return;
@@ -367,37 +157,17 @@ namespace ExplorerWpf {
             if ( !( tvi.DataContext is TreePathItem node ) ) return;
 
             try {
-                node.Items.Clear();
-                string[] x;
+                this.Handler.SetCurrentPath( node.Path + "\\" );
 
-                try {
-                    this.Handler.SetCurrentPath( node.Path + "\\" );
-
-                    x = this.Handler.ListDirectory( this.Handler.GetCurrentPath() );
-                } catch (Exception exception) {
-                    x = new[] { exception.Message };
-                }
-
-                if ( x == null ) return;
-
-                foreach ( var t in x ) {
-                    //var  pos  = x[i].LastIndexOf( "\\", StringComparison.Ordinal );
-                    //var  name = x[i].Substring( pos + 1 );
-                    //Item item = new Item( Path.GetFileName( x[i].Substring( pos + 1 ) ), , "", FileType.Directory );
-
+                foreach ( var t in this.Handler.ListDirectory( node.Path ) ) {
                     TreePathItem n1;
 
                     try {
-                        n1 = new TreePathItem( new DirectoryInfo( t ) );
+                        n1 = new TreePathItem( t );
 
                         try {
-                            if ( this.Handler.ListDirectory( this.Handler.GetCurrentPath() ) is string[] xJ )
-                                if ( xJ.Length > 0 )
-                                    n1.Items.Add( TreePathItem.Empty );
-                            //for ( var j = 0; j < xJ.Length; j++ ) {
-                            //    var n2 = new TreePathItem() { Name = xJ[j], PathAbs = xJ[j] };
-                            //    n1.Items.Add( n2 );
-                            //}
+                            if ( this.Handler.ListDirectory( this.Handler.GetCurrentPath() ).Length > 0 )
+                                n1.Items.Add( TreePathItem.Empty );
                         } catch (Exception exception) {
                             var tcs = TreePathItem.Empty;
                             tcs.Name = exception.Message;
@@ -406,7 +176,7 @@ namespace ExplorerWpf {
                         }
                     } catch {
                         n1      = TreePathItem.Empty;
-                        n1.Name = t;
+                        n1.Name = t.Name;
                     }
 
                     node.Items.Add( n1 );
@@ -421,14 +191,6 @@ namespace ExplorerWpf {
 
         private void MainWindow_OnLoaded(object sender, RoutedEventArgs e) {
             EnableBlur();
-            //InitializeComponent();
-            //(this.listView1.View as GridView)
-            //this.listView1.Columns.Add( "Name", 200, System.Windows.Forms.HorizontalAlignment.Left );
-            //this.listView1.Columns.Add( "Path", 200, System.Windows.Forms.HorizontalAlignment.Left );
-            //this.listView1.Columns.Add( "Size", 70,  System.Windows.Forms.HorizontalAlignment.Left );
-            //this.listView1.Columns.Add( "Type", -2,  System.Windows.Forms.HorizontalAlignment.Left );
-
-            //this.listBrowderView.Nodes.Add( "C:\\" );
 
             foreach ( var driveInfo in DriveInfo.GetDrives() ) {
                 var node = new TreePathItem( driveInfo.RootDirectory );
@@ -623,7 +385,7 @@ namespace ExplorerWpf {
             }
         }
 
-        private ExplorerView CreateExplorer(string path = "/") {
+        private ExplorerView CreateExplorer(string path = LocalHandler.ROOT_FOLDER) {
             var h = new LocalHandler( path );
             var x = new ExplorerView( new WindowInteropHelper( this ).Handle, this.consoleX );
         #if PerformanceTest
@@ -631,13 +393,20 @@ namespace ExplorerWpf {
         #endif
             x.Init( h );
 
-            x.SendDirectoryUpdateAsCmd += XOnSendDirectoryUpdateAsCmd;
+            x.SendDirectoryUpdateAsCmd += XOnSendDirectoryUpdateAsCmd;   
+            x.UpdateStatusBar += XOnUpdateStatusBar;
         #if PerformanceTest
             } );
             t.Start();
         #endif
             x.Margin = new Thickness( 0, 0, 0, 0 );
             return x;
+        }
+
+        private void XOnUpdateStatusBar(object arg1, string arg2, Brush arg3) {
+            StatusBar.Foreground = arg3;
+            StatusBar.Text = arg2;
+
         }
 
         private TabItem CreateExplorerTab(ExplorerView explorerView) {
@@ -666,19 +435,19 @@ namespace ExplorerWpf {
             taps_SelectionChanged( this, null );
         }
 
-        private void AddTab(string path = "/") {
+        private void AddTab(string path = LocalHandler.ROOT_FOLDER) {
             if ( this._contextMenu == null ) CreateContextMenu();
 
             AddTabToTabControl( CreateExplorerTab( CreateExplorer( path ) ) );
         }
 
         private void CloseTap(TabItem tp) {
-            if ( tp.Content is ExplorerView explorer ) {
-                explorer.Dispose();
-                tp.Content = null;
-                this.TabControl.Items.Remove( tp );
-                GC.Collect( 0, GCCollectionMode.Forced );
-            }
+            if ( !( tp.Content is ExplorerView explorer ) ) return;
+
+            explorer.Dispose();
+            tp.Content = null;
+            this.TabControl.Items.Remove( tp );
+            GC.Collect( 0, GCCollectionMode.Forced );
         }
 
         #endregion

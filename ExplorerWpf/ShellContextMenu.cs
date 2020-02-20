@@ -30,7 +30,7 @@ namespace Peter {
     ///     files[0] = new FileInfo(@"c:\windows\notepad.exe");
     ///     scm.ShowContextMenu(this.Handle, files, Cursor.Position);
     /// </example>
-    public class ShellContextMenu : NativeWindow {
+    internal class ShellContextMenu : NativeWindow {
 
         #region Constructor
 

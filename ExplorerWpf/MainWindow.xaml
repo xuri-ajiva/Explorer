@@ -10,7 +10,7 @@
     x:Class="ExplorerWpf.MainWindow"
     mc:Ignorable="d"
     Title="MainWindow" Background="{x:Null}"
-    Loaded="MainWindow_OnLoaded" Width="923" Height="774.175"
+    Loaded="MainWindow_OnLoaded" Width="923" Height="636.175"
     WindowState="Normal"
     ResizeMode="CanResize" WindowStyle="None" AllowsTransparency="True" WindowStartupLocation="CenterScreen"
     Icon="8788.png">
@@ -20,109 +20,151 @@
     <WindowChrome.WindowChrome>
         <WindowChrome
             CaptionHeight="0"
-            ResizeBorderThickness="10" />
+            ResizeBorderThickness="8" />
     </WindowChrome.WindowChrome>
 
     <Grid Margin="1">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="30" />
-            <RowDefinition Height="697*" />
-        </Grid.RowDefinitions>
-        <Grid MouseDown="MoveWindow" Background="{DynamicResource Aczent}">
-            <Button Content="❌" FontSize="17" Foreground="#FFF37F97" Click="CloseClick"
-                    Background="{DynamicResource Background}" HorizontalAlignment="Right"
-                    BorderBrush="{DynamicResource Border}" />
-            <Button Margin="0,0,35.343,-0.002" Content="🔳" FontSize="17" Foreground="#FF79E6F3" Click="MaxClick"
-                    HorizontalAlignment="Right" Background="{DynamicResource Background}"
-                    BorderBrush="{DynamicResource Border}" />
-            <Button Margin="0,0.002,70.686,-0.003" Content="🔻" FontSize="17" Foreground="#FFD853FF" Click="MinClick"
-                    HorizontalAlignment="Right" Background="{DynamicResource Background}"
-                    BorderBrush="{DynamicResource Border}" />
-            <Button Margin="0,0,106.029,0" Content="📌" FontSize="17" Foreground="#FFDCFF00" Click="PingClick"
-                    HorizontalAlignment="Right" Background="{DynamicResource Background}"
-                    BorderBrush="{DynamicResource Border}" />
-        </Grid>
-        <Grid Grid.Row="1">
+
+        <Border BorderThickness="4,3,4,4" CornerRadius="1" BorderBrush="{DynamicResource WindowBorder}">
+
             <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="105*" />
-                    <ColumnDefinition Width="6" />
-                    <ColumnDefinition Width="688*" />
-                </Grid.ColumnDefinitions>
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="90*" />
-                    <RowDefinition Height="6" />
-                    <RowDefinition Height="40*" />
+                    <RowDefinition Height="30" />
+                    <RowDefinition Height="697*" />
                 </Grid.RowDefinitions>
-                <Grid>
-                    <TreeView x:Name="TreeControl" BorderBrush="{DynamicResource Border}"
-                              MouseDown="trvMenu_MouseDown" MouseDoubleClick="trvMenu_MouseDoubleClick"
-                              TreeViewItem.Expanded="trvMenu_Expanded" TreeViewItem.Collapsed="trvMenu_Collapsed"
-                              Style="{DynamicResource {x:Type TreeView}}" Foreground="{DynamicResource Foreground}"
-                              Background="{DynamicResource Background}" BorderThickness="0,13,0,0">
-                        <TreeView.ItemTemplate>
-                            <HierarchicalDataTemplate DataType="{x:Type local:TreePathItem}"
-                                                      ItemsSource="{Binding Items}">
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="20" />
-                                        <ColumnDefinition Width="*" />
-                                    </Grid.ColumnDefinitions>
-                                    <Image Source="{Binding Icon, Converter={StaticResource Conv}}" Width="16"
-                                           Height="16" Grid.Column="0" />
-                                    <TextBlock Text="{Binding Name}" Foreground="{DynamicResource Foreground}"
-                                               Grid.Column="1" />
-                                </Grid>
-                            </HierarchicalDataTemplate>
-                        </TreeView.ItemTemplate>
-                    </TreeView>
+                <Grid MouseDown="MoveWindow" Background="{DynamicResource WindowBorder}">
+                    <Button Content="❌" FontSize="17" Foreground="#FFF37F97" Click="CloseClick"
+                            Background="{DynamicResource Background}" HorizontalAlignment="Right"
+                            BorderBrush="{DynamicResource WindowBorder}"
+                            Template="{DynamicResource ButtonBaseControalBar1}" />
+                    <Button Margin="0,0,35.343,-0.002" Content="🔳" FontSize="17" Foreground="#FF79E6F3"
+                            Click="MaxClick"
+                            HorizontalAlignment="Right" Background="{DynamicResource Background}"
+                            BorderBrush="{DynamicResource WindowBorder}"
+                            Template="{DynamicResource ButtonBaseControalBar1}" />
+                    <Button Margin="0,0.002,70.686,-0.003" Content="🔻" FontSize="17" Foreground="#FFD853FF"
+                            Click="MinClick"
+                            HorizontalAlignment="Right" Background="{DynamicResource Background}"
+                            BorderBrush="{DynamicResource WindowBorder}"
+                            Template="{DynamicResource ButtonBaseControalBar1}" />
+                    <Button Margin="0,0,106.029,0" Content="📌" FontSize="17" Foreground="#FFDCFF00" Click="PingClick"
+                            HorizontalAlignment="Right" Background="{DynamicResource Background}"
+                            BorderBrush="{DynamicResource WindowBorder}"
+                            Template="{DynamicResource ButtonBaseControalBar1}" />
+                    <Button Content="⤴" FontSize="17" Foreground="#FF4EFF96" Click="UpClick"
+                            Background="{DynamicResource Background}" HorizontalAlignment="Left"
+                            BorderBrush="{DynamicResource WindowBorder}" Margin="0.656,0,0,0" Template="{DynamicResource ButtonBaseControalBar1}" />
+                    <Button Content="🏠" FontSize="17" Foreground="#FFFFD208" Click="RootClick"
+                            Background="{DynamicResource Background}" HorizontalAlignment="Left"
+                            BorderBrush="{DynamicResource WindowBorder}" Margin="25.116,0,0,0"
+                            Template="{DynamicResource ButtonBaseControalBar1}" />
                 </Grid>
+                <Grid Grid.Row="1">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="105*" />
+                            <ColumnDefinition Width="6" />
+                            <ColumnDefinition Width="688*" />
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="502*" />
+                            <RowDefinition Height="6" />
+                            <RowDefinition Height="219*" />
+                            <RowDefinition Height="15" />
+                        </Grid.RowDefinitions>
+                        <Grid>
+                            <TreeView x:Name="TreeControl" BorderBrush="{DynamicResource Border}"
+                                      MouseDown="trvMenu_MouseDown" MouseDoubleClick="trvMenu_MouseDoubleClick"
+                                      TreeViewItem.Expanded="trvMenu_Expanded"
+                                      TreeViewItem.Collapsed="trvMenu_Collapsed"
+                                      Style="{DynamicResource {x:Type TreeView}}"
+                                      Foreground="{DynamicResource Foreground}"
+                                      Background="{DynamicResource Background}" BorderThickness="0,13,0,0">
+                                <TreeView.ItemTemplate>
+                                    <HierarchicalDataTemplate DataType="{x:Type local:TreePathItem}"
+                                                              ItemsSource="{Binding Items}">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="20" />
+                                                <ColumnDefinition Width="*" />
+                                            </Grid.ColumnDefinitions>
+                                            <Image Source="{Binding Icon, Converter={StaticResource Conv}}" Width="16"
+                                                   Height="16" Grid.Column="0" />
+                                            <TextBlock Text="{Binding Name}" Foreground="{DynamicResource Foreground}"
+                                                       Grid.Column="1" />
+                                        </Grid>
+                                    </HierarchicalDataTemplate>
+                                </TreeView.ItemTemplate>
+                            </TreeView>
+                        </Grid>
 
-                <GridSplitter x:Name="ColorExample" Grid.Row="0" Grid.Column="1" HorizontalAlignment="Stretch"
-                              Background="{DynamicResource Background}" BorderBrush="{DynamicResource Border}"
-                              BorderThickness="1" Foreground="{DynamicResource Foreground}" />
-                <Grid Grid.Column="2">
-                    <Grid.RowDefinitions>
-                        <RowDefinition />
-                    </Grid.RowDefinitions>
-                    <TabControl x:Name="TabControl" DataContextChanged="DcChange"
-                                SelectionChanged="taps_SelectionChanged" Background="{DynamicResource Background}"
-                                Foreground="{DynamicResource Foreground}" Style="{DynamicResource TabControlStyle1}"
-                                BorderBrush="{DynamicResource Border}" Margin="0,-30,0,0" FontSize="14"
-                                BorderThickness="1">
-                        <TabItem x:Name="PlusTabItem" Margin="0" Foreground="{DynamicResource Foreground}"
-                                 BorderBrush="{DynamicResource Border}" Background="{DynamicResource Background}"
-                                 TextOptions.TextFormattingMode="Display" Style="{DynamicResource TabItemStyle1}">
-                            <TabItem.ContextMenu>
-                                <ContextMenu>
-                                    <MenuItem Header="_LocalExplorer" Click="MenuItem_OnClick" TabIndex="1" />
-                                    <MenuItem Header="_Test" IsCheckable="True" IsChecked="False"
-                                              Click="MenuItem_OnClick" TabIndex="2" />
-                                </ContextMenu>
-                            </TabItem.ContextMenu>
-                            <TabItem.Header>
-                                <Label Content="➕" MouseLeftButtonDown="TabItem_MouseLeftButtonDown" Margin="-14,-4"
-                                       Background="{DynamicResource Background}" BorderBrush="{DynamicResource Border}"
-                                       Foreground="{DynamicResource Foreground}" FontSize="13" BorderThickness="1" />
-                            </TabItem.Header>
-                        </TabItem>
-                    </TabControl>
-                </Grid>
-                <GridSplitter Grid.Row="1" HorizontalAlignment="Stretch"
-                              Background="{DynamicResource Background}"
-                              ShowsPreview="True" Grid.ColumnSpan="3" BorderBrush="{DynamicResource Border}"
-                              BorderThickness="1" />
-
-                <Grid Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3" Background="{DynamicResource Background}">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition />
-                    </Grid.ColumnDefinitions>
-                    <WPF:ConsoleControl x:Name="consoleX" Background="{x:Null}" FontWeight="Bold"
+                        <GridSplitter x:Name="ColorExample" Grid.Row="0" Grid.Column="1" HorizontalAlignment="Stretch"
+                                      Background="{DynamicResource Background}" BorderBrush="{DynamicResource Border}"
+                                      BorderThickness="1" Foreground="{DynamicResource Foreground}" />
+                        <Grid Grid.Column="2">
+                            <Grid.RowDefinitions>
+                                <RowDefinition />
+                            </Grid.RowDefinitions>
+                            <TabControl x:Name="TabControl" DataContextChanged="DcChange"
+                                        SelectionChanged="taps_SelectionChanged"
+                                        Background="{DynamicResource Background}"
                                         Foreground="{DynamicResource Foreground}"
-                                        BorderBrush="{DynamicResource Border}" BorderThickness="1"
-                                        SnapsToDevicePixels="True" />
+                                        Style="{DynamicResource TabControlStyle1}"
+                                        BorderBrush="{DynamicResource Border}" Margin="0,-30,0,0" FontSize="14"
+                                        BorderThickness="1">
+                                <TabItem x:Name="PlusTabItem" Margin="0" Foreground="{DynamicResource Foreground}"
+                                         BorderBrush="{DynamicResource Border}"
+                                         Background="{DynamicResource Background}"
+                                         TextOptions.TextFormattingMode="Display"
+                                         Style="{DynamicResource TabItemStyle1}">
+                                    <TabItem.ContextMenu>
+                                        <ContextMenu>
+                                            <MenuItem Header="_LocalExplorer" Click="MenuItem_OnClick" TabIndex="1" />
+                                            <MenuItem Header="_Test" IsCheckable="True" IsChecked="False"
+                                                      Click="MenuItem_OnClick" TabIndex="2" />
+                                        </ContextMenu>
+                                    </TabItem.ContextMenu>
+                                    <TabItem.Header>
+                                        <Label Content="➕" MouseLeftButtonDown="TabItem_MouseLeftButtonDown"
+                                               Margin="-14,-4"
+                                               Background="{DynamicResource Background}"
+                                               BorderBrush="{DynamicResource Border}"
+                                               Foreground="{DynamicResource Foreground}" FontSize="13"
+                                               BorderThickness="1" />
+                                    </TabItem.Header>
+                                </TabItem>
+                            </TabControl>
+                        </Grid>
+                        <GridSplitter Grid.Row="1" HorizontalAlignment="Stretch"
+                                      Background="{DynamicResource Background}"
+                                      ShowsPreview="True" Grid.ColumnSpan="3" BorderBrush="{DynamicResource Border}"
+                                      BorderThickness="1" />
+
+                        <Grid Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3"
+                              Background="{DynamicResource Background}">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition />
+                            </Grid.ColumnDefinitions>
+                            <WPF:ConsoleControl x:Name="consoleX" Background="{x:Null}" FontWeight="Bold"
+                                                Foreground="{DynamicResource Foreground}"
+                                                BorderBrush="{DynamicResource Border}" BorderThickness="1"
+                                                SnapsToDevicePixels="True" />
+                        </Grid>
+                        <Border Margin="0" Grid.Row="3" Background="{DynamicResource Background}" Grid.ColumnSpan="3"
+                                BorderThickness="1" BorderBrush="{DynamicResource Border}" />
+                    </Grid>
+                    <TextBlock x:Name="StatusBar" Margin="1" TextWrapping="Wrap" Text="Online . . . "
+                               Foreground="{DynamicResource Foreground}" FontSize="9.8" VerticalAlignment="Bottom"
+                               HorizontalAlignment="Left" UseLayoutRounding="True" IsEnabled="False" />
+                    <Border BorderBrush="{DynamicResource Border}" BorderThickness="1" HorizontalAlignment="Right"
+                            VerticalAlignment="Bottom" Margin="0" Height="15">
+                        <TextBlock x:Name="coppyRightTextBox" TextWrapping="Wrap" FontSize="9.5" Margin="0"
+                                   Foreground="{DynamicResource Foreground}" Text="Loading . . ." IsEnabled="False"
+                                   TextOptions.TextHintingMode="Animated" IsHitTestVisible="False"
+                                   TextAlignment="Right" />
+                    </Border>
                 </Grid>
             </Grid>
-        </Grid>
+        </Border>
     </Grid>
 </Window>

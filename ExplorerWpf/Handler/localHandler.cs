@@ -2,120 +2,169 @@
 
 using System;
 using System.Diagnostics;
+using System.Drawing;
 using System.IO;
+using Peter;
 
 #endregion
 
-namespace ExplorerBase.Handlers {
-    public class LocalHandler : IHandler {
-        public const string ROOT_FOLDER = "/";
+namespace ExplorerWpf.Handler {
+    public sealed class LocalHandler : IHandler {
+        public const     string           ROOT_FOLDER = "/";
+        private          string           _currentPath;
+        private readonly ShellContextMenu _shellContextMenu;
 
         #region Implementation of IHandler
 
-        public string CurrentPath;
+        ~LocalHandler() {
+            this._shellContextMenu.DestroyHandle();
+            this._currentPath = null;
+        }
 
         public LocalHandler(string currentPath = "") {
-            this.OnSetCurrentPath?.Invoke( "", currentPath );
-            this.CurrentPath = currentPath;
+            try {
+                this.OnSetCurrentPath?.Invoke( "", currentPath );
+                this._currentPath      = string.IsNullOrEmpty( currentPath ) ? ROOT_FOLDER : currentPath;
+                this._shellContextMenu = new ShellContextMenu();
+            } catch (Exception e) {
+                OnOnError( e );
+            }
         }
 
         /// <inheritdoc />
         public string GetCurrentPath() {
-            this.OnGetCurrentPath?.Invoke();
-            return string.IsNullOrEmpty( this.CurrentPath ) ? ROOT_FOLDER : this.CurrentPath;
+            try {
+                this.OnGetCurrentPath?.Invoke();
+                return string.IsNullOrEmpty( this._currentPath ) ? ROOT_FOLDER : this._currentPath;
+            } catch (Exception e) {
+                OnOnError( e );
+                return default;
+            }
         }
 
         /// <inheritdoc />
         public void SetCurrentPath(string path) {
-            this.OnSetCurrentPath?.Invoke( GetCurrentPath(), path );
-            this.CurrentPath = path;
+            try {
+                this.OnSetCurrentPath?.Invoke( GetCurrentPath(), path );
+                this._currentPath = path;
+            } catch (Exception e) {
+                OnOnError( e );
+            }
         }
 
         /// <inheritdoc />
         public string GetRemotePath() {
-            this.OnGetRemotePath?.Invoke();
-            return this.CurrentPath;
+            try {
+                this.OnGetRemotePath?.Invoke();
+                return this._currentPath;
+            } catch (Exception e) {
+                OnOnError( e );
+                return default;
+            }
         }
 
         /// <inheritdoc />
         public void SetRemotePath(string path) {
-            this.CurrentPath = path;
-            this.OnSetRemotePath?.Invoke();
+            try {
+                this._currentPath = path;
+                this.OnSetRemotePath?.Invoke();
+            } catch (Exception e) {
+                OnOnError( e );
+            }
         }
 
         /// <inheritdoc />
         public bool DirectoryExists(string path) {
-            this.OnDirectoryExists?.Invoke();
-            return Directory.Exists( path );
-        }
-
-        /// <inheritdoc />
-        public void CreateDirectory(string path) {
-            this.OnCreateDirectory?.Invoke();
-            Directory.CreateDirectory( path );
-        }
-
-        /// <inheritdoc />
-        public void CreateFile(string path) {
-            this.OnCreateFile?.Invoke();
-            File.Create( path ).Close();
-        }
-
-        /// <inheritdoc />
-        public void DeleteDirectory(string path) {
-            this.OnDeleteDirectory?.Invoke();
-            Directory.Delete( path );
-        }
-
-        /// <inheritdoc />
-        public void DeleteFile(string path) {
-            this.OnDeleteFile?.Invoke();
-            File.Delete( path );
+            try {
+                this.OnDirectoryExists?.Invoke();
+                return Directory.Exists( path );
+            } catch (Exception e) {
+                OnOnError( e );
+                return default;
+            }
         }
 
         /// <inheritdoc />
         public void ValidatePath() {
-            this.OnValidatePath?.Invoke();
-            if ( this.CurrentPath == "/" )
+            if ( this._currentPath == "/" )
                 return;
 
-            var Cp = this.CurrentPath;
+            var cp = this._currentPath;
 
             try {
-                this.CurrentPath = Path.GetFullPath( string.IsNullOrEmpty( this.CurrentPath ) ? ROOT_FOLDER : this.CurrentPath );
+                this.OnValidatePath?.Invoke();
+
+                this._currentPath = Path.GetFullPath( string.IsNullOrEmpty( this._currentPath ) ? ROOT_FOLDER : this._currentPath );
             } catch (Exception e) {
-                Console.WriteLine( e );
-                this.CurrentPath = Cp;
+                OnOnError( e );
+                this._currentPath = cp;
             }
         }
 
         /// <inheritdoc />
-        public void DownloadFile(string remotePath, string localPath) { this.OnDownloadFile?.Invoke(); }
+        public void DownloadFile(string remotePath, string localPath) {
+            try {
+                this.OnDownloadFile?.Invoke();
+            } catch (Exception e) {
+                OnOnError( e );
+            }
+        }
 
         /// <inheritdoc />
         public void OpenFile(string localPath) {
-            this.OnOpenFile?.Invoke();
-
             try {
+                this.OnOpenFile?.Invoke();
+
                 Process.Start( localPath );
             } catch (Exception e) {
-                Console.WriteLine( e.Message );
-
-                //MessageBox.Show( e.Message );
+                OnOnError( e );
             }
         }
 
         /// <inheritdoc />
-        public string[] ListDirectory(string dirToList) {
-            this.OnListDirectory?.Invoke();
-            return Directory.GetDirectories( dirToList );
+        public void ShowContextMenu(FileInfo[] pathFileInfos, Point locationPoint) {
+            try {
+                this._shellContextMenu.ShowContextMenu( pathFileInfos, locationPoint );
+            } catch (Exception e) {
+                OnOnError( e );
+            }
         }
 
         /// <inheritdoc />
-        public string[] ListFiles(string dirToList) {
-            this.OnListFiles?.Invoke();
-            return Directory.GetFiles( dirToList );
+        public void ShowContextMenu(DirectoryInfo[] pathDirectoryInfos, Point locationPoint) {
+            try {
+                this._shellContextMenu.ShowContextMenu( pathDirectoryInfos, locationPoint );
+            } catch (Exception e) {
+                OnOnError( e );
+            }
         }
+
+        /// <inheritdoc />
+        public string RootPath => ROOT_FOLDER;
+
+        /// <inheritdoc />
+        public FileInfo[] ListFiles(string dirToList) {
+            try {
+                return new DirectoryInfo( dirToList ).GetFiles();
+            } catch (Exception e) {
+                OnOnError( e );
+                return default;
+            }
+        }
+
+        /// <inheritdoc />
+        public event Action<Exception> OnError;
+
+        /// <inheritdoc />
+        public DirectoryInfo[] ListDirectory(string dirToList) {
+            try {
+                return new DirectoryInfo( dirToList ).GetDirectories();
+            } catch (Exception e) {
+                OnOnError( e );
+                return default;
+            }
+        }
+
 
         /// <inheritdoc />
         public event Action OnGetCurrentPath;
@@ -161,5 +210,6 @@ namespace ExplorerBase.Handlers {
 
         #endregion
 
+        private void OnOnError(Exception obj) { this.OnError?.Invoke( obj ); }
     }
 }

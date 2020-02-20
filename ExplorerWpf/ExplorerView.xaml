@@ -30,7 +30,6 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="25" />
             <RowDefinition Height="404*"/>
-            <RowDefinition Height="20"/>
         </Grid.RowDefinitions>
         <local:SortableListView x:Name="MainView" AutomationProperties.IsColumnHeader="True"
                                 MouseDoubleClick="BrowseAction" MouseDown="MainView_OnMouseDown"
@@ -59,9 +58,6 @@
         </local:SortableListView>
         <texTBox:SelectFolderTextBox Grid.Row="0" x:Name="PathBar" Margin="0,0,60,0" Background="{x:Null}" BorderBrush="{DynamicResource Border}"
                                       OpacityMask="Black" Foreground="{DynamicResource Foreground}" RenderTransformOrigin="0.5,0.5" FontSize="14" Text="/" Height="Auto" KeyDown="PathBar_OnKeyDown"/>
-        <Label Grid.Row="2" x:Name="StatusLabel"
-               Background="{x:Null}" BorderBrush="{DynamicResource Border}"
-               OpacityMask="Black" Foreground="{DynamicResource Foreground}" RenderTransformOrigin="0.5,0.5" FontSize="8" Content="Test" />
         <Button Grid.Row="0" Content="LocalDisks" HorizontalAlignment="Right" Width="60" Click="Button_Click" RenderTransformOrigin="0.5,0.5" FontSize="10" />
 
     </Grid>

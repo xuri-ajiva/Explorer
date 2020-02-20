@@ -1,31 +1,34 @@
 ﻿#region using
 
 using System;
-using System.Diagnostics;
+using System.Drawing;
+using System.IO;
 
 #endregion
 
 // ReSharper disable EventNeverSubscribedTo.Global
 
-namespace ExplorerBase.Handlers {
+namespace ExplorerWpf.Handler {
     public interface IHandler {
         string GetCurrentPath();
         void   SetCurrentPath(string path);
         void   SetRemotePath(string  path);
         string GetRemotePath();
-
         bool DirectoryExists(string path);
-        void CreateDirectory(string path);
-        void CreateFile(string      path);
-        void DeleteDirectory(string path);
-        void DeleteFile(string      path);
         void ValidatePath();
         void DownloadFile(string remotePath, string localPath);
         void OpenFile(string     localPath);
 
 
-        string[] ListDirectory(string dirToList);
-        string[] ListFiles(string     dirToList);
+        void ShowContextMenu(FileInfo[] pathFileInfos, Point locationPoint);
+        void ShowContextMenu(DirectoryInfo[] pathDirectoryInfos, Point locationPoint);
+
+        string RootPath { get; }
+
+        DirectoryInfo[] ListDirectory(string dirToList);
+        FileInfo[] ListFiles(string     dirToList);
+
+        event Action<Exception> OnError; 
 
         event Action                 OnGetCurrentPath;
         event Action<string, string> OnSetCurrentPath;

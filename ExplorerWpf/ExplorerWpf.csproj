@@ -89,6 +89,7 @@
     </Compile>
     <Compile Include="Handler\IHandler.cs" />
     <Compile Include="Handler\localHandler.cs" />
+    <Compile Include="Item.cs" />
     <Compile Include="ShellContextMenu.cs" />
     <Compile Include="TexTBox\InvertSign.cs" />
     <Compile Include="TexTBox\SelectFolderTextBox.xaml.cs">
