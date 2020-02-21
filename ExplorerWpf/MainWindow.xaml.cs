@@ -5,7 +5,7 @@
 // ReSharper disable once RedundantUsingDirective
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Globalization;
@@ -23,7 +23,6 @@ using System.Windows.Media.Imaging;
 using ConsoleControlAPI;
 using ExplorerWpf.Handler;
 using Brush = System.Windows.Media.Brush;
-using Brushes = System.Windows.Media.Brushes;
 using Color = System.Windows.Media.Color;
 using MessageBox = System.Windows.Forms.MessageBox;
 
@@ -50,77 +49,88 @@ namespace ExplorerWpf {
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture) => throw new NotImplementedException();
     }
-          
 
-    /// <summary>
-    ///     Interaktionslogik für MainWindow.xaml
-    /// </summary>
     public partial class MainWindow {
-
 
         private ExplorerView _currentExplorerView;
 
 
         private bool _first;
 
-        /*const int GripSize   = 16;
-        const int BorderSize = 7;
+        private Process _mainProcess;
+        private Thread  _outReaderThread;
+        private Thread  _inWriteThread;
 
-        ConsoleContent dc = new ConsoleContent();*/
+        private TreePathItem _root;
+
+        private const bool USE_NEW_CONSOLE_B = true;
 
         public MainWindow() {
-            //AllocConsole();
-            InitializeComponent(); 
-            this.consoleX.InitializeComponent();
-            this.consoleX.OnProcessOutput += ConsoleXOnOnProcessOutput;
-            this.consoleX.OnProcessInput  += ConsoleXOnOnProcessInput;
-            this.consoleX.StartProcess( "cmd.exe", "" );
-            this.consoleX.IsInputEnabled = true;
-            this.consoleX.Visibility     = Visibility.Collapsed;
+            InitializeComponent();
 
-            this.coppyRightTextBox.Text =Program.Version + "  "+ Program.CopyRight;
+            if ( USE_NEW_CONSOLE_B ) {
+                this.ConsoleW.Visibility = Visibility.Visible;
+                this.ConsoleX.Visibility = Visibility.Hidden;
+                this.ConsoleX.IsHitTestVisible = false;
+                this.ConsoleX.Height = 0;
+                this.ConsoleX.Width = 0;
+            }
+            else {
+                this.ConsoleW.Visibility = Visibility.Hidden;
+                this.ConsoleX.Visibility = Visibility.Visible;
+            }
+
+            this.CopyRightTextBox.Text = Program.Version + "  " + Program.CopyRight;
         }
 
         private IHandler Handler => this._currentExplorerView.Handler;
 
-        // ReSharper disable once UnusedMember.Local
-        [DllImport( "kernel32" )] private static extern bool AllocConsole();
+        private void StartConsole() {
+            var p = new Process { StartInfo = new ProcessStartInfo( "cmd.exe" ) };
+            p.StartInfo.RedirectStandardInput  = true;
+            p.StartInfo.RedirectStandardOutput = true;
+            p.StartInfo.RedirectStandardError  = true;
+            p.StartInfo.WindowStyle            = ProcessWindowStyle.Normal;
+            p.StartInfo.UseShellExecute        = false;
+            p.Start();
+            p.StandardInput.AutoFlush = true;
 
-        private void ConsoleXOnOnProcessInput(object sender, ProcessEventArgs args) { }
+            //p.BeginErrorReadLine();
+            //p.BeginOutputReadLine();
 
+            this._outReaderThread = new Thread( () => {
+                while ( !p.StandardOutput.EndOfStream ) {
+                    var line = p.StandardOutput.ReadLine();
+                    Console.WriteLine( line );
+                }
+            } );
+            this._inWriteThread = new Thread( () => {
+                while ( true ) {
+                    var line = Console.In.ReadLine();
+                    WriteCmd( line );
+                }
+            } );
+            this._outReaderThread.Start(); 
+            this._inWriteThread.Start();
+
+            this.ConsoleW.Init();
+            this._mainProcess = p;
+            this.consoleHost.MouseDown += this.ConsoleW.MouseDownFocusWindow;
+        }
 
         private void ConsoleXOnOnProcessOutput(object sender, ProcessEventArgs args) {
             if ( !this._first ) {
-
-                this.consoleX.WriteOutput( "\nConsole Support Enabled!\n", Color.FromRgb( 0, 129, 255 ) );
-                this.consoleX.Visibility = Visibility.Visible;
+                this.ConsoleX.WriteOutput( "\nConsole Support Enabled!\n", Color.FromRgb( 0, 129, 255 ) );
+                this.ConsoleX.Visibility = Visibility.Visible;
                 this._first              = true;
             }
 
-            if ( args.Code.HasValue ) this.consoleX.WriteOutput( $"[{args.Code.Value}]", Colors.DarkBlue );
+            if ( args.Code.HasValue ) this.ConsoleX.WriteOutput( $"[{args.Code.Value}]", Colors.DarkBlue );
 
             //if ( Regex.IsMatch( args.Content, @"[A-Z]:\\[^>]*>" ) ) {
-            this.consoleX.WriteOutput( "> ", Colors.Yellow );
-            this.consoleX.WriteOutput( " ",  Colors.DeepSkyBlue );
+            this.ConsoleX.WriteOutput( "> ", Colors.Yellow );
+            this.ConsoleX.WriteOutput( " ",  Colors.DeepSkyBlue );
             //}
-        }
-
-        private void CloseClick(object sender, RoutedEventArgs e) { Close(); }
-
-        private void MaxClick(object sender, RoutedEventArgs e) { this.WindowState = this.WindowState == WindowState.Normal ? WindowState.Maximized : WindowState.Normal; }
-
-        private void MinClick(object sender, RoutedEventArgs e) {
-            //if ( WindowState == WindowState.Normal ) 
-            this.WindowState = WindowState.Minimized;
-        }
-
-        private void PingClick(object sender, RoutedEventArgs e) { this.Topmost = !this.Topmost; }
-
-        private void UpClick(object sender, RoutedEventArgs e) { }
-
-        private void RootClick(object sender, RoutedEventArgs e) {
-            this.Handler.SetCurrentPath( LocalHandler.ROOT_FOLDER );
-            this._currentExplorerView.List( this.Handler.GetCurrentPath() );
         }
 
         private void MoveWindow(object sender, MouseButtonEventArgs e) {
@@ -135,85 +145,38 @@ namespace ExplorerWpf {
             }
         }
 
-        private void trvMenu_MouseDown(object sender, MouseButtonEventArgs e) { }
-
-        private void trvMenu_MouseDoubleClick(object sender, MouseButtonEventArgs e) {
-            if ( this.TreeControl.SelectedItem == null ) return;
-
-            try {
-                this.Handler.SetCurrentPath( ( (TreePathItem) this.TreeControl.SelectedItem ).Path + "\\" );
-                this._currentExplorerView.List( this.Handler.GetCurrentPath() );
-            } catch {
-                // ignored
-            }
-        }
-
-        private void trvMenu_Expanded(object sender, RoutedEventArgs e) {
-            if ( !( e.OriginalSource is TreeViewItem tvi ) ) return;
-
-            //var node = tvi;
-
-            //MessageBox.Show( string.Format( "TreeNode '{0}' was expanded", tvi.Header ) );
-            if ( !( tvi.DataContext is TreePathItem node ) ) return;
-
-            try {
-                this.Handler.SetCurrentPath( node.Path + "\\" );
-
-                foreach ( var t in this.Handler.ListDirectory( node.Path ) ) {
-                    TreePathItem n1;
-
-                    try {
-                        n1 = new TreePathItem( t );
-
-                        try {
-                            if ( this.Handler.ListDirectory( this.Handler.GetCurrentPath() ).Length > 0 )
-                                n1.Items.Add( TreePathItem.Empty );
-                        } catch (Exception exception) {
-                            var tcs = TreePathItem.Empty;
-                            tcs.Name = exception.Message;
-
-                            n1.Items.Add( tcs );
-                        }
-                    } catch {
-                        n1      = TreePathItem.Empty;
-                        n1.Name = t.Name;
-                    }
-
-                    node.Items.Add( n1 );
-                }
-            } catch {
-                // ignored
-            }
-        }
-
-        private void trvMenu_Collapsed(object sender, RoutedEventArgs e) { }
-
-
         private void MainWindow_OnLoaded(object sender, RoutedEventArgs e) {
             EnableBlur();
 
+            if ( USE_NEW_CONSOLE_B ) {
+                StartConsole();
+            }
+            else {
+                this.ConsoleX.InitializeComponent();
+                this.ConsoleX.OnProcessOutput += ConsoleXOnOnProcessOutput;
+                this.ConsoleX.StartProcess( "cmd.exe", "" );
+                this.ConsoleX.IsInputEnabled = true;
+            }
+
+            this._root      = TreePathItem.Empty;
+            this._root.Icon = SystemIcons.Shield.ToBitmap();
+            this._root.Name = "/";
+            this._root.Path = "/";
+            this.TreeControl.Items.Add( this._root );
+            this._root.Items.Add( new TreePathItem( new DirectoryInfo( Environment.GetFolderPath( Environment.SpecialFolder.System ) ) ) );
+            this._root.Items.Add( new TreePathItem( new DirectoryInfo( Environment.GetFolderPath( Environment.SpecialFolder.UserProfile ) ) ) );
+            this._root.Items.Add( new TreePathItem( new DirectoryInfo( Environment.GetFolderPath( Environment.SpecialFolder.ApplicationData ) ) ) );
+            this._root.Items.Add( new TreePathItem( new DirectoryInfo( Environment.GetFolderPath( Environment.SpecialFolder.Desktop ) ) ) );
+            this._root.Items.Add( new TreePathItem( new DirectoryInfo( Environment.GetFolderPath( Environment.SpecialFolder.MyDocuments ) ) ) );
+            this._root.Items.Add( new TreePathItem( new DirectoryInfo( Environment.GetFolderPath( Environment.SpecialFolder.MyMusic ) ) ) );
+            this._root.Items.Add( new TreePathItem( new DirectoryInfo( Environment.GetFolderPath( Environment.SpecialFolder.MyPictures ) ) ) );
+            this._root.Items.Add( new TreePathItem( new DirectoryInfo( Environment.GetFolderPath( Environment.SpecialFolder.MyVideos ) ) ) );
+
             foreach ( var driveInfo in DriveInfo.GetDrives() ) {
                 var node = new TreePathItem( driveInfo.RootDirectory );
-                node.Items.Add( TreePathItem.Empty );
                 this.TreeControl.Items.Add( node );
             }
 
-            //
-            //
-            // TODO: NetworkHandler
-            //
-            // 
-            //var i = 0;
-            //
-            //foreach ( var dir in "ABCDEFGHIJKLMNOPQRSTUVWXYZ".Select( c => c + ":" ).Where( this._handler.DirectoryExists ) ) {
-            //    TreePathItem node = new TreePathItem() { Name = dir, PathAbs = dir };
-            //    node.Items.Add( new TreePathItem { Name       = "empty" } );
-            //    this.trvMenu.Items.Add( node );
-            //    //var e = new TreeViewEventArgs( this.listBrowderView.Nodes[i] );
-            //    //treeView1_AfterExpand( null, e );
-            //    i++;
-            //}
-            //
         #if PerformanceTest
             CreateContextMenu();
             var t = new Thread( () => {
@@ -265,23 +228,35 @@ namespace ExplorerWpf {
             if ( tp.Content != null ) {
                 if ( this._currentExplorerView != null && this._currentExplorerView.Equals( tp.Content ) ) return;
 
-                if ( !( tp.Content is ExplorerView explorer ) /*TODO: Check if nesselrode (|| !explorer.InitDone)*/ ) return;
+                if ( !( tp.Content is ExplorerView explorer ) ) return;
 
                 this._currentExplorerView = explorer;
                 var p = this.Handler.GetCurrentPath();
 
-                if ( Regex.IsMatch( p, @"[A-Za-z]:\\" ) ) this.consoleX.ProcessInterface.WriteInput( p.Substring( 0, 2 ) );
+                if ( Regex.IsMatch( p, @"[A-Za-z]:\\" ) ) WriteCmd( p.Substring( 0, 2 ) );
 
                 if ( p.Length > 3 )
-                    this.consoleX.ProcessInterface.WriteInput( "cd \"" + p + "\"" );
+                    WriteCmd( "cd \"" + p + "\"" );
             }
             else {
                 if ( this.TabControl.Items.Count > 1 ) this.TabControl.SelectedIndex = this.TabControl.Items.Count - 2;
             }
         }
 
+        private void WriteCmd(string command) {
+            if ( USE_NEW_CONSOLE_B ) {
+                this._mainProcess.StandardInput.WriteLine( command );
+            }
+            else {
+                this.ConsoleX.ProcessInterface.WriteInput( command );
+            }
+
+            //TODO:
+            //Console.WriteLine( command );
+        }
+
         private void XOnSendDirectoryUpdateAsCmd(object sender, string e) {
-            if ( sender.Equals( this._currentExplorerView ) ) this.consoleX.ProcessInterface.WriteInput( e );
+            if ( sender.Equals( this._currentExplorerView ) ) WriteCmd( e );
         }
 
         private void MenuItem_OnClick(object sender, RoutedEventArgs e) {
@@ -306,47 +281,134 @@ namespace ExplorerWpf {
             }
         }
 
-
         private void TabItem_MouseLeftButtonDown(object sender, MouseButtonEventArgs e) { AddTab(); }
 
         // ReSharper disable once UnusedMember.Local
-        private void DragmoveX(object sender, MouseButtonEventArgs e) { MoveWindow( sender, e ); }
+        private void DragMoveX(object sender, MouseButtonEventArgs e) { MoveWindow( sender, e ); }
+
+        private void MainWindow_OnClosed(object sender, EventArgs e) {
+            WriteCmd( "exit" );
+            this._mainProcess?.Close();
+            this._outReaderThread?.Abort();
+            this._inWriteThread?.Abort();
+            Environment.Exit( 0 );
+        }
+
+        #region Buttons
+
+        private void CloseClick(object sender, RoutedEventArgs e) { Close(); }
+
+        private void MaxClick(object sender, RoutedEventArgs e) { this.WindowState = this.WindowState == WindowState.Normal ? WindowState.Maximized : WindowState.Normal; }
+
+        private void MinClick(object sender, RoutedEventArgs e) {
+            //if ( WindowState == WindowState.Normal ) 
+            this.WindowState = WindowState.Minimized;
+        }
+
+        private void PingClick(object sender, RoutedEventArgs e) { this.Topmost = !this.Topmost; }
+
+        private void UpClick(object sender, RoutedEventArgs e) { }
+
+        private void RootClick(object sender, RoutedEventArgs e) {
+            this.Handler.SetCurrentPath( LocalHandler.ROOT_FOLDER );
+            this._currentExplorerView.List( this.Handler.GetCurrentPath() );
+        }
+
+        #endregion
+
+        #region TreeControal
+
+        private void trvMenu_MouseDown(object sender, MouseButtonEventArgs e) { }
+
+        private void trvMenu_MouseDoubleClick(object sender, MouseButtonEventArgs e) {
+            if ( this.TreeControl.SelectedItem == null ) return;
+
+            try {
+                this.Handler.SetCurrentPath( ( (TreePathItem) this.TreeControl.SelectedItem ).Path );
+                this._currentExplorerView.List( this.Handler.GetCurrentPath() );
+            } catch {
+                // ignored
+            }
+        }
+
+        private void trvMenu_Expanded(object sender, RoutedEventArgs e) {
+            if ( !( e.OriginalSource is TreeViewItem tvi ) ) return;
+            if ( !( tvi.DataContext is TreePathItem node ) ) return;
+            if ( node.Type == Item.FileType.NONE ) return;
+
+            try {
+                node.Items.Clear();
+                this.Handler.SetCurrentPath( node.Path + "\\" );
+
+                foreach ( var t in this.Handler.ListDirectory( node.Path ) ) {
+                    TreePathItem n1;
+
+                    try {
+                        n1 = new TreePathItem( t );
+
+                        try {
+                            if ( this.Handler.ListDirectory( this.Handler.GetCurrentPath() ).Length == 0 )
+                                n1.Items.Clear(); //clear default item
+                        } catch (Exception exception) {
+                            var tcs = TreePathItem.Empty;
+                            tcs.Name = exception.Message;
+
+                            n1.Items.Add( tcs );
+                        }
+                    } catch {
+                        n1      = TreePathItem.Empty;
+                        n1.Name = t.Name;
+                    }
+
+                    node.Items.Add( n1 );
+                }
+            } catch {
+                // ignored
+            }
+        }
+
+        private void trvMenu_Collapsed(object sender, RoutedEventArgs e) { }
+
+        #endregion
 
         #region Blur
 
-        [DllImport( "user32.dll" )]
-        internal static extern int SetWindowCompositionAttribute(IntPtr hwnd, ref WindowCompositionAttributeData data);
+        [DllImport( "user32.dll" )] private static extern int SetWindowCompositionAttribute(IntPtr hWnd, ref WindowCompositionAttributeData data);
 
         [StructLayout( LayoutKind.Sequential )]
-        internal struct WindowCompositionAttributeData {
+        private struct WindowCompositionAttributeData {
             public WindowCompositionAttribute Attribute;
             public IntPtr                     Data;
             public int                        SizeOfData;
         }
 
-        internal enum WindowCompositionAttribute {
+        private enum WindowCompositionAttribute {
             // ...
             WCA_ACCENT_POLICY = 19
             // ...
         }
 
-        internal enum AccentState {
+        private enum AccentState {
+            // ReSharper disable UnusedMember.Local
+
             ACCENT_DISABLED                   = 0,
             ACCENT_ENABLE_GRADIENT            = 1,
             ACCENT_ENABLE_TRANSPARENTGRADIENT = 2,
             ACCENT_ENABLE_BLURBEHIND          = 3,
             ACCENT_INVALID_STATE              = 4
+
+            // ReSharper restore UnusedMember.Local
         }
 
         [StructLayout( LayoutKind.Sequential )]
-        internal struct AccentPolicy {
-            public AccentState AccentState;
-            public int         AccentFlags;
-            public int         GradientColor;
-            public int         AnimationId;
+        private struct AccentPolicy {
+            public           AccentState AccentState;
+            private readonly int         AccentFlags;
+            private readonly int         GradientColor;
+            private readonly int         AnimationId;
         }
 
-        internal void EnableBlur() {
+        private void EnableBlur() {
             var windowHelper = new WindowInteropHelper( this );
 
             var accent           = new AccentPolicy();
@@ -356,10 +418,7 @@ namespace ExplorerWpf {
             var accentPtr = Marshal.AllocHGlobal( accentStructSize );
             Marshal.StructureToPtr( accent, accentPtr, false );
 
-            var data = new WindowCompositionAttributeData();
-            data.Attribute  = WindowCompositionAttribute.WCA_ACCENT_POLICY;
-            data.SizeOfData = accentStructSize;
-            data.Data       = accentPtr;
+            var data = new WindowCompositionAttributeData { Attribute = WindowCompositionAttribute.WCA_ACCENT_POLICY, SizeOfData = accentStructSize, Data = accentPtr };
 
             SetWindowCompositionAttribute( windowHelper.Handle, ref data );
 
@@ -367,7 +426,6 @@ namespace ExplorerWpf {
         }
 
         #endregion
-
 
         #region TabS
 
@@ -387,14 +445,14 @@ namespace ExplorerWpf {
 
         private ExplorerView CreateExplorer(string path = LocalHandler.ROOT_FOLDER) {
             var h = new LocalHandler( path );
-            var x = new ExplorerView( new WindowInteropHelper( this ).Handle, this.consoleX );
+            var x = new ExplorerView( new WindowInteropHelper( this ).Handle );
         #if PerformanceTest
             var t = new Thread( () => {
         #endif
             x.Init( h );
 
-            x.SendDirectoryUpdateAsCmd += XOnSendDirectoryUpdateAsCmd;   
-            x.UpdateStatusBar += XOnUpdateStatusBar;
+            x.SendDirectoryUpdateAsCmd += XOnSendDirectoryUpdateAsCmd;
+            x.UpdateStatusBar          += XOnUpdateStatusBar;
         #if PerformanceTest
             } );
             t.Start();
@@ -404,9 +462,8 @@ namespace ExplorerWpf {
         }
 
         private void XOnUpdateStatusBar(object arg1, string arg2, Brush arg3) {
-            StatusBar.Foreground = arg3;
-            StatusBar.Text = arg2;
-
+            this.StatusBar.Foreground = arg3;
+            this.StatusBar.Text       = arg2;
         }
 
         private TabItem CreateExplorerTab(ExplorerView explorerView) {

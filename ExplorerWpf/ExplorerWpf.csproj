@@ -5,7 +5,7 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{966F2BCD-54BE-41BD-A1E0-E6798F5B12FE}</ProjectGuid>
-    <OutputType>WinExe</OutputType>
+    <OutputType>Exe</OutputType>
     <RootNamespace>ExplorerWpf</RootNamespace>
     <AssemblyName>ExplorerWpf</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
@@ -84,6 +84,9 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="ConsoleImplemantation.xaml.cs">
+      <DependentUpon>ConsoleImplemantation.xaml</DependentUpon>
+    </Compile>
     <Compile Include="ExplorerView.xaml.cs">
       <DependentUpon>ExplorerView.xaml</DependentUpon>
     </Compile>
@@ -95,6 +98,10 @@
     <Compile Include="TexTBox\SelectFolderTextBox.xaml.cs">
       <DependentUpon>SelectFolderTextBox.xaml</DependentUpon>
     </Compile>
+    <Page Include="ConsoleImplemantation.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Dictionary2.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

@@ -4,13 +4,12 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:local="clr-namespace:ExplorerWpf"
-    xmlns:WPF="clr-namespace:ConsoleControl.WPF;assembly=ConsoleControl.WPF"
-    xmlns:forms="clr-namespace:System.Windows.Forms;assembly=System.Windows.Forms"
+    xmlns:wpf="clr-namespace:ConsoleControl.WPF;assembly=ConsoleControl.WPF"
     x:Name="WindowX"
     x:Class="ExplorerWpf.MainWindow"
     mc:Ignorable="d"
     Title="MainWindow" Background="{x:Null}"
-    Loaded="MainWindow_OnLoaded" Width="923" Height="636.175"
+    Loaded="MainWindow_OnLoaded" Closed="MainWindow_OnClosed" Width="923" Height="636.175"
     WindowState="Normal"
     ResizeMode="CanResize" WindowStyle="None" AllowsTransparency="True" WindowStartupLocation="CenterScreen"
     Icon="8788.png">
@@ -53,7 +52,8 @@
                             Template="{DynamicResource ButtonBaseControalBar1}" />
                     <Button Content="⤴" FontSize="17" Foreground="#FF4EFF96" Click="UpClick"
                             Background="{DynamicResource Background}" HorizontalAlignment="Left"
-                            BorderBrush="{DynamicResource WindowBorder}" Margin="0.656,0,0,0" Template="{DynamicResource ButtonBaseControalBar1}" />
+                            BorderBrush="{DynamicResource WindowBorder}" Margin="0.656,0,0,0"
+                            Template="{DynamicResource ButtonBaseControalBar1}" />
                     <Button Content="🏠" FontSize="17" Foreground="#FFFFD208" Click="RootClick"
                             Background="{DynamicResource Background}" HorizontalAlignment="Left"
                             BorderBrush="{DynamicResource WindowBorder}" Margin="25.116,0,0,0"
@@ -101,10 +101,7 @@
                         <GridSplitter x:Name="ColorExample" Grid.Row="0" Grid.Column="1" HorizontalAlignment="Stretch"
                                       Background="{DynamicResource Background}" BorderBrush="{DynamicResource Border}"
                                       BorderThickness="1" Foreground="{DynamicResource Foreground}" />
-                        <Grid Grid.Column="2">
-                            <Grid.RowDefinitions>
-                                <RowDefinition />
-                            </Grid.RowDefinitions>
+                        <Grid Grid.Row="0" Grid.Column="2">
                             <TabControl x:Name="TabControl" DataContextChanged="DcChange"
                                         SelectionChanged="taps_SelectionChanged"
                                         Background="{DynamicResource Background}"
@@ -137,20 +134,24 @@
                         </Grid>
                         <GridSplitter Grid.Row="1" HorizontalAlignment="Stretch"
                                       Background="{DynamicResource Background}"
-                                      ShowsPreview="True" Grid.ColumnSpan="3" BorderBrush="{DynamicResource Border}"
+                                      ShowsPreview="True" Grid.ColumnSpan="3" Grid.Column="0"
+                                      BorderBrush="{DynamicResource Border}"
                                       BorderThickness="1" />
 
-                        <Grid Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3"
+                        <Grid x:Name="consoleHost" Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3"
                               Background="{DynamicResource Background}">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition />
-                            </Grid.ColumnDefinitions>
-                            <WPF:ConsoleControl x:Name="consoleX" Background="{x:Null}" FontWeight="Bold"
+                            <wpf:ConsoleControl x:Name="ConsoleX" Background="{x:Null}" FontWeight="Bold"
                                                 Foreground="{DynamicResource Foreground}"
                                                 BorderBrush="{DynamicResource Border}" BorderThickness="1"
                                                 SnapsToDevicePixels="True" />
+                            <local:ConsoleImplemantation x:Name="ConsoleW" Background="{x:Null}" FontWeight="Bold"
+                                                         Foreground="{DynamicResource Foreground}"
+                                                         BorderBrush="{DynamicResource Border}" BorderThickness="1"
+                                                         SnapsToDevicePixels="True" Width="Auto" Height="Auto"
+                                                         Margin="1" />
                         </Grid>
                         <Border Margin="0" Grid.Row="3" Background="{DynamicResource Background}" Grid.ColumnSpan="3"
+                                Grid.Column="0"
                                 BorderThickness="1" BorderBrush="{DynamicResource Border}" />
                     </Grid>
                     <TextBlock x:Name="StatusBar" Margin="1" TextWrapping="Wrap" Text="Online . . . "
@@ -158,7 +159,7 @@
                                HorizontalAlignment="Left" UseLayoutRounding="True" IsEnabled="False" />
                     <Border BorderBrush="{DynamicResource Border}" BorderThickness="1" HorizontalAlignment="Right"
                             VerticalAlignment="Bottom" Margin="0" Height="15">
-                        <TextBlock x:Name="coppyRightTextBox" TextWrapping="Wrap" FontSize="9.5" Margin="0"
+                        <TextBlock x:Name="CopyRightTextBox" TextWrapping="Wrap" FontSize="9.5" Margin="0"
                                    Foreground="{DynamicResource Foreground}" Text="Loading . . ." IsEnabled="False"
                                    TextOptions.TextHintingMode="Animated" IsHitTestVisible="False"
                                    TextAlignment="Right" />
@@ -166,5 +167,6 @@
                 </Grid>
             </Grid>
         </Border>
+        <Grid HorizontalAlignment="Left" Height="558" VerticalAlignment="Top" Width="439" Margin="237,202,0,-126"/>
     </Grid>
 </Window>

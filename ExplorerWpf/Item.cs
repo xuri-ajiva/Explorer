@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
@@ -61,22 +62,28 @@ namespace ExplorerWpf {
 
     public class TreePathItem : Item {
 
-        public TreePathItem(DirectoryInfo d) : base( d ) { Init(); }
-        public TreePathItem(FileInfo      f) : base( f ) { Init(); }
+        public TreePathItem(DirectoryInfo d) : base( d ) { Init(false); }
+        public TreePathItem(FileInfo      f) : base( f ) { Init(false); }
 
         // ReSharper disable once RedundantBaseConstructorCall
-        protected TreePathItem() : base() { }
+        protected TreePathItem() : base() { Init(true); }
 
         public new static TreePathItem Empty => new TreePathItem();
 
-        public  ObservableCollection<TreePathItem> Items  { get; set; }
-        private void                               Init() { this.Items = new ObservableCollection<TreePathItem>(); }
+        public ObservableCollection<TreePathItem> Items { get; set; }
+
+        private void Init(bool noSubNode) {
+            this.Items = new ObservableCollection<TreePathItem>();
+            if ( !noSubNode )
+                this.Items.Add( Empty );
+        }
     }
 
     public class Item {
         public enum FileType {
             DIRECTORY, FILE, NONE
         }
+
         public Item(FileInfo f) {
             this.Path           = f.FullName.Replace( "\\\\", "\\" );
             this.Name           = f.Name;
@@ -163,19 +170,17 @@ namespace ExplorerWpf {
                 Console.WriteLine( e.Message );
             }
         }
-        
+
         #region IDisposable
 
-        ~Item() {
-            this.Icon?.Dispose();
-        }
+        ~Item() { this.Icon?.Dispose(); }
 
         #endregion
 
 
         // ReSharper disable UnusedAutoPropertyAccessor.Global
 
-        public Bitmap   Icon           { get; private set; }
+        public Bitmap   Icon           { get; set; }
         public string   Name           { get; set; }
         public string   Path           { get; set; }
         public string   Size           { get; set; }
