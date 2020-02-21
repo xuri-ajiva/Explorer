@@ -69,11 +69,11 @@ namespace ExplorerWpf {
             InitializeComponent();
 
             if ( USE_NEW_CONSOLE_B ) {
-                this.ConsoleW.Visibility = Visibility.Visible;
-                this.ConsoleX.Visibility = Visibility.Hidden;
+                this.ConsoleW.Visibility       = Visibility.Visible;
+                this.ConsoleX.Visibility       = Visibility.Hidden;
                 this.ConsoleX.IsHitTestVisible = false;
-                this.ConsoleX.Height = 0;
-                this.ConsoleX.Width = 0;
+                this.ConsoleX.Height           = 0;
+                this.ConsoleX.Width            = 0;
             }
             else {
                 this.ConsoleW.Visibility = Visibility.Hidden;
@@ -101,20 +101,44 @@ namespace ExplorerWpf {
             this._outReaderThread = new Thread( () => {
                 while ( !p.StandardOutput.EndOfStream ) {
                     var line = p.StandardOutput.ReadLine();
+
+                    try {
+                        var parches = Regex.Match( line, "[A-Za-z]:\\\\[^§]+>" );
+                        if ( parches.Success ) {
+                            Handler.SetCurrentPath( parches.Value.Substring( 0, parches.Length-1 ) );
+                            this._currentExplorerView.List( Handler.GetCurrentPath() );
+                        }
+                    }catch{}
+
                     Console.WriteLine( line );
                 }
             } );
             this._inWriteThread = new Thread( () => {
                 while ( true ) {
                     var line = Console.In.ReadLine();
+
+                    if ( line.Length > 4 ) {
+                        if ( Regex.IsMatch( line.Substring( 0, 3 ), "[cC][dD]" ) ) {
+                            try {
+                                var pat = Handler.GetCurrentPath()  + line.Substring( 3 );
+
+                                if ( Directory.Exists( pat ) ) {      
+                                    Console.WriteLine( pat );
+                                    Handler.SetCurrentPath( pat );
+                                    this._currentExplorerView.List( Handler.GetCurrentPath() );
+                                }
+                            }catch{}
+                        }
+                    }
+
                     WriteCmd( line );
                 }
             } );
-            this._outReaderThread.Start(); 
+            this._outReaderThread.Start();
             this._inWriteThread.Start();
 
             this.ConsoleW.Init();
-            this._mainProcess = p;
+            this._mainProcess          =  p;
             this.consoleHost.MouseDown += this.ConsoleW.MouseDownFocusWindow;
         }
 
