@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace TestBuilds
 {
@@ -11,9 +12,14 @@ namespace TestBuilds
         static string test = @"C:\Daten\..\AMD\Daten\root\tste\dir\..\..\";
         static void Main(string[] args)
         {
-            Console.WriteLine(test);
-            Console.WriteLine(MakePath(test));
-            Console.Read();
+            Application.SetCompatibleTextRenderingDefault( true );
+            Application.EnableVisualStyles();
+            Application.Run(new Form1());
+
+
+            //Console.WriteLine(test);
+            //Console.WriteLine(MakePath(test));
+            //Console.Read();
         }
         private static string MakePath(string Dir)
         {
