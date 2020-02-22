@@ -79,10 +79,15 @@ namespace ExplorerWpf {
 
             try {
                 string d;
-                d = arg2 == SettingsHandler.ROOT_FOLDER ? new DirectoryInfo( arg2 ).Name : "Root";
+                d = arg2 == SettingsHandler.ROOT_FOLDER ? "Root" : new DirectoryInfo( arg2 ).Name;
                 d = string.IsNullOrEmpty( d ) ? "Explorer" : d;
                 Debug.WriteLine( d );
-                this.myTab.Dispatcher.Invoke( () => { this.myTab.Header = d; } );
+                this.myTab.Dispatcher.Invoke( () => {
+                    if ( this.myTab.Header is Label l )
+                        l.Content = d;
+                    else
+                        this.myTab.Header = d;
+                } );
             } catch (Exception e) {
                 this.Handler.ThrowError( e );
             }

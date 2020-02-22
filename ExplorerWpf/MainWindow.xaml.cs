@@ -20,7 +20,6 @@ using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using ConsoleControlAPI;
 using ExplorerWpf.Handler;
 using Brush = System.Windows.Media.Brush;
 using Color = System.Windows.Media.Color;
@@ -45,7 +44,8 @@ namespace ExplorerWpf {
                     return bitmap;
                 }
             } catch (Exception e) {
-                SettingsHandler.OnError( e );
+                Debug.WriteLine( e );
+                //SettingsHandler.OnError( e );
             }
 
             return value;
@@ -71,19 +71,7 @@ namespace ExplorerWpf {
 
         public MainWindow() {
             InitializeComponent();
-
-            if ( SettingsHandler.UseNewConsoleB ) {
-                this.ConsoleW.Visibility       = Visibility.Visible;
-                this.ConsoleX.Visibility       = Visibility.Hidden;
-                this.ConsoleX.IsHitTestVisible = false;
-                this.ConsoleX.Height           = 0;
-                this.ConsoleX.Width            = 0;
-            }
-            else {
-                this.ConsoleW.Visibility = Visibility.Hidden;
-                this.ConsoleX.Visibility = Visibility.Visible;
-            }
-
+            
             this.CopyRightTextBox.Text = Program.Version + "  " + Program.CopyRight;
         }
 
@@ -163,22 +151,7 @@ namespace ExplorerWpf {
         }
 
         private void HandlerOnOnError(Exception obj) { SettingsHandler.OnError( obj ); }
-
-        private void ConsoleXOnOnProcessOutput(object sender, ProcessEventArgs args) {
-            if ( !this._first ) {
-                this.ConsoleX.WriteOutput( "\nConsole Support Enabled!\n", Color.FromRgb( 0, 129, 255 ) );
-                this.ConsoleX.Visibility = Visibility.Visible;
-                this._first              = true;
-            }
-
-            if ( args.Code.HasValue ) this.ConsoleX.WriteOutput( $"[{args.Code.Value}]", Colors.DarkBlue );
-
-            //if ( Regex.IsMatch( args.Content, @"[A-Z]:\\[^>]*>" ) ) {
-            this.ConsoleX.WriteOutput( "> ", Colors.Yellow );
-            this.ConsoleX.WriteOutput( " ",  Colors.DeepSkyBlue );
-            //}
-        }
-
+                                                                                            
         private void MoveWindow(object sender, MouseButtonEventArgs e) {
             if ( e.LeftButton != MouseButtonState.Pressed ) return;
 
@@ -194,15 +167,8 @@ namespace ExplorerWpf {
         private void MainWindow_OnLoaded(object sender, RoutedEventArgs e) {
             EnableBlur();
 
-            if ( SettingsHandler.UseNewConsoleB ) {
                 StartConsole();
-            }
-            else {
-                this.ConsoleX.InitializeComponent();
-                this.ConsoleX.OnProcessOutput += ConsoleXOnOnProcessOutput;
-                this.ConsoleX.StartProcess( "cmd.exe", "" );
-                this.ConsoleX.IsInputEnabled = true;
-            }
+
 
             this._root      = TreePathItem.Empty;
             this._root.Icon = DefaultIcons.ShieldIcon;
@@ -297,16 +263,12 @@ namespace ExplorerWpf {
         }
 
         private void WriteCmd(string command, bool echo = true) {
-            if ( SettingsHandler.UseNewConsoleB ) {
                 if ( this._mainProcess == null || this._mainProcess.HasExited ) return;
 
                 this._mainProcess.StandardInput.WriteLine( command );
                 if ( echo && SettingsHandler.ConsoleAutoChangePath )
                     this._mainProcess.StandardInput.WriteLine( "echo %cd%" );
-            }
-            else {
-                this.ConsoleX.ProcessInterface.WriteInput( command );
-            }
+
         }
 
         private void XOnSendDirectoryUpdateAsCmd(object sender, string e, bool cd) {

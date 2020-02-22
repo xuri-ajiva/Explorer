@@ -4,7 +4,6 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:local="clr-namespace:ExplorerWpf"
-    xmlns:wpf="clr-namespace:ConsoleControl.WPF;assembly=ConsoleControl.WPF"
     x:Name="WindowX"
     x:Class="ExplorerWpf.MainWindow"
     mc:Ignorable="d"
@@ -139,10 +138,6 @@
                                       BorderThickness="1" />
 
                         <Grid x:Name="consoleHost" Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3">
-                            <wpf:ConsoleControl x:Name="ConsoleX" Background="{DynamicResource Background}" FontWeight="Bold"
-                                                Foreground="{DynamicResource Foreground}"
-                                                BorderBrush="{DynamicResource Border}" BorderThickness="1"
-                                                SnapsToDevicePixels="True" />
                             <local:ConsoleImplemantation x:Name="ConsoleW" Background="{DynamicResource BackgroundLight}" FontWeight="Bold"
                                                          Foreground="{DynamicResource Foreground}"
                                                          BorderBrush="{DynamicResource Border}" BorderThickness="1"

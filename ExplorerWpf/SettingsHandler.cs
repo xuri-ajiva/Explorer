@@ -8,18 +8,18 @@ using System.Runtime.InteropServices;
 
 namespace ExplorerWpf {
     public static class SettingsHandler {
-        public static string       InitCall = Init();
-        public static List<string> ExtenstionWithSpecialIcons;
+        public const string ROOT_FOLDER = "/";
 
         public static bool ConsoleAutoChangeDisc = true;
         public static bool ConsoleAutoChangePath = true;
-        public static bool UseNewConsoleB        = true;
-        public static bool ConsolePresent        = false;
+        public static bool ConsolePresent        = true;
 
-
-        public const string ROOT_FOLDER = "/";
 
         public static string ParentDirectoryPrefix = "⤴ ";
+
+        public static List<string> ExtenstionWithSpecialIcons;
+
+        public static string InitCall = Init();
 
         private static string Init() {
             ExtenstionWithSpecialIcons = new List<string>();
