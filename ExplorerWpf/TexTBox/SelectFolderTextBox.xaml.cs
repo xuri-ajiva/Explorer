@@ -195,7 +195,7 @@ namespace ExplorerWpf.TexTBox {
                     }
                 }
             } catch (Exception ex) {
-                Console.WriteLine( ex );
+                SettingsHandler.OnError( ex );
             }
 
             return new string[0];

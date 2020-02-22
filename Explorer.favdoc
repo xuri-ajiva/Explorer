@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<Favorites xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <folders />
+  <favorites>
+    <Favorite>
+      <name>ExplorerWpf.se</name>
+      <path>ExplorerWpf</path>
+      <viewKind>Solution Explorer</viewKind>
+    </Favorite>
+  </favorites>
+</Favorites>

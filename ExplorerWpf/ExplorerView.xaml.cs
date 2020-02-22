@@ -1,6 +1,5 @@
 ﻿#region using
 
-using ExplorerWpf.Handler;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -15,26 +14,29 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
+using ExplorerWpf.Handler;
 using Point = System.Drawing.Point;
 
 #endregion
 
 namespace ExplorerWpf {
-    public partial class ExplorerView : UserControl, IDisposable {
-        private readonly DriveInfo[]                       _devInfo;
-        private readonly IntPtr                            _hWnd;
+    public sealed partial class ExplorerView : UserControl, IDisposable {
+        private readonly DriveInfo[] _devInfo;
+        private readonly IntPtr      _hWnd;
 
         private readonly List<Item> _list = new List<Item>();
 
+        private readonly bool _useListOnly = false;
+
         private bool _lastError;
 
-        private readonly bool           _useListOnly = false;
-        private          GridViewColumn freePB;
+        private GridViewColumn freePB;
+        private TabItem        myTab;
 
         public ExplorerView(IntPtr hWnd) {
             this._devInfo = DriveInfo.GetDrives();
 
-            this._hWnd           = hWnd;
+            this._hWnd = hWnd;
             InitializeComponent();
             if ( this._useListOnly ) this.DataContext          = this._list;
             if ( this._useListOnly ) this.MainView.DataContext = this._list;
@@ -57,8 +59,9 @@ namespace ExplorerWpf {
         #endregion
 
         public void Init(IHandler handler) {
-            this.Handler         =  handler;
-            this.Handler.OnError += HandlerOnOnError;
+            this.Handler             =  handler;
+            handler.OnError          += HandlerOnOnError;
+            handler.OnSetCurrentPath += HandlerOnOnSetCurrentPath;
 
             this.freePB = ( (GridView) this.MainView.View ).Columns[4];
 
@@ -71,13 +74,26 @@ namespace ExplorerWpf {
                 }
         }
 
+        private void HandlerOnOnSetCurrentPath(string arg1, string arg2) {
+            if ( this.myTab == null ) return;
+
+            try {
+                string d;
+                d = arg2 == SettingsHandler.ROOT_FOLDER ? new DirectoryInfo( arg2 ).Name : "Root";
+                d = string.IsNullOrEmpty( d ) ? "Explorer" : d;
+                Debug.WriteLine( d );
+                this.myTab.Dispatcher.Invoke( () => { this.myTab.Header = d; } );
+            } catch (Exception e) {
+                this.Handler.ThrowError( e );
+            }
+        }
+
         private void HandlerOnOnError(Exception obj) {
             new Thread( () => { MessageBox.Show( "module: " + obj.Source + "\n\n" + obj.Message + "\n" + obj.InnerException + "\n" + obj.HelpLink, "Error from FileHandler: " + obj.HResult, MessageBoxButton.OK, MessageBoxImage.Error, MessageBoxResult.OK, MessageBoxOptions.ServiceNotification ); } ).Start();
             this._lastError = true;
             Set_Status( obj.ToString(), false );
-            Console.WriteLine( obj );
         }
-        
+
         private void BrowseAction(object sender, MouseButtonEventArgs e) {
             if ( e.RightButton == MouseButtonState.Pressed ) return;
 
@@ -86,27 +102,29 @@ namespace ExplorerWpf {
             var item = this.MainView.SelectedItems[0] as Item;
 
             if ( item != null && item.Type == Item.FileType.DIRECTORY ) {
-                if ( this.Handler.GetCurrentPath() == "/" )
+                if ( this.Handler.GetCurrentPath() == SettingsHandler.ROOT_FOLDER )
                     if ( item.Path.Length >= 2 )
-                        OnDirectoryUpdate( item.Path.Substring( 0, 2 ) );
+                        if ( SettingsHandler.ConsoleAutoChangeDisc )
+                            OnDirectoryUpdate( item.Path.Substring( 0, 2 ) );
 
-                this.Handler.SetCurrentPath( item.Path + ( item.Path == "/" ? "" : @"\" ) );
+                this.Handler.SetCurrentPath( item.Path + ( item.Path == SettingsHandler.ROOT_FOLDER ? "" : @"\" ) );
 
                 List( this.Handler.GetCurrentPath() );
             }
             else {
                 try {
-                    if ( item != null ) OnDirectoryUpdate(  "\"" + item.Path + "\"" );
+                    if ( item != null )
+                        if ( SettingsHandler.ConsoleAutoChangePath )
+                            OnDirectoryUpdate( "\"" + item.Path + "\"", false );
                 } catch (Exception ex) {
                     MessageBox.Show( ex.Message );
                 }
             }
         }
 
-        public event EventHandler<string>          SendDirectoryUpdateAsCmd;
+        public event Action<object, string, bool>  SendDirectoryUpdateAsCmd;
         public event Action<object, string, Brush> UpdateStatusBar;
 
-        protected virtual void OnDirectoryUpdate(string e) { this.SendDirectoryUpdateAsCmd?.Invoke( this, e ); }
 
         private void Button_Click(object sender, RoutedEventArgs e) { ListDiscs(); }
 
@@ -134,6 +152,17 @@ namespace ExplorerWpf {
             if ( sender is SortableListView sl ) sl.GridViewColumnHeaderClicked( e.OriginalSource as GridViewColumnHeader );
         }
 
+        private void PathBar_OnKeyDown(object sender, KeyEventArgs e) {
+            if ( e.Key != Key.Enter ) return;
+
+            this.Handler.SetCurrentPath( ( sender as TextBox )?.Text );
+            List( this.Handler.GetCurrentPath() );
+        }
+
+        [DebuggerStepThrough] private void OnUpdateStatusBar(string e, Brush c) { this.UpdateStatusBar?.Invoke( this, e, c ); }
+
+        [DebuggerStepThrough] private void OnDirectoryUpdate(string e, bool cd = true) { this.SendDirectoryUpdateAsCmd?.Invoke( this, e, cd ); }
+
         #region ListHandeling
 
         private void AddList(Item item) {
@@ -159,15 +188,6 @@ namespace ExplorerWpf {
 
         #endregion
 
-        private void PathBar_OnKeyDown(object sender, KeyEventArgs e) {
-            if ( e.Key != Key.Enter ) return;
-
-            this.Handler.SetCurrentPath( ( sender as TextBox )?.Text );
-            List( this.Handler.GetCurrentPath() );
-        }
-
-        protected virtual void OnUpdateStatusBar(string e, Brush c) { this.UpdateStatusBar?.Invoke( this, e, c ); }
-
     #if DEBUG
         ~ExplorerView() { Console.WriteLine( "Destroyed Items: " + DestroyCount++ ); }
 
@@ -179,6 +199,8 @@ namespace ExplorerWpf {
         #region List
 
         private void List_Dir(string dirToList) {
+            if ( this._lastError ) return;
+
             var subDirectory = this.Handler.ListDirectory( dirToList );
 
             foreach ( var directoryInfo in subDirectory ) {
@@ -189,6 +211,8 @@ namespace ExplorerWpf {
         }
 
         private void List_Files(string dirToList) {
+            if ( this._lastError ) return;
+
             var subFiles = this.Handler.ListFiles( dirToList );
 
             foreach ( var fileInfo in subFiles ) {
@@ -199,29 +223,37 @@ namespace ExplorerWpf {
 
 
         private void Add_Parent_Dir() {
-            var pt = this.Handler.GetCurrentPath();
-            var p  = pt;
+            var pt   = DirUp( this.Handler.GetCurrentPath() );
+            var item = pt == SettingsHandler.ROOT_FOLDER ? Item.Root : new Item( new DirectoryInfo( pt ) );
 
-            if ( pt.Length <= 3 && Regex.IsMatch( pt, @"[A-Za-z]:" ) ) {
-                pt = "/";
-            }
-            else {
-                this.Handler.SetCurrentPath( this.Handler.GetCurrentPath() + "\\..\\" );
-                this.Handler.ValidatePath();
-                pt = this.Handler.GetCurrentPath();
-            }
-
-            var item = pt == "/" ? Item.Root : new Item( new DirectoryInfo( pt ) );
-
-            item.Name = "!(..)!: " + item.Name;
+            item.Name = SettingsHandler.ParentDirectoryPrefix + item.Name;
 
             AddList( item );
-            this.Handler.SetCurrentPath( p );
         }
 
+        public string DirUp(string path) {
+            if ( path == SettingsHandler.ROOT_FOLDER )
+                return SettingsHandler.ROOT_FOLDER;
 
-        public void List(string dirToScan, bool noCd = false) {
-            if ( dirToScan == "/" ) {
+            var p = this.Handler.GetCurrentPath();
+
+            if ( path.Length <= 3 && Regex.IsMatch( path, @"[A-Za-z]:" ) ) {
+                path = SettingsHandler.ROOT_FOLDER;
+            }
+            else {
+                this.Handler.SetCurrentPath( path + "\\..\\" );
+                this.Handler.ValidatePath();
+                path = this.Handler.GetCurrentPath();
+            }
+
+            this.Handler.SetCurrentPath( p );
+            return path;
+        }
+
+        public void ListP(string dirToScan, bool noCd = false) { this.Dispatcher?.Invoke( () => { List( dirToScan, noCd ); } ); }
+
+        private void List(string dirToScan, bool noCd = false) {
+            if ( dirToScan == SettingsHandler.ROOT_FOLDER ) {
                 ListDiscs();
                 return;
             }
@@ -245,14 +277,14 @@ namespace ExplorerWpf {
                 List_Files( dirToScan );
 
                 if ( this._lastError ) {
-                    Console.WriteLine( "Error On List" );
                     this._lastError = false;
                     return;
                 }
 
                 var p = this.Handler.GetCurrentPath();
                 if ( !noCd && p.Length > 3 )
-                    OnDirectoryUpdate( "cd \"" + p + "\"" );
+                    if ( SettingsHandler.ConsoleAutoChangePath )
+                        OnDirectoryUpdate( "cd \"" + p + "\"" );
 
                 Set_Status( "Listed: " + p, true );
                 SetPath( p );
@@ -280,15 +312,17 @@ namespace ExplorerWpf {
             try {
                 ClearList();
             } catch (Exception e) {
-                Console.WriteLine( e );
+                this.Handler.ThrowError( e );
             }
 
             foreach ( var driveInfo in this._devInfo ) {
-                //Item item = new Item( string.IsNullOrEmpty( driveInfo.VolumeLabel ) ? "Local Disk(Not Named)" : driveInfo.VolumeLabel, driveInfo.Name, GetLenght( driveInfo.AvailableFreeSpace ) + " / " + GetLenght( driveInfo.TotalSize ), FileType.Directory );
+                //Item item = new Item( string.IsNullOrEmpty( driveInfo.VolumeLabel ) ? "Local Disk(Not Named)" : driveInfo.VolumeLabel, driveInfo.Name, GetLength( driveInfo.AvailableFreeSpace ) + " / " + GetLength( driveInfo.TotalSize ), FileType.Directory );
 
-                var i = new Item( new DirectoryInfo( driveInfo.Name ) );
-                i.Size   = $"{Item.GetLenght( driveInfo.AvailableFreeSpace )} free of {Item.GetLenght( driveInfo.TotalSize )} ~ {(double) ( driveInfo.TotalSize - driveInfo.AvailableFreeSpace ) / driveInfo.TotalSize * 100D:00.000} %";
-                i.SizePb = (double) ( driveInfo.TotalSize - driveInfo.AvailableFreeSpace ) / driveInfo.TotalSize * 100D;
+                var i = new Item( new DirectoryInfo( driveInfo.Name ) ) {
+                    Name   = string.IsNullOrEmpty( driveInfo.VolumeLabel ) ? "Local Disk (NotNamed)" : driveInfo.VolumeLabel,
+                    Size   = $"{Item.GetLength( driveInfo.AvailableFreeSpace )} free of {Item.GetLength( driveInfo.TotalSize )} ~ {(double) ( driveInfo.TotalSize - driveInfo.AvailableFreeSpace ) / driveInfo.TotalSize * 100D:00.000} %",
+                    SizePb = (double) ( driveInfo.TotalSize - driveInfo.AvailableFreeSpace ) / driveInfo.TotalSize * 100D
+                };
 
                 AddList( i );
 
@@ -297,7 +331,7 @@ namespace ExplorerWpf {
                 this._pb = true;
             }
 
-            SetPath( "/" );
+            SetPath( SettingsHandler.ROOT_FOLDER );
 
             this.Handler.SetCurrentPath( "" );
         }
@@ -310,6 +344,8 @@ namespace ExplorerWpf {
 
         #endregion
 
+
+        public void setTapItem(TabItem tabItem) { this.myTab = tabItem; }
     }
 
     public class SortableListView : ListView {
@@ -323,12 +359,8 @@ namespace ExplorerWpf {
 
             if ( clickedHeader.Role == GridViewColumnHeaderRole.Padding ) return;
 
-            if ( clickedHeader != this._lastHeaderClicked ) {
-                direction = ListSortDirection.Ascending;
-            }
-            else {
-                direction = this._lastDirection == ListSortDirection.Ascending ? ListSortDirection.Descending : ListSortDirection.Ascending;
-            }
+            if ( clickedHeader != this._lastHeaderClicked ) direction = ListSortDirection.Ascending;
+            else direction                                            = this._lastDirection == ListSortDirection.Ascending ? ListSortDirection.Descending : ListSortDirection.Ascending;
 
             if ( clickedHeader.Column.DisplayMemberBinding == null ) return;
 

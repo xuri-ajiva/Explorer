@@ -24,7 +24,7 @@
 
                     <LinearGradientBrush x:Key="Background" EndPoint="0.5,1" StartPoint="0.5,0">
             <GradientStop Color="#F3181B28" />
-            <GradientStop Color="#E5181B28" Offset="1" />
+            <GradientStop Color="#DD181B28" Offset="1" />
         </LinearGradientBrush>
         <LinearGradientBrush x:Key="Foreground" EndPoint="0,0" StartPoint="1,0">
             <GradientStop Color="#FFAE54F0" Offset="1" />
@@ -32,7 +32,11 @@
         </LinearGradientBrush>
         <SolidColorBrush x:Key="Border" Color="#FF111421" />
         <SolidColorBrush x:Key="Aczent" Color="#E6141721" />
-            <SolidColorBrush x:Key="WindowBorder" Color="#A4090E1D" />
+            <SolidColorBrush x:Key="WindowBorder" Color="#7F090E1D" />
+            <LinearGradientBrush x:Key="BackgroundLight" EndPoint="0.5,1" StartPoint="0.5,0">
+                <GradientStop Color="#F3181B28" />
+                <GradientStop Color="#CC181B28" Offset="1" />
+            </LinearGradientBrush>
 
         </ResourceDictionary>
     </Application.Resources>

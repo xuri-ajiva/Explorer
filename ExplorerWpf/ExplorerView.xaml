@@ -50,15 +50,15 @@
                     <GridViewColumn Header="Exists" Width="Auto" DisplayMemberBinding="{Binding Exists}" />
                     <GridViewColumn Header="IsReadOnly" Width="Auto" DisplayMemberBinding="{Binding IsReadOnly}" />
                     <GridViewColumn Header="CreationTime" Width="Auto" DisplayMemberBinding="{Binding CreationTime}" />
-                    <GridViewColumn Header="LastAccessTime" Width="Auto"
-                                    DisplayMemberBinding="{Binding LastAccessTime}" />
+                    <GridViewColumn Header="LastAccessTime" Width="Auto" DisplayMemberBinding="{Binding LastAccessTime}" />
                     <GridViewColumn Header="LastWriteTime" Width="Auto" DisplayMemberBinding="{Binding LastWriteTime}" />
                 </GridView>
             </local:SortableListView.View>
         </local:SortableListView>
         <texTBox:SelectFolderTextBox Grid.Row="0" x:Name="PathBar" Margin="0,0,60,0" Background="{x:Null}" BorderBrush="{DynamicResource Border}"
-                                      OpacityMask="Black" Foreground="{DynamicResource Foreground}" RenderTransformOrigin="0.5,0.5" FontSize="14" Text="/" Height="Auto" KeyDown="PathBar_OnKeyDown"/>
-        <Button Grid.Row="0" Content="LocalDisks" HorizontalAlignment="Right" Width="60" Click="Button_Click" RenderTransformOrigin="0.5,0.5" FontSize="10" />
+                                      OpacityMask="Black" Foreground="{DynamicResource Foreground}" RenderTransformOrigin="0.5,0.5" FontSize="14" Text="/" Height="Auto" KeyDown="PathBar_OnKeyDown">
+        </texTBox:SelectFolderTextBox>
+        <Button Grid.Row="0" Content="LocalDisks" HorizontalAlignment="Right" Width="60" Click="Button_Click" RenderTransformOrigin="0.5,0.5" FontSize="10" Background="{DynamicResource Background}" BorderBrush="{DynamicResource Border}" Foreground="{DynamicResource Foreground}" />
 
     </Grid>
 </UserControl>

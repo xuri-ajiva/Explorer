@@ -32,16 +32,20 @@ using MessageBox = System.Windows.Forms.MessageBox;
 namespace ExplorerWpf {
     public class ImageConverter : IValueConverter {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture) {
-            if ( value is Bitmap bitmap1 ) {
-                var stream = new MemoryStream();
-                bitmap1.Save( stream, ImageFormat.Png );
+            try {
+                if ( value is Bitmap bitmap1 ) {
+                    var stream = new MemoryStream();
+                    bitmap1.Save( stream, ImageFormat.Png );
 
-                var bitmap = new BitmapImage();
-                bitmap.BeginInit();
-                bitmap.StreamSource = stream;
-                bitmap.EndInit();
+                    var bitmap = new BitmapImage();
+                    bitmap.BeginInit();
+                    bitmap.StreamSource = stream;
+                    bitmap.EndInit();
 
-                return bitmap;
+                    return bitmap;
+                }
+            } catch (Exception e) {
+                SettingsHandler.OnError( e );
             }
 
             return value;
@@ -51,24 +55,24 @@ namespace ExplorerWpf {
     }
 
     public partial class MainWindow {
-
         private ExplorerView _currentExplorerView;
 
 
-        private bool _first;
+        private bool   _first;
+        private Thread _inWriteThread;
 
         private Process _mainProcess;
         private Thread  _outReaderThread;
-        private Thread  _inWriteThread;
+        private Thread  _errReaderThread;
 
         private TreePathItem _root;
 
-        private const bool USE_NEW_CONSOLE_B = true;
+        private bool SkipOneWrite;
 
         public MainWindow() {
             InitializeComponent();
 
-            if ( USE_NEW_CONSOLE_B ) {
+            if ( SettingsHandler.UseNewConsoleB ) {
                 this.ConsoleW.Visibility       = Visibility.Visible;
                 this.ConsoleX.Visibility       = Visibility.Hidden;
                 this.ConsoleX.IsHitTestVisible = false;
@@ -90,50 +94,66 @@ namespace ExplorerWpf {
             p.StartInfo.RedirectStandardInput  = true;
             p.StartInfo.RedirectStandardOutput = true;
             p.StartInfo.RedirectStandardError  = true;
-            p.StartInfo.WindowStyle            = ProcessWindowStyle.Normal;
+            p.StartInfo.CreateNoWindow         = true;
             p.StartInfo.UseShellExecute        = false;
             p.Start();
             p.StandardInput.AutoFlush = true;
 
             //p.BeginErrorReadLine();
             //p.BeginOutputReadLine();
-
+            this._errReaderThread = new Thread( () => {
+                while ( !p.StandardError.EndOfStream ) {
+                    var line = p.StandardError.ReadLine();
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine( line );
+                    Console.ResetColor();
+                }
+            } );
             this._outReaderThread = new Thread( () => {
+                p.StandardInput.WriteLine( "@echo off" );
+                p.StandardInput.WriteLine( "cd /" );
+                Console.Clear();
+                Console.ForegroundColor = ConsoleColor.Magenta;
+                Console.WriteLine( "Console Support Online" );
+                Console.ResetColor();
+
                 while ( !p.StandardOutput.EndOfStream ) {
                     var line = p.StandardOutput.ReadLine();
 
                     try {
-                        var parches = Regex.Match( line, "[A-Za-z]:\\\\[^§]+>" );
-                        if ( parches.Success ) {
-                            Handler.SetCurrentPath( parches.Value.Substring( 0, parches.Length-1 ) );
-                            this._currentExplorerView.List( Handler.GetCurrentPath() );
-                        }
-                    }catch{}
+                        var parches = Regex.Match( line, "[^\"]?[A-Za-z]:\\\\[^\"]*" );
 
-                    Console.WriteLine( line );
+                        if ( parches.Success ) {
+                            var path = parches.Value.Substring( 0, parches.Length );
+
+                            if ( Directory.Exists( path ) )
+                                if ( this.Handler.GetCurrentPath() != path ) {
+                                    //Console.ForegroundColor = ConsoleColor.DarkGreen;
+                                    //Console.WriteLine( path );
+                                    //Console.ResetColor();
+                                    this.Handler.SetCurrentPath( path );
+                                    this._currentExplorerView.ListP( this.Handler.GetCurrentPath(), true );
+                                }
+                        }
+                    } catch { }
+
+                    if ( !this.SkipOneWrite ) {
+                        if ( line != "echo %cd%" )
+                            Console.WriteLine( line );
+                    }
+                    else {
+                        this.SkipOneWrite = false;
+                    }
                 }
             } );
             this._inWriteThread = new Thread( () => {
                 while ( true ) {
                     var line = Console.In.ReadLine();
-
-                    if ( line.Length > 4 ) {
-                        if ( Regex.IsMatch( line.Substring( 0, 3 ), "[cC][dD]" ) ) {
-                            try {
-                                var pat = Handler.GetCurrentPath()  + line.Substring( 3 );
-
-                                if ( Directory.Exists( pat ) ) {      
-                                    Console.WriteLine( pat );
-                                    Handler.SetCurrentPath( pat );
-                                    this._currentExplorerView.List( Handler.GetCurrentPath() );
-                                }
-                            }catch{}
-                        }
-                    }
-
+                    this.SkipOneWrite = true;
                     WriteCmd( line );
                 }
             } );
+            this._errReaderThread.Start();
             this._outReaderThread.Start();
             this._inWriteThread.Start();
 
@@ -141,6 +161,8 @@ namespace ExplorerWpf {
             this._mainProcess          =  p;
             this.consoleHost.MouseDown += this.ConsoleW.MouseDownFocusWindow;
         }
+
+        private void HandlerOnOnError(Exception obj) { SettingsHandler.OnError( obj ); }
 
         private void ConsoleXOnOnProcessOutput(object sender, ProcessEventArgs args) {
             if ( !this._first ) {
@@ -165,14 +187,14 @@ namespace ExplorerWpf {
             try {
                 DragMove();
             } catch (Exception exception) {
-                Console.WriteLine( exception );
+                HandlerOnOnError( exception );
             }
         }
 
         private void MainWindow_OnLoaded(object sender, RoutedEventArgs e) {
             EnableBlur();
 
-            if ( USE_NEW_CONSOLE_B ) {
+            if ( SettingsHandler.UseNewConsoleB ) {
                 StartConsole();
             }
             else {
@@ -183,9 +205,9 @@ namespace ExplorerWpf {
             }
 
             this._root      = TreePathItem.Empty;
-            this._root.Icon = SystemIcons.Shield.ToBitmap();
-            this._root.Name = "/";
-            this._root.Path = "/";
+            this._root.Icon = DefaultIcons.ShieldIcon;
+            this._root.Name = SettingsHandler.ROOT_FOLDER;
+            this._root.Path = SettingsHandler.ROOT_FOLDER;
             this.TreeControl.Items.Add( this._root );
             this._root.Items.Add( new TreePathItem( new DirectoryInfo( Environment.GetFolderPath( Environment.SpecialFolder.System ) ) ) );
             this._root.Items.Add( new TreePathItem( new DirectoryInfo( Environment.GetFolderPath( Environment.SpecialFolder.UserProfile ) ) ) );
@@ -247,6 +269,10 @@ namespace ExplorerWpf {
         private void DcChange(object sender, DependencyPropertyChangedEventArgs e) { Console.WriteLine( e ); }
 
         private void taps_SelectionChanged(object sender, SelectionChangedEventArgs e) {
+            if ( this.TabControl.Items.Count == 1 ) {
+                return;
+            }
+
             if ( !( this.TabControl.SelectedItem is TabItem tp ) ) return;
 
             if ( tp.Content != null ) {
@@ -257,30 +283,35 @@ namespace ExplorerWpf {
                 this._currentExplorerView = explorer;
                 var p = this.Handler.GetCurrentPath();
 
-                if ( Regex.IsMatch( p, @"[A-Za-z]:\\" ) ) WriteCmd( p.Substring( 0, 2 ) );
+                if ( Regex.IsMatch( p, @"[A-Za-z]:\\" ) )
+                    if ( SettingsHandler.ConsoleAutoChangeDisc )
+                        WriteCmd( p.Substring( 0, 2 ) );
 
                 if ( p.Length > 3 )
-                    WriteCmd( "cd \"" + p + "\"" );
+                    if ( SettingsHandler.ConsoleAutoChangePath )
+                        WriteCmd( "cd \"" + p + "\"" );
             }
             else {
                 if ( this.TabControl.Items.Count > 1 ) this.TabControl.SelectedIndex = this.TabControl.Items.Count - 2;
             }
         }
 
-        private void WriteCmd(string command) {
-            if ( USE_NEW_CONSOLE_B ) {
+        private void WriteCmd(string command, bool echo = true) {
+            if ( SettingsHandler.UseNewConsoleB ) {
+                if ( this._mainProcess == null || this._mainProcess.HasExited ) return;
+
                 this._mainProcess.StandardInput.WriteLine( command );
+                if ( echo && SettingsHandler.ConsoleAutoChangePath )
+                    this._mainProcess.StandardInput.WriteLine( "echo %cd%" );
             }
             else {
                 this.ConsoleX.ProcessInterface.WriteInput( command );
             }
-
-            //TODO:
-            //Console.WriteLine( command );
         }
 
-        private void XOnSendDirectoryUpdateAsCmd(object sender, string e) {
-            if ( sender.Equals( this._currentExplorerView ) ) WriteCmd( e );
+        private void XOnSendDirectoryUpdateAsCmd(object sender, string e, bool cd) {
+            if ( sender.Equals( this._currentExplorerView ) )
+                WriteCmd( e, cd );
         }
 
         private void MenuItem_OnClick(object sender, RoutedEventArgs e) {
@@ -331,11 +362,15 @@ namespace ExplorerWpf {
 
         private void PingClick(object sender, RoutedEventArgs e) { this.Topmost = !this.Topmost; }
 
-        private void UpClick(object sender, RoutedEventArgs e) { }
+        private void UpClick(object sender, RoutedEventArgs e) {
+            var dir = this._currentExplorerView.DirUp( this.Handler.GetCurrentPath() );
+            this.Handler.SetCurrentPath( dir );
+            this._currentExplorerView.ListP( dir );
+        }
 
         private void RootClick(object sender, RoutedEventArgs e) {
-            this.Handler.SetCurrentPath( LocalHandler.ROOT_FOLDER );
-            this._currentExplorerView.List( this.Handler.GetCurrentPath() );
+            this.Handler.SetCurrentPath( SettingsHandler.ROOT_FOLDER );
+            this._currentExplorerView.ListP( this.Handler.GetCurrentPath() );
         }
 
         #endregion
@@ -349,7 +384,7 @@ namespace ExplorerWpf {
 
             try {
                 this.Handler.SetCurrentPath( ( (TreePathItem) this.TreeControl.SelectedItem ).Path );
-                this._currentExplorerView.List( this.Handler.GetCurrentPath() );
+                this._currentExplorerView.ListP( this.Handler.GetCurrentPath() );
             } catch {
                 // ignored
             }
@@ -467,8 +502,10 @@ namespace ExplorerWpf {
             }
         }
 
-        private ExplorerView CreateExplorer(string path = LocalHandler.ROOT_FOLDER) {
+        private ExplorerView CreateExplorer(string path = SettingsHandler.ROOT_FOLDER) {
             var h = new LocalHandler( path );
+            h.OnError += HandlerOnOnError;
+
             var x = new ExplorerView( new WindowInteropHelper( this ).Handle );
         #if PerformanceTest
             var t = new Thread( () => {
@@ -503,6 +540,7 @@ namespace ExplorerWpf {
                 //BorderBrush = this.ColorExample.BorderBrush,
                 Style = this.PlusTabItem.Style
             };
+            explorerView.setTapItem( newTabItem );
             return newTabItem;
         }
 
@@ -516,7 +554,7 @@ namespace ExplorerWpf {
             taps_SelectionChanged( this, null );
         }
 
-        private void AddTab(string path = LocalHandler.ROOT_FOLDER) {
+        private void AddTab(string path = SettingsHandler.ROOT_FOLDER) {
             if ( this._contextMenu == null ) CreateContextMenu();
 
             AddTabToTabControl( CreateExplorerTab( CreateExplorer( path ) ) );
@@ -529,6 +567,7 @@ namespace ExplorerWpf {
             tp.Content = null;
             this.TabControl.Items.Remove( tp );
             GC.Collect( 0, GCCollectionMode.Forced );
+            if ( this.TabControl.Items.Count == 1 ) this.CloseClick( null, null );
         }
 
         #endregion

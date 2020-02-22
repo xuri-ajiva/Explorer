@@ -138,17 +138,16 @@
                                       BorderBrush="{DynamicResource Border}"
                                       BorderThickness="1" />
 
-                        <Grid x:Name="consoleHost" Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3"
-                              Background="{DynamicResource Background}">
-                            <wpf:ConsoleControl x:Name="ConsoleX" Background="{x:Null}" FontWeight="Bold"
+                        <Grid x:Name="consoleHost" Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3">
+                            <wpf:ConsoleControl x:Name="ConsoleX" Background="{DynamicResource Background}" FontWeight="Bold"
                                                 Foreground="{DynamicResource Foreground}"
                                                 BorderBrush="{DynamicResource Border}" BorderThickness="1"
                                                 SnapsToDevicePixels="True" />
-                            <local:ConsoleImplemantation x:Name="ConsoleW" Background="{x:Null}" FontWeight="Bold"
+                            <local:ConsoleImplemantation x:Name="ConsoleW" Background="{DynamicResource BackgroundLight}" FontWeight="Bold"
                                                          Foreground="{DynamicResource Foreground}"
                                                          BorderBrush="{DynamicResource Border}" BorderThickness="1"
                                                          SnapsToDevicePixels="True" Width="Auto" Height="Auto"
-                                                         Margin="1" />
+                                                         Margin="0" />
                         </Grid>
                         <Border Margin="0" Grid.Row="3" Background="{DynamicResource Background}" Grid.ColumnSpan="3"
                                 Grid.Column="0"

@@ -46,5 +46,7 @@ namespace ExplorerWpf.Handler {
 
         event Action OnListDirectory;
         event Action OnListFiles;
+
+        void ThrowError(Exception exception);
     }
 }

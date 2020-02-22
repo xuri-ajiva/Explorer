@@ -10,7 +10,6 @@ using Peter;
 
 namespace ExplorerWpf.Handler {
     public sealed class LocalHandler : IHandler {
-        public const     string           ROOT_FOLDER = "/";
         private          string           _currentPath;
         private readonly ShellContextMenu _shellContextMenu;
 
@@ -24,7 +23,7 @@ namespace ExplorerWpf.Handler {
         public LocalHandler(string currentPath = "") {
             try {
                 this.OnSetCurrentPath?.Invoke( "", currentPath );
-                this._currentPath      = string.IsNullOrEmpty( currentPath ) ? ROOT_FOLDER : currentPath;
+                this._currentPath      = string.IsNullOrEmpty( currentPath ) ? SettingsHandler.ROOT_FOLDER : currentPath;
                 this._shellContextMenu = new ShellContextMenu();
             } catch (Exception e) {
                 OnOnError( e );
@@ -35,7 +34,7 @@ namespace ExplorerWpf.Handler {
         public string GetCurrentPath() {
             try {
                 this.OnGetCurrentPath?.Invoke();
-                return string.IsNullOrEmpty( this._currentPath ) ? ROOT_FOLDER : this._currentPath;
+                return string.IsNullOrEmpty( this._currentPath ) ? SettingsHandler.ROOT_FOLDER : this._currentPath;
             } catch (Exception e) {
                 OnOnError( e );
                 return default;
@@ -86,7 +85,7 @@ namespace ExplorerWpf.Handler {
 
         /// <inheritdoc />
         public void ValidatePath() {
-            if ( this._currentPath == "/" )
+            if ( this._currentPath == SettingsHandler.ROOT_FOLDER )
                 return;
 
             var cp = this._currentPath;
@@ -94,7 +93,7 @@ namespace ExplorerWpf.Handler {
             try {
                 this.OnValidatePath?.Invoke();
 
-                this._currentPath = Path.GetFullPath( string.IsNullOrEmpty( this._currentPath ) ? ROOT_FOLDER : this._currentPath );
+                this._currentPath = Path.GetFullPath( string.IsNullOrEmpty( this._currentPath ) ? SettingsHandler.ROOT_FOLDER : this._currentPath );
             } catch (Exception e) {
                 OnOnError( e );
                 this._currentPath = cp;
@@ -140,7 +139,7 @@ namespace ExplorerWpf.Handler {
         }
 
         /// <inheritdoc />
-        public string RootPath => ROOT_FOLDER;
+        public string RootPath => SettingsHandler.ROOT_FOLDER;
 
         /// <inheritdoc />
         public FileInfo[] ListFiles(string dirToList) {
@@ -207,6 +206,9 @@ namespace ExplorerWpf.Handler {
 
         /// <inheritdoc />
         public event Action OnListFiles;
+
+        /// <inheritdoc />
+        public void ThrowError(Exception obj) { OnOnError( obj ); }
 
         #endregion
 
