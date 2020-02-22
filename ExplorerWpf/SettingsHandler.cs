@@ -12,7 +12,7 @@ namespace ExplorerWpf {
 
         public static bool ConsoleAutoChangeDisc = true;
         public static bool ConsoleAutoChangePath = true;
-        public static bool ConsolePresent        = true;
+        public static bool ConsolePresent        = false;
 
 
         public static string ParentDirectoryPrefix = "⤴ ";
