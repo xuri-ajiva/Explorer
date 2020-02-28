@@ -1,5 +1,6 @@
 ﻿#region using
 
+using ExplorerWpf.Handler;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -14,13 +15,12 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
-using ExplorerWpf.Handler;
 using Point = System.Drawing.Point;
 
 #endregion
 
 namespace ExplorerWpf {
-    public sealed partial class ExplorerView : UserControl, IDisposable {
+    public sealed partial class ExplorerView : UserControl, IPage {
         private readonly DriveInfo[] _devInfo;
         private readonly IntPtr      _hWnd;
 
@@ -31,7 +31,6 @@ namespace ExplorerWpf {
         private bool _lastError;
 
         private GridViewColumn freePB;
-        private TabItem        myTab;
 
         public ExplorerView(IntPtr hWnd) {
             this._devInfo = DriveInfo.GetDrives();
@@ -63,30 +62,35 @@ namespace ExplorerWpf {
             handler.OnError          += HandlerOnOnError;
             handler.OnSetCurrentPath += HandlerOnOnSetCurrentPath;
 
-            this.freePB = ( (GridView) this.MainView.View ).Columns[4];
-
-            if ( this.Dispatcher != null ) this.Dispatcher.Invoke( () => { List( this.Handler.GetCurrentPath() ); } );
+            if ( this.Dispatcher != null )
+                this.Dispatcher.Invoke( () => {
+                    this.freePB = ( (GridView) this.MainView.View ).Columns[4];
+                    List( this.Handler.GetCurrentPath() );
+                } );
             else
                 try {
+                    this.freePB = ( (GridView) this.MainView.View ).Columns[4];
                     List( this.Handler.GetCurrentPath() );
-                } catch {
+                } catch (Exception e) {
+                    SettingsHandler.OnError( e );
                     // ignored
                 }
         }
 
         private void HandlerOnOnSetCurrentPath(string arg1, string arg2) {
-            if ( this.myTab == null ) return;
+            if ( this.ParentTapItem == null ) return;
+
+            if ( string.IsNullOrEmpty( arg2 ) ) return;
 
             try {
                 string d;
                 d = arg2 == SettingsHandler.ROOT_FOLDER ? "Root" : new DirectoryInfo( arg2 ).Name;
                 d = string.IsNullOrEmpty( d ) ? "Explorer" : d;
-                Debug.WriteLine( d );
-                this.myTab.Dispatcher.Invoke( () => {
-                    if ( this.myTab.Header is Label l )
-                        l.Content = d;
-                    else
-                        this.myTab.Header = d;
+                //Debug.WriteLine( d );
+                this.ParentTapItem.Dispatcher.Invoke( () => {
+                    if ( this.ParentTapItem.Header is Label l )
+                        l.Content                  = d;
+                    else this.ParentTapItem.Header = d;
                 } );
             } catch (Exception e) {
                 this.Handler.ThrowError( e );
@@ -129,7 +133,6 @@ namespace ExplorerWpf {
 
         public event Action<object, string, bool>  SendDirectoryUpdateAsCmd;
         public event Action<object, string, Brush> UpdateStatusBar;
-
 
         private void Button_Click(object sender, RoutedEventArgs e) { ListDiscs(); }
 
@@ -226,17 +229,19 @@ namespace ExplorerWpf {
             }
         }
 
-
         private void Add_Parent_Dir() {
-            var pt   = DirUp( this.Handler.GetCurrentPath() );
-            var item = pt == SettingsHandler.ROOT_FOLDER ? Item.Root : new Item( new DirectoryInfo( pt ) );
+            this._currentDirUp = DirUp( this.Handler.GetCurrentPath() );
+            var item = this._currentDirUp == SettingsHandler.ROOT_FOLDER ? Item.Root : new Item( new DirectoryInfo( this._currentDirUp ) );
 
             item.Name = SettingsHandler.ParentDirectoryPrefix + item.Name;
 
             AddList( item );
         }
 
-        public string DirUp(string path) {
+        private string _currentDirUp = "/";
+        public  string GetDirUp() { return this._currentDirUp; }
+
+        private string DirUp(string path) {
             if ( path == SettingsHandler.ROOT_FOLDER )
                 return SettingsHandler.ROOT_FOLDER;
 
@@ -349,8 +354,36 @@ namespace ExplorerWpf {
 
         #endregion
 
+        #region Implementation of IPage
 
-        public void setTapItem(TabItem tabItem) { this.myTab = tabItem; }
+        /// <inheritdoc />
+        public bool ShowTreeView => true;
+
+        /// <inheritdoc />
+        public bool HideConsole => false;
+
+        /// <inheritdoc />
+        public bool HideNavigation => false;
+
+        /// <inheritdoc />
+        public TabItem ParentTapItem { get; set; }
+
+        /// <inheritdoc />
+        public void OnReFocus() {
+            var p = this.Handler.GetCurrentPath();
+
+            if ( Regex.IsMatch( p, @"[A-Za-z]:\\" ) )
+                if ( SettingsHandler.ConsoleAutoChangeDisc )
+                    OnDirectoryUpdate( p.Substring( 0, 2 ), false );
+
+            if ( p.Length <= 3 ) return;
+
+            if ( SettingsHandler.ConsoleAutoChangePath )
+                OnDirectoryUpdate( "cd \"" + p + "\"", true );
+        }
+
+        #endregion
+
     }
 
     public class SortableListView : ListView {

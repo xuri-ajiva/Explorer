@@ -6,6 +6,7 @@
     xmlns:system="clr-namespace:System;assembly=mscorlib"
     x:Class="ExplorerWpf.App"
     StartupUri="MainWindow.xaml">
+
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
@@ -17,21 +18,21 @@
             <Color x:Key="DynamicResourceControlLightBrushKey">#00000000</Color>
             <Brush x:Key="DynamicResourceControlBrushKey">#00000000</Brush>
             <Color x:Key="DynamicResourceControlDarkBrushKey">#00000000</Color>
-                                                                                
+
             <Brush x:Key="DisabledBackgroundBrush">#474B8F</Brush>
             <Brush x:Key="DisabledForegroundBrush">#474B8F</Brush>
 
 
-                    <LinearGradientBrush x:Key="Background" EndPoint="0.5,1" StartPoint="0.5,0">
-            <GradientStop Color="#F3181B28" />
-            <GradientStop Color="#DD181B28" Offset="1" />
-        </LinearGradientBrush>
-        <LinearGradientBrush x:Key="Foreground" EndPoint="0,0" StartPoint="1,0">
-            <GradientStop Color="#FFAE54F0" Offset="1" />
-            <GradientStop Color="#FF5A32E6" />
-        </LinearGradientBrush>
-        <SolidColorBrush x:Key="Border" Color="#FF111421" />
-        <SolidColorBrush x:Key="Aczent" Color="#E6141721" />
+            <LinearGradientBrush x:Key="Background" EndPoint="0.5,1" StartPoint="0.5,0">
+                <GradientStop Color="#F3181B28" />
+                <GradientStop Color="#DD181B28" Offset="1" />
+            </LinearGradientBrush>
+            <LinearGradientBrush x:Key="Foreground" EndPoint="0,0" StartPoint="1,0">
+                <GradientStop Color="#FFAE54F0" Offset="1" />
+                <GradientStop Color="#FF5A32E6" />
+            </LinearGradientBrush>
+            <SolidColorBrush x:Key="Border" Color="#FF111421" />
+            <SolidColorBrush x:Key="Aczent" Color="#E6141721" />
             <SolidColorBrush x:Key="WindowBorder" Color="#7F090E1D" />
             <LinearGradientBrush x:Key="BackgroundLight" EndPoint="0.5,1" StartPoint="0.5,0">
                 <GradientStop Color="#F3181B28" />

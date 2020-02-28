@@ -11,7 +11,7 @@ namespace ExplorerWpf.TexTBox {
     /// Interaction logic for SelectFolderTextBox.xaml
     /// </summary>
     public partial class SelectFolderTextBox : TextBox {
-        public Popup   Popup => this.Template.FindName( "PART_Popup", this ) as Popup;
+        public Popup   Popup    => this.Template.FindName( "PART_Popup",    this ) as Popup;
         public ListBox ItemList => this.Template.FindName( "PART_ItemList", this ) as ListBox;
 
         public Grid Root => this.Template.FindName( "root", this ) as Grid;
@@ -39,23 +39,23 @@ namespace ExplorerWpf.TexTBox {
         public override void OnApplyTemplate() {
             base.OnApplyTemplate();
             this._loaded                   =  true;
-            this.KeyDown              += new KeyEventHandler( AutoCompleteTextBox_KeyDown );
-            this.PreviewKeyDown       += new KeyEventHandler( AutoCompleteTextBox_PreviewKeyDown );
-            this.ItemList.PreviewMouseDown += new MouseButtonEventHandler( ItemList_PreviewMouseDown );
-            this.ItemList.KeyDown          += new KeyEventHandler( ItemList_KeyDown );
+            this.KeyDown                   += AutoCompleteTextBox_KeyDown;
+            this.PreviewKeyDown            += AutoCompleteTextBox_PreviewKeyDown;
+            this.ItemList.PreviewMouseDown += ItemList_PreviewMouseDown;
+            this.ItemList.KeyDown          += ItemList_KeyDown;
             //TempVisual.MouseDown += new MouseButtonEventHandler(TempVisual_MouseDown);
             //09-04-09 Based on SilverLaw's approach 
-            this.Popup.CustomPopupPlacementCallback += new CustomPopupPlacementCallback( Repositioning );
+            this.Popup.CustomPopupPlacementCallback += Repositioning;
 
-            Window parentWindow = getParentWindow();
+            var parentWindow = getParentWindow();
 
-            if ( parentWindow != null ) {
-                parentWindow.Deactivated += delegate {
-                    this.prevState    = this.Popup.IsOpen;
-                    this.Popup.IsOpen = false;
-                };
-                parentWindow.Activated += delegate { this.Popup.IsOpen = this.prevState; };
-            }
+            if ( parentWindow == null ) return;
+
+            parentWindow.Deactivated += delegate {
+                this.prevState    = this.Popup.IsOpen;
+                this.Popup.IsOpen = false;
+            };
+            parentWindow.Activated += delegate { this.Popup.IsOpen = this.prevState; };
         }
 
         private Window getParentWindow() {
@@ -144,16 +144,14 @@ namespace ExplorerWpf.TexTBox {
         }
 
         void ItemList_PreviewMouseDown(object sender, MouseButtonEventArgs e) {
-            if ( e.LeftButton == MouseButtonState.Pressed ) {
-                TextBlock tb = e.OriginalSource as TextBlock;
+            if ( e.LeftButton != MouseButtonState.Pressed ) return;
 
-                if ( tb != null ) {
-                    this.Text = tb.Text;
-                    updateSource();
-                    this.Popup.IsOpen = false;
-                    e.Handled    = true;
-                }
-            }
+            if ( !( e.OriginalSource is TextBlock tb ) ) return;
+
+            this.Text = tb.Text;
+            updateSource();
+            this.Popup.IsOpen = false;
+            e.Handled         = true;
         }
 
         protected override void OnTextChanged(TextChangedEventArgs e) {

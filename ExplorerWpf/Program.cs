@@ -14,7 +14,7 @@ namespace ExplorerWpf {
         [STAThread]
         public static void Main(string[] args) {
             if ( !SettingsHandler.ConsolePresent )
-                SettingsHandler.DllImport.ShowWindowAsync( SettingsHandler.DllImport.GetConsoleWindow(), SettingsHandler.DllImport.SW_HIDE );
+                SettingsHandler.NativeMethods.ShowWindowAsync( SettingsHandler.NativeMethods.GetConsoleWindow(), SettingsHandler.NativeMethods.SW_HIDE );
             var app = new App();
             app.InitializeComponent();
             app.Run();

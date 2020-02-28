@@ -1,17 +1,16 @@
-﻿<Window
-    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:local="clr-namespace:ExplorerWpf"
-    x:Name="WindowX"
-    x:Class="ExplorerWpf.MainWindow"
-    mc:Ignorable="d"
-    Title="MainWindow" Background="{x:Null}"
-    Loaded="MainWindow_OnLoaded" Closed="MainWindow_OnClosed" Width="923" Height="636.175"
-    WindowState="Normal"
-    ResizeMode="CanResize" WindowStyle="None" AllowsTransparency="True" WindowStartupLocation="CenterScreen"
-    Icon="8788.png">
+﻿<Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:ExplorerWpf"
+        x:Name="WindowX"
+        x:Class="ExplorerWpf.MainWindow"
+        mc:Ignorable="d"
+        Title="MainWindow" Background="{x:Null}"
+        Loaded="MainWindow_OnLoaded" Closed="MainWindow_OnClosed" Width="923" Height="636.175"
+        WindowState="Normal"
+        ResizeMode="CanResize" WindowStyle="None" AllowsTransparency="True" WindowStartupLocation="CenterScreen"
+        Icon="8788.png">
     <Window.Resources>
         <local:ImageConverter x:Key="Conv" />
     </Window.Resources>
@@ -22,52 +21,63 @@
     </WindowChrome.WindowChrome>
 
     <Grid Margin="1">
-
         <Border BorderThickness="4,3,4,4" CornerRadius="1" BorderBrush="{DynamicResource WindowBorder}">
-
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="30" />
                     <RowDefinition Height="697*" />
                 </Grid.RowDefinitions>
                 <Grid MouseDown="MoveWindow" Background="{DynamicResource WindowBorder}">
-                    <Button Content="❌" FontSize="17" Foreground="#FFF37F97" Click="CloseClick"
-                            Background="{DynamicResource Background}" HorizontalAlignment="Right"
-                            BorderBrush="{DynamicResource WindowBorder}"
-                            Template="{DynamicResource ButtonBaseControalBar1}" />
-                    <Button Margin="0,0,35.343,-0.002" Content="🔳" FontSize="17" Foreground="#FF79E6F3"
-                            Click="MaxClick"
-                            HorizontalAlignment="Right" Background="{DynamicResource Background}"
-                            BorderBrush="{DynamicResource WindowBorder}"
-                            Template="{DynamicResource ButtonBaseControalBar1}" />
-                    <Button Margin="0,0.002,70.686,-0.003" Content="🔻" FontSize="17" Foreground="#FFD853FF"
-                            Click="MinClick"
-                            HorizontalAlignment="Right" Background="{DynamicResource Background}"
-                            BorderBrush="{DynamicResource WindowBorder}"
-                            Template="{DynamicResource ButtonBaseControalBar1}" />
-                    <Button Margin="0,0,106.029,0" Content="📌" FontSize="17" Foreground="#FFDCFF00" Click="PingClick"
-                            HorizontalAlignment="Right" Background="{DynamicResource Background}"
-                            BorderBrush="{DynamicResource WindowBorder}"
-                            Template="{DynamicResource ButtonBaseControalBar1}" />
-                    <Button Content="⤴" FontSize="17" Foreground="#FF4EFF96" Click="UpClick"
-                            Background="{DynamicResource Background}" HorizontalAlignment="Left"
-                            BorderBrush="{DynamicResource WindowBorder}" Margin="0.656,0,0,0"
-                            Template="{DynamicResource ButtonBaseControalBar1}" />
-                    <Button Content="🏠" FontSize="17" Foreground="#FFFFD208" Click="RootClick"
-                            Background="{DynamicResource Background}" HorizontalAlignment="Left"
-                            BorderBrush="{DynamicResource WindowBorder}" Margin="25.116,0,0,0"
-                            Template="{DynamicResource ButtonBaseControalBar1}" />
+                    <Grid x:Name="NaviGation" Margin="0" HorizontalAlignment="Left" UseLayoutRounding="True">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="auto" />
+                            <ColumnDefinition Width="auto" />
+                        </Grid.ColumnDefinitions>
+                        <Button Content="⤴" FontSize="17" Foreground="#FF4EFF96" Click="UpClick"
+                                Background="{DynamicResource Background}"
+                                BorderBrush="{DynamicResource WindowBorder}"
+                                Template="{DynamicResource ButtonBaseControalBar1}" Grid.Column="0" />
+                        <Button Content="🏠" FontSize="17" Foreground="#FFFFD208" Click="RootClick"
+                                Background="{DynamicResource Background}"
+                                BorderBrush="{DynamicResource WindowBorder}"
+                                Template="{DynamicResource ButtonBaseControalBar1}" Grid.Column="1" />
+                    </Grid>
+                    <Grid x:Name="WindowControalBar" Margin="0" RenderTransformOrigin="0.5,0.5"
+                          HorizontalAlignment="Right" UseLayoutRounding="True" FlowDirection="RightToLeft">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="auto" />
+                            <ColumnDefinition Width="auto" />
+                            <ColumnDefinition Width="auto" />
+                            <ColumnDefinition Width="auto" />
+                        </Grid.ColumnDefinitions>
+                        <Button Content="❌" FontSize="17" Foreground="#FFF37F97" Click="CloseClick"
+                                Background="{DynamicResource Background}"
+                                BorderBrush="{DynamicResource WindowBorder}"
+                                Template="{DynamicResource ButtonBaseControalBar1}" Grid.Column="0" />
+                        <Button Content="🔳" FontSize="17" Foreground="#FF79E6F3"
+                                Click="MaxClick" Background="{DynamicResource Background}"
+                                BorderBrush="{DynamicResource WindowBorder}"
+                                Template="{DynamicResource ButtonBaseControalBar1}" Grid.Column="1" />
+                        <Button Content="🔻" FontSize="17" Foreground="#FFD853FF"
+                                Click="MinClick" Background="{DynamicResource Background}"
+                                BorderBrush="{DynamicResource WindowBorder}"
+                                Template="{DynamicResource ButtonBaseControalBar1}" Grid.Column="2" />
+                        <Button Content="📌" FontSize="17" Foreground="#FFDCFF00"
+                                Click="PingClick" Background="{DynamicResource Background}"
+                                BorderBrush="{DynamicResource WindowBorder}"
+                                Template="{DynamicResource ButtonBaseControalBar1}" Grid.Column="3" />
+                    </Grid>
                 </Grid>
                 <Grid Grid.Row="1">
                     <Grid>
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="105*" />
-                            <ColumnDefinition Width="6" />
+                            <ColumnDefinition Name="TreeColumn" Width="120" />
+                            <ColumnDefinition Name="VerticalSplitter1" Width="6" />
                             <ColumnDefinition Width="688*" />
                         </Grid.ColumnDefinitions>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="502*" />
-                            <RowDefinition Height="6" />
+                            <RowDefinition Name="HorizontalSplitter1" Height="6" />
                             <RowDefinition Height="219*" />
                             <RowDefinition Height="15" />
                         </Grid.RowDefinitions>
@@ -116,8 +126,9 @@
                                     <TabItem.ContextMenu>
                                         <ContextMenu>
                                             <MenuItem Header="_LocalExplorer" Click="MenuItem_OnClick" TabIndex="1" />
+                                            <MenuItem Header="_SettingsView" Click="MenuItem_OnClick" TabIndex="2" />
                                             <MenuItem Header="_Test" IsCheckable="True" IsChecked="False"
-                                                      Click="MenuItem_OnClick" TabIndex="2" />
+                                                      Click="MenuItem_OnClick" TabIndex="99" />
                                         </ContextMenu>
                                     </TabItem.ContextMenu>
                                     <TabItem.Header>
@@ -138,7 +149,9 @@
                                       BorderThickness="1" />
 
                         <Grid x:Name="consoleHost" Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3">
-                            <local:ConsoleImplemantation x:Name="ConsoleW" Background="{DynamicResource BackgroundLight}" FontWeight="Bold"
+                            <local:ConsoleImplementation x:Name="ConsoleW"
+                                                         Background="{DynamicResource BackgroundLight}"
+                                                         FontWeight="Bold"
                                                          Foreground="{DynamicResource Foreground}"
                                                          BorderBrush="{DynamicResource Border}" BorderThickness="1"
                                                          SnapsToDevicePixels="True" Width="Auto" Height="Auto"
@@ -161,6 +174,6 @@
                 </Grid>
             </Grid>
         </Border>
-        <Grid HorizontalAlignment="Left" Height="558" VerticalAlignment="Top" Width="439" Margin="237,202,0,-126"/>
+        <Grid HorizontalAlignment="Left" Height="558" VerticalAlignment="Top" Width="439" Margin="237,202,0,-126" />
     </Grid>
 </Window>

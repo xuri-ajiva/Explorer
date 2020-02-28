@@ -14,21 +14,21 @@ namespace ExplorerWpf.Handler {
         void   SetCurrentPath(string path);
         void   SetRemotePath(string  path);
         string GetRemotePath();
-        bool DirectoryExists(string path);
-        void ValidatePath();
-        void DownloadFile(string remotePath, string localPath);
-        void OpenFile(string     localPath);
+        bool   DirectoryExists(string path);
+        void   ValidatePath();
+        void   DownloadFile(string remotePath, string localPath);
+        void   OpenFile(string     localPath);
 
 
-        void ShowContextMenu(FileInfo[] pathFileInfos, Point locationPoint);
+        void ShowContextMenu(FileInfo[]      pathFileInfos,      Point locationPoint);
         void ShowContextMenu(DirectoryInfo[] pathDirectoryInfos, Point locationPoint);
 
         string RootPath { get; }
 
         DirectoryInfo[] ListDirectory(string dirToList);
-        FileInfo[] ListFiles(string     dirToList);
+        FileInfo[]      ListFiles(string     dirToList);
 
-        event Action<Exception> OnError; 
+        event Action<Exception> OnError;
 
         event Action                 OnGetCurrentPath;
         event Action<string, string> OnSetCurrentPath;
@@ -36,10 +36,6 @@ namespace ExplorerWpf.Handler {
         event Action                 OnGetRemotePath;
 
         event Action OnDirectoryExists;
-        event Action OnCreateDirectory;
-        event Action OnCreateFile;
-        event Action OnDeleteDirectory;
-        event Action OnDeleteFile;
         event Action OnValidatePath;
         event Action OnDownloadFile;
         event Action OnOpenFile;

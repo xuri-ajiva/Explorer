@@ -1,10 +1,10 @@
 ﻿#region using
 
+using Peter;
 using System;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
-using Peter;
 
 #endregion
 
@@ -144,6 +144,7 @@ namespace ExplorerWpf.Handler {
         /// <inheritdoc />
         public FileInfo[] ListFiles(string dirToList) {
             try {
+                this.OnListFiles?.Invoke();
                 return new DirectoryInfo( dirToList ).GetFiles();
             } catch (Exception e) {
                 OnOnError( e );
@@ -157,6 +158,7 @@ namespace ExplorerWpf.Handler {
         /// <inheritdoc />
         public DirectoryInfo[] ListDirectory(string dirToList) {
             try {
+                this.OnListDirectory?.Invoke();
                 return new DirectoryInfo( dirToList ).GetDirectories();
             } catch (Exception e) {
                 OnOnError( e );
@@ -179,18 +181,6 @@ namespace ExplorerWpf.Handler {
 
         /// <inheritdoc />
         public event Action OnDirectoryExists;
-
-        /// <inheritdoc />
-        public event Action OnCreateDirectory;
-
-        /// <inheritdoc />
-        public event Action OnCreateFile;
-
-        /// <inheritdoc />
-        public event Action OnDeleteDirectory;
-
-        /// <inheritdoc />
-        public event Action OnDeleteFile;
 
         /// <inheritdoc />
         public event Action OnValidatePath;

@@ -3,8 +3,8 @@
 #region using
 
 // ReSharper disable once RedundantUsingDirective
+using ExplorerWpf.Handler;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Imaging;
@@ -18,11 +18,8 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Interop;
-using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using ExplorerWpf.Handler;
 using Brush = System.Windows.Media.Brush;
-using Color = System.Windows.Media.Color;
 using MessageBox = System.Windows.Forms.MessageBox;
 
 #endregion
@@ -54,25 +51,24 @@ namespace ExplorerWpf {
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture) => throw new NotImplementedException();
     }
 
-    public partial class MainWindow {
+    public partial class MainWindow : IDisposable {
         private ExplorerView _currentExplorerView;
+        private IPage        _currentPage = new EmptyPage();
 
+        private double _drag;
 
-        private bool   _first;
-        private Thread _inWriteThread;
-
+        private Thread  _errReaderThread;
+        private Thread  _inWriteThread;
         private Process _mainProcess;
         private Thread  _outReaderThread;
-        private Thread  _errReaderThread;
 
         private TreePathItem _root;
 
-        private bool SkipOneWrite;
+        private bool _skipOneWrite;
 
         public MainWindow() {
             InitializeComponent();
-            
-            this.CopyRightTextBox.Text = Program.Version + "  " + Program.CopyRight;
+            this.CopyRightTextBox.Text = Program.Version + "    " + Program.CopyRight;
         }
 
         private IHandler Handler => this._currentExplorerView.Handler;
@@ -125,19 +121,19 @@ namespace ExplorerWpf {
                         }
                     } catch { }
 
-                    if ( !this.SkipOneWrite ) {
+                    if ( !this._skipOneWrite ) {
                         if ( line != "echo %cd%" )
                             Console.WriteLine( line );
                     }
                     else {
-                        this.SkipOneWrite = false;
+                        this._skipOneWrite = false;
                     }
                 }
             } );
             this._inWriteThread = new Thread( () => {
                 while ( true ) {
                     var line = Console.In.ReadLine();
-                    this.SkipOneWrite = true;
+                    this._skipOneWrite = true;
                     WriteCmd( line );
                 }
             } );
@@ -150,8 +146,8 @@ namespace ExplorerWpf {
             this.consoleHost.MouseDown += this.ConsoleW.MouseDownFocusWindow;
         }
 
-        private void HandlerOnOnError(Exception obj) { SettingsHandler.OnError( obj ); }
-                                                                                            
+        private static void HandlerOnOnError(Exception obj) { SettingsHandler.OnError( obj ); }
+
         private void MoveWindow(object sender, MouseButtonEventArgs e) {
             if ( e.LeftButton != MouseButtonState.Pressed ) return;
 
@@ -167,8 +163,12 @@ namespace ExplorerWpf {
         private void MainWindow_OnLoaded(object sender, RoutedEventArgs e) {
             EnableBlur();
 
+            if ( SettingsHandler.ConsolePresent )
                 StartConsole();
-
+            else {
+                var consoleWrapper = new Thread( StartConsole );
+                consoleWrapper.Start();
+            }
 
             this._root      = TreePathItem.Empty;
             this._root.Icon = DefaultIcons.ShieldIcon;
@@ -194,11 +194,13 @@ namespace ExplorerWpf {
             var t = new Thread( () => {
                 const int MaxTaps = 100;
 
+                var r = new Random();
+
                 while ( true ) {
                     Thread.Sleep( 2000 );
 
                     for ( int i = 0; i < MaxTaps; i++ ) {
-                        this.Dispatcher?.Invoke( () => { AddTabToTabControl( CreateExplorerTab( CreateExplorer( Path.GetDirectoryName( System.Windows.Forms.Application.ExecutablePath ) ) ) ); } );
+                        this.Dispatcher?.Invoke( () => { AddTab( r.NextDouble() > .5 ? TapType.Settings : TapType.Explorer, Path.GetDirectoryName( System.Windows.Forms.Application.ExecutablePath ) ); } );
 
                         Thread.Sleep( 50 );
                     }
@@ -219,7 +221,6 @@ namespace ExplorerWpf {
                     }
 
                     Thread.Sleep( 1000 );
-                    this.currentExplorerView = null;
 
                     GC.Collect( 1, GCCollectionMode.Forced, true );
                 }
@@ -229,33 +230,51 @@ namespace ExplorerWpf {
             t.Start();
         #endif
 
-            AddTab();
+            AddTab( TapType.Explorer );
         }
 
         private void DcChange(object sender, DependencyPropertyChangedEventArgs e) { Console.WriteLine( e ); }
 
         private void taps_SelectionChanged(object sender, SelectionChangedEventArgs e) {
-            if ( this.TabControl.Items.Count == 1 ) {
-                return;
-            }
+            if ( this.TabControl.Items.Count == 1 ) return;
 
             if ( !( this.TabControl.SelectedItem is TabItem tp ) ) return;
 
             if ( tp.Content != null ) {
-                if ( this._currentExplorerView != null && this._currentExplorerView.Equals( tp.Content ) ) return;
+                if ( !( tp.Content is IPage page ) ) return;
 
-                if ( !( tp.Content is ExplorerView explorer ) ) return;
+                if ( page.Equals( this._currentPage ) ) return;
 
-                this._currentExplorerView = explorer;
-                var p = this.Handler.GetCurrentPath();
+                this._currentPage = page;
+                page.OnReFocus();
 
-                if ( Regex.IsMatch( p, @"[A-Za-z]:\\" ) )
-                    if ( SettingsHandler.ConsoleAutoChangeDisc )
-                        WriteCmd( p.Substring( 0, 2 ) );
+                if ( !page.ShowTreeView ) {
+                    this.TreeControl.Visibility  = Visibility.Hidden;
+                    this._drag                   = this.TreeColumn.Width.Value;
+                    this.TreeColumn.Width        = new GridLength( 0 );
+                    this.VerticalSplitter1.Width = new GridLength( 0 );
+                }
+                else if ( this.TreeControl.Visibility == Visibility.Hidden ) {
+                    this.TreeControl.Visibility  = Visibility.Visible;
+                    this.TreeColumn.Width        = new GridLength( this._drag );
+                    this.VerticalSplitter1.Width = new GridLength( 6 );
+                }
 
-                if ( p.Length > 3 )
-                    if ( SettingsHandler.ConsoleAutoChangePath )
-                        WriteCmd( "cd \"" + p + "\"" );
+                this.NaviGation.Visibility = page.HideNavigation ? Visibility.Hidden : Visibility.Visible;
+
+                this.consoleHost.Visibility = page.HideConsole ? Visibility.Hidden : Visibility.Visible;
+
+                switch (page) {
+                    case EmptyPage ep:
+                        //Console.WriteLine();
+                        break;
+                    case ExplorerView explorer:
+                        this._currentExplorerView = explorer;
+                        break;
+                    case SettingsView sp:
+                        //Console.WriteLine();
+                        break;
+                }
             }
             else {
                 if ( this.TabControl.Items.Count > 1 ) this.TabControl.SelectedIndex = this.TabControl.Items.Count - 2;
@@ -263,12 +282,11 @@ namespace ExplorerWpf {
         }
 
         private void WriteCmd(string command, bool echo = true) {
-                if ( this._mainProcess == null || this._mainProcess.HasExited ) return;
+            if ( this._mainProcess == null || this._mainProcess.HasExited ) return;
 
-                this._mainProcess.StandardInput.WriteLine( command );
-                if ( echo && SettingsHandler.ConsoleAutoChangePath )
-                    this._mainProcess.StandardInput.WriteLine( "echo %cd%" );
-
+            this._mainProcess.StandardInput.WriteLine( command );
+            if ( echo && SettingsHandler.ConsoleAutoChangePath )
+                this._mainProcess.StandardInput.WriteLine( "echo %cd%" );
         }
 
         private void XOnSendDirectoryUpdateAsCmd(object sender, string e, bool cd) {
@@ -276,15 +294,22 @@ namespace ExplorerWpf {
                 WriteCmd( e, cd );
         }
 
+        private void XOnUpdateStatusBar(object arg1, string arg2, Brush arg3) {
+            this.StatusBar.Foreground = arg3;
+            this.StatusBar.Text       = arg2;
+        }
+
         private void MenuItem_OnClick(object sender, RoutedEventArgs e) {
             var me = (MenuItem) sender;
 
             switch (( (MenuItem) sender ).TabIndex) {
                 case 1:
-                    AddTab();
+                    AddTab( TapType.Explorer );
                     break;
-
                 case 2:
+                    AddTab( TapType.Settings );
+                    break;
+                case 99:
                     if ( me.IsChecked )
                         MessageBox.Show( "Test" );
                     break;
@@ -298,7 +323,7 @@ namespace ExplorerWpf {
             }
         }
 
-        private void TabItem_MouseLeftButtonDown(object sender, MouseButtonEventArgs e) { AddTab(); }
+        private void TabItem_MouseLeftButtonDown(object sender, MouseButtonEventArgs e) { AddTab( TapType.Explorer ); }
 
         // ReSharper disable once UnusedMember.Local
         private void DragMoveX(object sender, MouseButtonEventArgs e) { MoveWindow( sender, e ); }
@@ -309,6 +334,14 @@ namespace ExplorerWpf {
             this._outReaderThread?.Abort();
             this._inWriteThread?.Abort();
             Environment.Exit( 0 );
+        }
+
+        private enum TapType {
+            Explorer,
+            Settings,
+
+            //TODO:: Theams,
+            Empty
         }
 
         #region Buttons
@@ -325,7 +358,7 @@ namespace ExplorerWpf {
         private void PingClick(object sender, RoutedEventArgs e) { this.Topmost = !this.Topmost; }
 
         private void UpClick(object sender, RoutedEventArgs e) {
-            var dir = this._currentExplorerView.DirUp( this.Handler.GetCurrentPath() );
+            var dir = this._currentExplorerView.GetDirUp();
             this.Handler.SetCurrentPath( dir );
             this._currentExplorerView.ListP( dir );
         }
@@ -464,6 +497,10 @@ namespace ExplorerWpf {
             }
         }
 
+        private EmptyPage CreateEmpty() => new EmptyPage();
+
+        private SettingsView CreateSettings() => new SettingsView();
+
         private ExplorerView CreateExplorer(string path = SettingsHandler.ROOT_FOLDER) {
             var h = new LocalHandler( path );
             h.OnError += HandlerOnOnError;
@@ -484,25 +521,20 @@ namespace ExplorerWpf {
             return x;
         }
 
-        private void XOnUpdateStatusBar(object arg1, string arg2, Brush arg3) {
-            this.StatusBar.Foreground = arg3;
-            this.StatusBar.Text       = arg2;
-        }
-
-        private TabItem CreateExplorerTab(ExplorerView explorerView) {
+        private TabItem CreateTabItem(IPage page, string name) {
             var ex = (Label) this.PlusTabItem.Header;
-            var l  = new Label { Content = "Explorer", Style = ex.Style, Margin = ex.Margin, FontSize = ex.FontSize, Effect = ex.Effect, Foreground = ex.Foreground, Background = ex.Background, BorderBrush = ex.BorderBrush, BorderThickness = ex.BorderThickness, ContextMenu = this._contextMenu };
+            var l  = new Label { Content = name, Style = ex.Style, Margin = ex.Margin, FontSize = ex.FontSize, Effect = ex.Effect, Foreground = ex.Foreground, Background = ex.Background, BorderBrush = ex.BorderBrush, BorderThickness = ex.BorderThickness, ContextMenu = this._contextMenu };
 
             var newTabItem = new TabItem {
                 Header  = l,
-                Name    = "explorer",
-                Content = explorerView,
+                Name    = name,
+                Content = page,
                 //Background  = this.ColorExample.Background,
                 //Foreground  = this.ColorExample.Foreground,
                 //BorderBrush = this.ColorExample.BorderBrush,
                 Style = this.PlusTabItem.Style
             };
-            explorerView.setTapItem( newTabItem );
+            page.ParentTapItem = newTabItem;
             return newTabItem;
         }
 
@@ -516,20 +548,56 @@ namespace ExplorerWpf {
             taps_SelectionChanged( this, null );
         }
 
-        private void AddTab(string path = SettingsHandler.ROOT_FOLDER) {
+        private void AddTab(TapType type, string path = SettingsHandler.ROOT_FOLDER) {
             if ( this._contextMenu == null ) CreateContextMenu();
 
-            AddTabToTabControl( CreateExplorerTab( CreateExplorer( path ) ) );
+            IPage page;
+
+            switch (type) {
+                case TapType.Explorer:
+                    page = CreateExplorer( path );
+                    break;
+                case TapType.Settings:
+                    page = CreateSettings();
+                    break;
+                case TapType.Empty:
+                    page = CreateEmpty();
+                    break;
+                default: throw new ArgumentOutOfRangeException( nameof(type), type, null );
+            }
+
+            AddTabToTabControl( CreateTabItem( page, type.ToString() ) );
         }
 
         private void CloseTap(TabItem tp) {
-            if ( !( tp.Content is ExplorerView explorer ) ) return;
+            if ( !( tp.Content is IPage page ) ) return;
 
-            explorer.Dispose();
+            page.Dispose();
             tp.Content = null;
             this.TabControl.Items.Remove( tp );
             GC.Collect( 0, GCCollectionMode.Forced );
-            if ( this.TabControl.Items.Count == 1 ) this.CloseClick( null, null );
+            if ( this.TabControl.Items.Count == 1 ) CloseClick( null, null );
+        }
+
+        #endregion
+
+
+        #region IDisposable
+
+        private void Dispose(bool disposing) {
+            if ( disposing ) {
+                this.ConsoleW?.Dispose();
+                this._currentExplorerView?.Dispose();
+                this._currentPage?.Dispose();
+                this._mainProcess.Dispose();
+                this.WindowX.Dispose();
+            }
+        }
+
+        /// <inheritdoc />
+        public void Dispose() {
+            Dispose( true );
+            GC.SuppressFinalize( this );
         }
 
         #endregion

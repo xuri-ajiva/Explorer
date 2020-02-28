@@ -1,5 +1,6 @@
 #region using
 
+using ExplorerWpf;
 using System;
 using System.Drawing;
 using System.IO;
@@ -194,7 +195,7 @@ namespace Peter {
 
             if ( null == this._oDesktopFolder ) {
                 // Get desktop IShellFolder
-                var nResult = SHGetDesktopFolder( out pUnkownDesktopFolder );
+                var nResult = SettingsHandler.NativeMethods.SHGetDesktopFolder( out pUnkownDesktopFolder );
                 if ( S_OK != nResult ) throw new ShellContextMenuException( "Failed to get the desktop shell folder" );
 
                 this._oDesktopFolder = (IShellFolder) Marshal.GetTypedObjectForIUnknown( pUnkownDesktopFolder, typeof(IShellFolder) );
@@ -228,7 +229,7 @@ namespace Peter {
                 Marshal.WriteInt32( pStrRet, 0, 0 );
                 nResult = this._oDesktopFolder.GetDisplayNameOf( pPIDL, SHGNO.FORPARSING, pStrRet );
                 var strFolder = new StringBuilder( MAX_PATH );
-                StrRetToBuf( pStrRet, pPIDL, strFolder, MAX_PATH );
+                SettingsHandler.NativeMethods.StrRetToBuf( pStrRet, pPIDL, strFolder, MAX_PATH );
                 Marshal.FreeCoTaskMem( pStrRet );
                 pStrRet               = IntPtr.Zero;
                 this._strParentFolder = strFolder.ToString();
@@ -287,7 +288,7 @@ namespace Peter {
                     return;
                 }
 
-                pMenu = CreatePopupMenu();
+                pMenu = SettingsHandler.NativeMethods.CreatePopupMenu();
 
                 var nResult = this._oContextMenu.QueryContextMenu( pMenu,
                     0,
@@ -296,13 +297,13 @@ namespace Peter {
                     CMF.DEFAULTONLY |
                     ( ( Control.ModifierKeys & Keys.Shift ) != 0 ? CMF.EXTENDEDVERBS : 0 ) );
 
-                var nDefaultCmd = (uint) GetMenuDefaultItem( pMenu, false, 0 );
+                var nDefaultCmd = (uint) SettingsHandler.NativeMethods.GetMenuDefaultItem( pMenu, false, 0 );
                 if ( nDefaultCmd >= CMD_FIRST ) InvokeCommand( this._oContextMenu, nDefaultCmd, arrFI[0].DirectoryName, Control.MousePosition );
 
-                DestroyMenu( pMenu );
+                SettingsHandler.NativeMethods.DestroyMenu( pMenu );
                 pMenu = IntPtr.Zero;
             } finally {
-                if ( pMenu != IntPtr.Zero ) DestroyMenu( pMenu );
+                if ( pMenu != IntPtr.Zero ) SettingsHandler.NativeMethods.DestroyMenu( pMenu );
                 ReleaseAll();
             }
         }
@@ -540,7 +541,7 @@ namespace Peter {
                     return;
                 }
 
-                pMenu = CreatePopupMenu();
+                pMenu = SettingsHandler.NativeMethods.CreatePopupMenu();
 
                 var nResult = this._oContextMenu.QueryContextMenu( pMenu,
                     0,
@@ -563,13 +564,13 @@ namespace Peter {
                     this.Handle,
                     IntPtr.Zero );
 
-                DestroyMenu( pMenu );
+                SettingsHandler.NativeMethods.DestroyMenu( pMenu );
                 pMenu = IntPtr.Zero;
 
                 if ( nSelected != 0 ) InvokeCommand( this._oContextMenu, nSelected, this._strParentFolder, pointScreen );
             } finally {
                 //hook.Uninstall();
-                if ( pMenu != IntPtr.Zero ) DestroyMenu( pMenu );
+                if ( pMenu != IntPtr.Zero ) SettingsHandler.NativeMethods.DestroyMenu( pMenu );
 
                 if ( iContextMenuPtr != IntPtr.Zero )
                     Marshal.Release( iContextMenuPtr );
@@ -612,33 +613,6 @@ namespace Peter {
 
         #endregion
 
-        #region DLL Import
-
-        // Retrieves the IShellFolder interface for the desktop folder, which is the root of the Shell's namespace.
-        [DllImport( "shell32.dll" )]
-        private static extern int SHGetDesktopFolder(out IntPtr ppshf);
-
-        // Takes a STRRET structure returned by IShellFolder::GetDisplayNameOf, converts it to a string, and places the result in a buffer. 
-        [DllImport( "shlwapi.dll", EntryPoint = "StrRetToBuf", ExactSpelling = false, CharSet = CharSet.Auto, SetLastError = true )]
-        private static extern int StrRetToBuf(IntPtr pstr, IntPtr pidl, StringBuilder pszBuf, int cchBuf);
-
-        // The TrackPopupMenuEx function displays a shortcut menu at the specified location and tracks the selection of items on the shortcut menu. The shortcut menu can appear anywhere on the screen.
-        [DllImport( "user32.dll", ExactSpelling = true, CharSet = CharSet.Auto )]
-        private static extern uint TrackPopupMenuEx(IntPtr hmenu, TPM flags, int x, int y, IntPtr hwnd, IntPtr lptpm);
-
-        // The CreatePopupMenu function creates a drop-down menu, submenu, or shortcut menu. The menu is initially empty. You can insert or append menu items by using the InsertMenuItem function. You can also use the InsertMenu function to insert menu items and the AppendMenu function to append menu items.
-        [DllImport( "user32", SetLastError = true, CharSet = CharSet.Auto )]
-        private static extern IntPtr CreatePopupMenu();
-
-        // The DestroyMenu function destroys the specified menu and frees any memory that the menu occupies.
-        [DllImport( "user32", SetLastError = true, CharSet = CharSet.Auto )]
-        private static extern bool DestroyMenu(IntPtr hMenu);
-
-        // Determines the default menu item on the specified menu
-        [DllImport( "user32", SetLastError = true, CharSet = CharSet.Auto )]
-        private static extern int GetMenuDefaultItem(IntPtr hMenu, bool fByPos, uint gmdiFlags);
-
-        #endregion
 
         #region Shell GUIDs
 
@@ -648,6 +622,11 @@ namespace Peter {
         private static Guid IID_IContextMenu3 = new Guid( "{bcfce0a0-ec17-11d0-8d10-00a0c90f2719}" );
 
         #endregion
+
+        // The TrackPopupMenuEx function displays a shortcut menu at the specified location and tracks the selection of items on the shortcut menu. The shortcut menu can appear anywhere on the screen.
+        [DllImport( "user32.dll", ExactSpelling = true, CharSet = CharSet.Auto )]
+        private static extern uint TrackPopupMenuEx(IntPtr hmenu, TPM flags, int x, int y, IntPtr hwnd, IntPtr lptpm);
+
 
         #region Structs
 
@@ -1313,147 +1292,6 @@ namespace Peter {
         /// <param name="message">Message</param>
         public ShellContextMenuException(string message)
             : base( message ) { }
-    }
-
-    #endregion
-
-    #region Class HookEventArgs
-
-    public class HookEventArgs : EventArgs {
-        public int    HookCode; // Hook code
-        public IntPtr lParam;   // LPARAM argument
-        public IntPtr wParam;   // WPARAM argument
-    }
-
-    #endregion
-
-    #region Enum HookType
-
-    // Hook Types
-    public enum HookType {
-        WH_JOURNALRECORD   = 0,
-        WH_JOURNALPLAYBACK = 1,
-        WH_KEYBOARD        = 2,
-        WH_GETMESSAGE      = 3,
-        WH_CALLWNDPROC     = 4,
-        WH_CBT             = 5,
-        WH_SYSMSGFILTER    = 6,
-        WH_MOUSE           = 7,
-        WH_HARDWARE        = 8,
-        WH_DEBUG           = 9,
-        WH_SHELL           = 10,
-        WH_FOREGROUNDIDLE  = 11,
-        WH_CALLWNDPROCRET  = 12,
-        WH_KEYBOARD_LL     = 13,
-        WH_MOUSE_LL        = 14
-    }
-
-    #endregion
-
-    #region Class LocalWindowsHook
-
-    public class LocalWindowsHook {
-        // ************************************************************************
-
-        // ************************************************************************
-        // Event delegate
-        public delegate void HookEventHandler(object sender, HookEventArgs e);
-        // ************************************************************************
-        // Filter function delegate
-        public delegate int HookProc(int code, IntPtr wParam, IntPtr lParam);
-
-        protected HookProc m_filterFunc;
-        // ************************************************************************
-
-        // ************************************************************************
-        // Internal properties
-        protected IntPtr m_hhook = IntPtr.Zero;
-
-        protected HookType m_hookType;
-        // ************************************************************************
-
-        // ************************************************************************
-        // Class constructor(s)
-        public LocalWindowsHook(HookType hook) {
-            this.m_hookType   = hook;
-            this.m_filterFunc = CoreHookProc;
-        }
-
-        public LocalWindowsHook(HookType hook, HookProc func) {
-            this.m_hookType   = hook;
-            this.m_filterFunc = func;
-        }
-        // ************************************************************************
-
-        // ************************************************************************
-        // Event: HookInvoked 
-        public event HookEventHandler HookInvoked;
-
-        protected void OnHookInvoked(HookEventArgs e) {
-            if ( this.HookInvoked != null ) this.HookInvoked( this, e );
-        }
-        // ************************************************************************
-
-        // ************************************************************************
-        // Default filter function
-        protected int CoreHookProc(int code, IntPtr wParam, IntPtr lParam) {
-            if ( code < 0 )
-                return CallNextHookEx( this.m_hhook, code, wParam, lParam );
-
-            // Let clients determine what to do
-            var e = new HookEventArgs();
-            e.HookCode = code;
-            e.wParam   = wParam;
-            e.lParam   = lParam;
-            OnHookInvoked( e );
-
-            // Yield to the next hook in the chain
-            return CallNextHookEx( this.m_hhook, code, wParam, lParam );
-        }
-        // ************************************************************************
-
-        // ************************************************************************
-        // Install the hook
-        public void Install() {
-            this.m_hhook = SetWindowsHookEx( this.m_hookType, this.m_filterFunc,
-                IntPtr.Zero,
-                AppDomain.GetCurrentThreadId() );
-        }
-        // ************************************************************************
-
-        // ************************************************************************
-        // Uninstall the hook
-        public void Uninstall() { UnhookWindowsHookEx( this.m_hhook ); }
-        // ************************************************************************
-
-
-        #region Win32 Imports
-
-        // ************************************************************************
-        // Win32: SetWindowsHookEx()
-        [DllImport( "user32.dll" )]
-        protected static extern IntPtr SetWindowsHookEx(HookType code,
-            HookProc                                             func,
-            IntPtr                                               hInstance,
-            int                                                  threadID);
-        // ************************************************************************
-
-        // ************************************************************************
-        // Win32: UnhookWindowsHookEx()
-        [DllImport( "user32.dll" )]
-        protected static extern int UnhookWindowsHookEx(IntPtr hhook);
-        // ************************************************************************
-
-        // ************************************************************************
-        // Win32: CallNextHookEx()
-        [DllImport( "user32.dll" )]
-        protected static extern int CallNextHookEx(IntPtr hhook,
-            int                                           code, IntPtr wParam, IntPtr lParam);
-
-        // ************************************************************************
-
-        #endregion
-
     }
 
     #endregion

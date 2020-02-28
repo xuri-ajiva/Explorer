@@ -5,9 +5,11 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Drawing;
+using System.Drawing.Imaging;
 using System.IO;
 using System.Runtime.InteropServices;
-using ExplorerWpf.Handler;
+using System.Threading;
+using ThreadState = System.Threading.ThreadState;
 
 #endregion
 
@@ -22,16 +24,28 @@ namespace ExplorerWpf {
 
         private static Bitmap _errorCash;
         private static Icon   _errorCashI;
-
         private static Bitmap _shieldCash;
+        private static Bitmap _warningCash;
+        private static Bitmap _loadingCash;
 
-        private static          Bitmap                   _warningCash;
-        private static readonly Dictionary<string, Icon> Cache = new Dictionary<string, Icon>();
-        public static           Bitmap                   ErrorIcon   => _errorCash   ?? ( _errorCash = SystemIcons.Error.ToBitmap() );
-        public static           Icon                     ErrorIconI  => _errorCashI  ?? ( _errorCashI = SystemIcons.Error );
-        public static           Bitmap                   ShieldIcon  => _shieldCash  ?? ( _shieldCash = SystemIcons.Shield.ToBitmap() );
-        public static           Bitmap                   WarningIcon => _warningCash ?? ( _warningCash = SystemIcons.Warning.ToBitmap() );
+        private static readonly Dictionary<string, Icon> Cache     = new Dictionary<string, Icon>();
+        private static readonly object                   CacheLock = new object();
 
+        public static Bitmap ErrorIcon  => _errorCash  ?? ( _errorCash = ErrorIconI.ToBitmap() );
+        public static Icon   ErrorIconI => _errorCashI ?? ( _errorCashI = SystemIcons.Error );
+
+        public static Bitmap ShieldIcon {
+            get {
+                if ( _shieldCash                  == null ) _shieldCash                 = SystemIcons.Shield.ToBitmap();
+                else if ( _shieldCash.PixelFormat == PixelFormat.DontCare ) _shieldCash = SystemIcons.Shield.ToBitmap();
+
+                return _shieldCash;
+            }
+        }
+
+        public static Bitmap WarningIcon => _warningCash ?? ( _warningCash = SystemIcons.Warning.ToBitmap() );
+
+        public static Bitmap LoadingIcon => _loadingCash ?? ( _loadingCash = SystemIcons.Hand.ToBitmap() );
 
         public static Icon GetFileIconCashed(string path) {
             var ext = path;
@@ -44,15 +58,18 @@ namespace ExplorerWpf {
                 return null;
 
             Icon icon;
-            if ( Cache.TryGetValue( ext, out icon ) )
+
+            lock (CacheLock) {
+                if ( Cache.TryGetValue( ext, out icon ) )
+                    return icon;
+
+                icon = ExtractFromPath( path );
+
+                if ( icon == null ) return null;
+
+                Cache.Add( ext, icon );
                 return icon;
-
-            icon = ExtractFromPath( path );
-
-            if ( icon == null ) return null;
-
-            Cache.Add( ext, icon );
-            return icon;
+            }
         }
 
         private static Icon ExtractFromPath(string path) {
@@ -81,6 +98,40 @@ namespace ExplorerWpf {
             [MarshalAs( UnmanagedType.ByValTStr, SizeConst = 80 )]
             public readonly string szTypeName;
         }
+
+        private static readonly Queue<(string, string)> CashQueue = new Queue<(string, string)>();
+
+        public static void CacheIcon(string path) {
+            var ext = path;
+
+            if ( File.Exists( path ) ) ext = Path.GetExtension( path );
+
+            if ( SettingsHandler.ExtenstionWithSpecialIcons.Contains( ext ) ) ext = path;
+
+            if ( ext == null ) return;
+
+            CashQueue.Enqueue( ( ext, path ) );
+
+            if ( CashThread != null && CashThread.ThreadState == ThreadState.Unstarted ) {
+                CashThread.Start();
+            }
+        }
+
+        private static readonly Thread CashThread = new Thread( () => {
+            while ( CashQueue != null ) {
+                ( var ext, var path ) = CashQueue.Dequeue();
+
+                lock (CacheLock) {
+                    if ( Cache.ContainsKey( ext ) ) return;
+
+                    var icon = ExtractFromPath( path );
+
+                    if ( icon == null ) return;
+
+                    Cache.Add( ext, icon );
+                }
+            }
+        } );
     }
 
     public class TreePathItem : Item {
@@ -120,9 +171,13 @@ namespace ExplorerWpf {
 
             this.Type = FileType.FILE;
 
-            CreateIcon();
+            Icon = DefaultIcons.LoadingIcon;
+            PreLoadIcon();
+            //CreateIcon();
             this.TryGetFileInfo = f;
         }
+
+        private void PreLoadIcon() { DefaultIcons.CacheIcon( this.Path ); }
 
         public Item(DirectoryInfo d) {
             this.Path           = d.FullName.Replace( "\\\\", "\\" );
@@ -137,7 +192,9 @@ namespace ExplorerWpf {
 
             this.Type = FileType.DIRECTORY;
 
-            CreateIcon();
+            Icon = DefaultIcons.LoadingIcon;
+            PreLoadIcon();
+            //CreateIcon();
             this.TryGetDirectoryInfo = d;
         }
 
@@ -202,7 +259,19 @@ namespace ExplorerWpf {
 
         // ReSharper disable UnusedAutoPropertyAccessor.Global
 
-        public Bitmap   Icon           { get; set; }
+        private Bitmap _icon;
+
+        public Bitmap Icon {
+            get {
+                if ( this._icon == DefaultIcons.LoadingIcon ) {
+                    CreateIcon();
+                }
+
+                return this._icon;
+            }
+            set => this._icon = value;
+        }
+
         public string   Name           { get; set; }
         public string   Path           { get; set; }
         public string   Size           { get; set; }

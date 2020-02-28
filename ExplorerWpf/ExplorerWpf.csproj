@@ -78,22 +78,26 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="ConsoleImplemantation.xaml.cs">
-      <DependentUpon>ConsoleImplemantation.xaml</DependentUpon>
+    <Compile Include="ConsoleImplementation.xaml.cs">
+      <DependentUpon>ConsoleImplementation.xaml</DependentUpon>
     </Compile>
     <Compile Include="ExplorerView.xaml.cs">
       <DependentUpon>ExplorerView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Handler\IHandler.cs" />
     <Compile Include="Handler\localHandler.cs" />
+    <Compile Include="IPage.cs" />
     <Compile Include="Item.cs" />
+    <Compile Include="SettingsView.xaml.cs">
+      <DependentUpon>SettingsView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="SettingsHandler.cs" />
     <Compile Include="ShellContextMenu.cs" />
     <Compile Include="TexTBox\InvertSign.cs" />
     <Compile Include="TexTBox\SelectFolderTextBox.xaml.cs">
       <DependentUpon>SelectFolderTextBox.xaml</DependentUpon>
     </Compile>
-    <Page Include="ConsoleImplemantation.xaml">
+    <Page Include="ConsoleImplementation.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -114,6 +118,10 @@
       <SubType>Code</SubType>
     </Compile>
     <Page Include="ExplorerView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="SettingsView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

@@ -1,8 +1,8 @@
-﻿<UserControl x:Class="ExplorerWpf.ConsoleImplemantation"
+﻿<UserControl x:Class="ExplorerWpf.ConsoleImplementation"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:local="clr-namespace:ExplorerWpf"
              mc:Ignorable="d" Height="420.384" Width="477.514" Loaded="ConsoleImplemantation_OnLoaded">
     <Grid x:Name="ParterreControl">

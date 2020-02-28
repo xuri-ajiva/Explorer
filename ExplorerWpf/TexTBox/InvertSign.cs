@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Windows.Data;
 
-namespace QuickZip.Tools {
+namespace ExplorerWpf.TexTBox {
     [ValueConversion( typeof(int), typeof(int) )]
     public class InvertSignConverter : IValueConverter {
         public static InvertSignConverter Instance = new InvertSignConverter();
