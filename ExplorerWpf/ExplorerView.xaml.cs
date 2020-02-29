@@ -1,6 +1,5 @@
 ﻿#region using
 
-using ExplorerWpf.Handler;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -15,47 +14,53 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
+using ExplorerWpf.Handler;
 using Point = System.Drawing.Point;
 
 #endregion
 
 namespace ExplorerWpf {
     public sealed partial class ExplorerView : UserControl, IPage {
-        private readonly DriveInfo[] _devInfo;
-        private readonly IntPtr      _hWnd;
 
-        private readonly List<Item> _list = new List<Item>();
-
-        private readonly bool _useListOnly = false;
+        private DriveInfo[] _devInfo;
+        private IntPtr      _hWnd;
 
         private bool _lastError;
 
-        private GridViewColumn freePB;
+        private GridViewColumn _freePb;
 
         public ExplorerView(IntPtr hWnd) {
             this._devInfo = DriveInfo.GetDrives();
 
             this._hWnd = hWnd;
             InitializeComponent();
-            if ( this._useListOnly ) this.DataContext          = this._list;
-            if ( this._useListOnly ) this.MainView.DataContext = this._list;
         }
 
         public IHandler Handler { [DebuggerStepThrough] get; private set; }
-
-        public ObservableCollection<Item> DataCollection => new ObservableCollection<Item>( GetList() );
 
         #region IDisposable
 
         /// <inheritdoc />
         public void Dispose() {
-            this.Root.Children.Clear();
-            this.Root = null;
-            //this._handler?.Close();
-            this.Handler = null;
+            try {
+                this.MainView.Items.Clear();
+                this.Root.Children.Clear();
+                this.Handler.Dispose();
+                this.Root          = null;
+                this._devInfo      = default;
+                this._freePb       = null;
+                this.PathBar       = null;
+                this.MainView      = null;
+                this.Handler       = null;
+                this._hWnd         = default;
+                this.ParentTapItem = null;
+            } catch { }
+
+            GC.Collect( 2, GCCollectionMode.Forced, true );
         }
 
         #endregion
+
 
         public void Init(IHandler handler) {
             this.Handler             =  handler;
@@ -64,12 +69,12 @@ namespace ExplorerWpf {
 
             if ( this.Dispatcher != null )
                 this.Dispatcher.Invoke( () => {
-                    this.freePB = ( (GridView) this.MainView.View ).Columns[4];
+                    this._freePb = ( (GridView) this.MainView.View ).Columns[4];
                     List( this.Handler.GetCurrentPath() );
                 } );
             else
                 try {
-                    this.freePB = ( (GridView) this.MainView.View ).Columns[4];
+                    this._freePb = ( (GridView) this.MainView.View ).Columns[4];
                     List( this.Handler.GetCurrentPath() );
                 } catch (Exception e) {
                     SettingsHandler.OnError( e );
@@ -87,7 +92,7 @@ namespace ExplorerWpf {
                 d = arg2 == SettingsHandler.ROOT_FOLDER ? "Root" : new DirectoryInfo( arg2 ).Name;
                 d = string.IsNullOrEmpty( d ) ? "Explorer" : d;
                 //Debug.WriteLine( d );
-                this.ParentTapItem.Dispatcher.Invoke( () => {
+                this.ParentTapItem.Dispatcher?.Invoke( () => {
                     if ( this.ParentTapItem.Header is Label l )
                         l.Content                  = d;
                     else this.ParentTapItem.Header = d;
@@ -173,31 +178,19 @@ namespace ExplorerWpf {
 
         #region ListHandeling
 
-        private void AddList(Item item) {
-            if ( this._useListOnly )
-                this._list.Add( item );
-            else
-                this.MainView.Items.Add( item );
-        }
+        private void AddList(Item item) { this.MainView.Items.Add( item ); }
 
-        private void ClearList() {
-            if ( this._useListOnly )
-                this._list.Clear();
-            else
-                this.MainView.Items.Clear();
-        }
+        private void ClearList() { this.MainView.Items.Clear(); }
 
-        private List<Item> GetList() {
-            if ( this._useListOnly )
-                return this._list;
-
-            return this.MainView.Items.Cast<Item>().ToList();
-        }
+        private List<Item> GetList() { return this.MainView.Items.Cast<Item>().ToList(); }
 
         #endregion
 
     #if DEBUG
-        ~ExplorerView() { Console.WriteLine( "Destroyed Items: " + DestroyCount++ ); }
+        ~ExplorerView() {
+            this.Dispose();
+            Debug.WriteLine( "Destroyed Items: " + DestroyCount++ );
+        }
 
         public static int DestroyCount;
 
@@ -239,7 +232,7 @@ namespace ExplorerWpf {
         }
 
         private string _currentDirUp = "/";
-        public  string GetDirUp() { return this._currentDirUp; }
+        public  string GetDirUp() => this._currentDirUp;
 
         private string DirUp(string path) {
             if ( path == SettingsHandler.ROOT_FOLDER )
@@ -251,12 +244,12 @@ namespace ExplorerWpf {
                 path = SettingsHandler.ROOT_FOLDER;
             }
             else {
-                this.Handler.SetCurrentPath( path + "\\..\\" );
+                this.Handler.SetCurrentPath( path + "\\..\\", true );
                 this.Handler.ValidatePath();
                 path = this.Handler.GetCurrentPath();
             }
 
-            this.Handler.SetCurrentPath( p );
+            this.Handler.SetCurrentPath( p, true );
             return path;
         }
 
@@ -269,7 +262,7 @@ namespace ExplorerWpf {
             }
 
             if ( this._pb ) {
-                ( (GridView) this.MainView.View ).Columns.First( x => (string) x.Header == (string) this.freePB.Header ).Width = 0;
+                ( (GridView) this.MainView.View ).Columns.First( x => (string) x.Header == (string) this._freePb.Header ).Width = 0;
 
                 this._pb = false;
             }
@@ -336,7 +329,7 @@ namespace ExplorerWpf {
 
                 AddList( i );
 
-                ( (GridView) this.MainView.View ).Columns.First( x => (string) x.Header == (string) this.freePB.Header ).Width = 100;
+                ( (GridView) this.MainView.View ).Columns.First( x => (string) x.Header == (string) this._freePb.Header ).Width = 100;
 
                 this._pb = true;
             }
@@ -370,16 +363,20 @@ namespace ExplorerWpf {
 
         /// <inheritdoc />
         public void OnReFocus() {
-            var p = this.Handler.GetCurrentPath();
+            try {
+                var p = this.Handler.GetCurrentPath();
 
-            if ( Regex.IsMatch( p, @"[A-Za-z]:\\" ) )
-                if ( SettingsHandler.ConsoleAutoChangeDisc )
-                    OnDirectoryUpdate( p.Substring( 0, 2 ), false );
+                if ( Regex.IsMatch( p, @"[A-Za-z]:\\" ) )
+                    if ( SettingsHandler.ConsoleAutoChangeDisc )
+                        OnDirectoryUpdate( p.Substring( 0, 2 ), false );
 
-            if ( p.Length <= 3 ) return;
+                if ( p.Length <= 3 ) return;
 
-            if ( SettingsHandler.ConsoleAutoChangePath )
-                OnDirectoryUpdate( "cd \"" + p + "\"", true );
+                if ( SettingsHandler.ConsoleAutoChangePath )
+                    OnDirectoryUpdate( "cd \"" + p + "\"" );
+            } catch (Exception e) {
+                HandlerOnOnError( e );
+            }
         }
 
         #endregion

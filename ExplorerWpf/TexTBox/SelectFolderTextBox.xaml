@@ -50,9 +50,7 @@
                                                        Text="{TemplateBinding ToolTip}" VerticalAlignment="Top"
                                                        Background="Red" Foreground="White" FontSize="10" />
                                             <Border.RenderTransform>
-                                                <TranslateTransform X="2"
-                                                                    Y="{Binding ElementName=dockWarning, Path=ActualHeight,
-                                                    Converter={x:Static t:InvertSignConverter.Instance}}" />
+                                                <TranslateTransform X="2" Y="{Binding ElementName=dockWarning, Path=ActualHeight, Converter={x:Static t:InvertSignConverter.Instance}}" /> <!--TODO: Fix ActualHeight Path -->
                                             </Border.RenderTransform>
                                         </Border>
                                     </DockPanel>

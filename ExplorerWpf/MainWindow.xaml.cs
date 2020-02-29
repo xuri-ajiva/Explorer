@@ -19,6 +19,7 @@ using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media.Imaging;
+using System.Windows.Threading;
 using Brush = System.Windows.Media.Brush;
 using MessageBox = System.Windows.Forms.MessageBox;
 
@@ -200,24 +201,24 @@ namespace ExplorerWpf {
                     Thread.Sleep( 2000 );
 
                     for ( int i = 0; i < MaxTaps; i++ ) {
-                        this.Dispatcher?.Invoke( () => { AddTab( r.NextDouble() > .5 ? TapType.Settings : TapType.Explorer, Path.GetDirectoryName( System.Windows.Forms.Application.ExecutablePath ) ); } );
+                        this.Dispatcher?.Invoke( () => { AddTab( r.NextDouble() > .9 ? TapType.Settings : TapType.Explorer, "S:\\" ); } );
 
-                        Thread.Sleep( 50 );
+                        Thread.Sleep( 10 );
                     }
 
                     Thread.Sleep( 1000 );
 
-                    //for ( int i = 0; i < MaxTaps; i++ ) {
-                    //    var fg = i;
-                    //    this.Dispatcher?.Invoke( () => { this.TabControl.SelectedIndex = fg; } );
-                    //    Thread.Sleep( 5 );
-                    //}
-                    //
-                    //Thread.Sleep( 1000 );
+                    for ( int i = 0; i < MaxTaps; i++ ) {
+                        var fg = i;
+                        this.Dispatcher?.Invoke( () => { this.TabControl.SelectedIndex = fg; } );
+                        Thread.Sleep( 20 );
+                    }
+
+                    Thread.Sleep( 1000 );
 
                     for ( int i = 0; i < MaxTaps; i++ ) {
                         this.Dispatcher?.Invoke( () => { CloseTap( (TabItem) this.TabControl.Items[0] ); } );
-                        Thread.Sleep( 50 );
+                        Thread.Sleep( 20 );
                     }
 
                     Thread.Sleep( 1000 );
@@ -295,8 +296,26 @@ namespace ExplorerWpf {
         }
 
         private void XOnUpdateStatusBar(object arg1, string arg2, Brush arg3) {
-            this.StatusBar.Foreground = arg3;
-            this.StatusBar.Text       = arg2;
+            this.Dispatcher?.Invoke( () => {
+                this.StatusBar.Foreground = arg3;
+                this.StatusBar.Text       = arg2;
+            } );
+        }
+
+        private void HOnOnSetCurrentPath(string arg1, string arg2) {
+            if ( this._currentExplorerView == null ) return;
+
+            this.Dispatcher?.Invoke( () => {
+                this.outB.Text =  "";
+                this.outB.Text += ( "-------------------------------\n" );
+
+                for ( var i = 0; i < this.Handler.PathHistory.Count; i++ ) {
+                    var v = this.Handler.PathHistory[i];
+                    this.outB.Text += ( $"[{( this.Handler.HistoryIndex == i + 1 ? "*" : " " )}]: " + v + "\n" );
+                }
+
+                this.outB.Text += ( "-------------------------------\n" );
+            } );
         }
 
         private void MenuItem_OnClick(object sender, RoutedEventArgs e) {
@@ -366,6 +385,23 @@ namespace ExplorerWpf {
         private void RootClick(object sender, RoutedEventArgs e) {
             this.Handler.SetCurrentPath( SettingsHandler.ROOT_FOLDER );
             this._currentExplorerView.ListP( this.Handler.GetCurrentPath() );
+        }
+
+
+        private void ForClick(object sender, RoutedEventArgs e) {
+            if ( !this.Handler.HistoryHasFor ) return;
+
+            this.Handler.GoInHistoryTo( this.Handler.HistoryIndex + 1 );
+            this._currentExplorerView.ListP( this.Handler.GetCurrentPath() );
+            HOnOnSetCurrentPath( "", "" );
+        }
+
+        private void BackClick(object sender, RoutedEventArgs e) {
+            if ( !this.Handler.HistoryHasBack ) return;
+
+            this.Handler.GoInHistoryTo( this.Handler.HistoryIndex - 1 );
+            this._currentExplorerView.ListP( this.Handler.GetCurrentPath() );
+            HOnOnSetCurrentPath( "", "" );
         }
 
         #endregion
@@ -503,20 +539,16 @@ namespace ExplorerWpf {
 
         private ExplorerView CreateExplorer(string path = SettingsHandler.ROOT_FOLDER) {
             var h = new LocalHandler( path );
-            h.OnError += HandlerOnOnError;
+            h.OnError          += HandlerOnOnError;
+            h.OnSetCurrentPath += HOnOnSetCurrentPath;
 
             var x = new ExplorerView( new WindowInteropHelper( this ).Handle );
-        #if PerformanceTest
-            var t = new Thread( () => {
-        #endif
+
             x.Init( h );
 
             x.SendDirectoryUpdateAsCmd += XOnSendDirectoryUpdateAsCmd;
             x.UpdateStatusBar          += XOnUpdateStatusBar;
-        #if PerformanceTest
-            } );
-            t.Start();
-        #endif
+
             x.Margin = new Thickness( 0, 0, 0, 0 );
             return x;
         }
@@ -528,7 +560,7 @@ namespace ExplorerWpf {
             var newTabItem = new TabItem {
                 Header  = l,
                 Name    = name,
-                Content = page,
+                Content =  (UserControl) page,
                 //Background  = this.ColorExample.Background,
                 //Foreground  = this.ColorExample.Foreground,
                 //BorderBrush = this.ColorExample.BorderBrush,
@@ -581,7 +613,6 @@ namespace ExplorerWpf {
 
         #endregion
 
-
         #region IDisposable
 
         private void Dispose(bool disposing) {
@@ -590,7 +621,6 @@ namespace ExplorerWpf {
                 this._currentExplorerView?.Dispose();
                 this._currentPage?.Dispose();
                 this._mainProcess.Dispose();
-                this.WindowX.Dispose();
             }
         }
 
@@ -602,5 +632,6 @@ namespace ExplorerWpf {
 
         #endregion
 
+        private void MainWindow_OnActivated(object sender, EventArgs e) { }
     }
 }

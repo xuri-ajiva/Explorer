@@ -3,21 +3,17 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ExplorerWpf"
-        x:Name="WindowX"
-        x:Class="ExplorerWpf.MainWindow"
-        mc:Ignorable="d"
+        x:Name="WindowX" x:Class="ExplorerWpf.MainWindow" mc:Ignorable="d"
         Title="MainWindow" Background="{x:Null}"
-        Loaded="MainWindow_OnLoaded" Closed="MainWindow_OnClosed" Width="923" Height="636.175"
-        WindowState="Normal"
-        ResizeMode="CanResize" WindowStyle="None" AllowsTransparency="True" WindowStartupLocation="CenterScreen"
-        Icon="8788.png">
+        Loaded="MainWindow_OnLoaded" Closed="MainWindow_OnClosed" Activated="MainWindow_OnActivated"
+        WindowState="Normal" ResizeMode="CanResizeWithGrip" WindowStyle="None" AllowsTransparency="True"
+        WindowStartupLocation="CenterOwner"
+        Icon="8788.png" MinWidth="400" MinHeight="300" Height="500" Width="800">
     <Window.Resources>
         <local:ImageConverter x:Key="Conv" />
     </Window.Resources>
     <WindowChrome.WindowChrome>
-        <WindowChrome
-            CaptionHeight="0"
-            ResizeBorderThickness="8" />
+        <WindowChrome CaptionHeight="0" ResizeBorderThickness="8" />
     </WindowChrome.WindowChrome>
 
     <Grid Margin="1">
@@ -32,15 +28,29 @@
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="auto" />
                             <ColumnDefinition Width="auto" />
+                            <ColumnDefinition Width="auto" />
+                            <ColumnDefinition Width="auto" />
                         </Grid.ColumnDefinitions>
-                        <Button Content="⤴" FontSize="17" Foreground="#FF4EFF96" Click="UpClick"
-                                Background="{DynamicResource Background}"
-                                BorderBrush="{DynamicResource WindowBorder}"
-                                Template="{DynamicResource ButtonBaseControalBar1}" Grid.Column="0" />
                         <Button Content="🏠" FontSize="17" Foreground="#FFFFD208" Click="RootClick"
                                 Background="{DynamicResource Background}"
                                 BorderBrush="{DynamicResource WindowBorder}"
-                                Template="{DynamicResource ButtonBaseControalBar1}" Grid.Column="1" />
+                                Template="{DynamicResource ButtonBaseControalBar1}" Grid.Column="0"
+                                ToolTip="File Explorer Root" />
+                        <Button Content="⤴" FontSize="17" Foreground="#FF4EFF96" Click="UpClick"
+                                Background="{DynamicResource Background}"
+                                BorderBrush="{DynamicResource WindowBorder}"
+                                Template="{DynamicResource ButtonBaseControalBar1}" Grid.Column="3" Cursor="UpArrow"
+                                Width="25" ToolTip="File Explorer directory Up" />
+                        <Button Content="◀" FontSize="17" Foreground="#3090BD" Click="BackClick"
+                                Background="{DynamicResource Background}"
+                                BorderBrush="{DynamicResource WindowBorder}"
+                                Template="{DynamicResource ButtonBaseControalBar1}" Grid.Column="1" Width="25"
+                                Cursor="ScrollW" ToolTip="History Backward" />
+                        <Button Content="▶" FontSize="17" Foreground="#3090BD" Click="ForClick"
+                                Background="{DynamicResource Background}"
+                                BorderBrush="{DynamicResource WindowBorder}"
+                                Template="{DynamicResource ButtonBaseControalBar1}" Grid.Column="2" Width="25"
+                                Cursor="ScrollE" ToolTip="History Forward" />
                     </Grid>
                     <Grid x:Name="WindowControalBar" Margin="0" RenderTransformOrigin="0.5,0.5"
                           HorizontalAlignment="Right" UseLayoutRounding="True" FlowDirection="RightToLeft">
@@ -53,19 +63,23 @@
                         <Button Content="❌" FontSize="17" Foreground="#FFF37F97" Click="CloseClick"
                                 Background="{DynamicResource Background}"
                                 BorderBrush="{DynamicResource WindowBorder}"
-                                Template="{DynamicResource ButtonBaseControalBar1}" Grid.Column="0" />
+                                Template="{DynamicResource ButtonBaseControalBar1}" Grid.Column="0" Cursor="No"
+                                ToolTip="Close Window" />
                         <Button Content="🔳" FontSize="17" Foreground="#FF79E6F3"
                                 Click="MaxClick" Background="{DynamicResource Background}"
                                 BorderBrush="{DynamicResource WindowBorder}"
-                                Template="{DynamicResource ButtonBaseControalBar1}" Grid.Column="1" />
+                                Template="{DynamicResource ButtonBaseControalBar1}" Grid.Column="1" Cursor="SizeNESW"
+                                ToolTip="Maximal this Window" />
                         <Button Content="🔻" FontSize="17" Foreground="#FFD853FF"
                                 Click="MinClick" Background="{DynamicResource Background}"
                                 BorderBrush="{DynamicResource WindowBorder}"
-                                Template="{DynamicResource ButtonBaseControalBar1}" Grid.Column="2" />
+                                Template="{DynamicResource ButtonBaseControalBar1}" Grid.Column="2" Cursor="ScrollS"
+                                ToolTip="Minimal this Window" />
                         <Button Content="📌" FontSize="17" Foreground="#FFDCFF00"
                                 Click="PingClick" Background="{DynamicResource Background}"
                                 BorderBrush="{DynamicResource WindowBorder}"
-                                Template="{DynamicResource ButtonBaseControalBar1}" Grid.Column="3" />
+                                Template="{DynamicResource ButtonBaseControalBar1}" Grid.Column="3" Cursor="Hand"
+                                ToolTip="Window Always On Top" />
                     </Grid>
                 </Grid>
                 <Grid Grid.Row="1">
@@ -115,14 +129,13 @@
                                         SelectionChanged="taps_SelectionChanged"
                                         Background="{DynamicResource Background}"
                                         Foreground="{DynamicResource Foreground}"
-                                        Style="{DynamicResource TabControlStyle1}"
                                         BorderBrush="{DynamicResource Border}" Margin="0,-30,0,0" FontSize="14"
-                                        BorderThickness="1">
+                                        BorderThickness="1" Style="{DynamicResource TabControlStyle2}">
                                 <TabItem x:Name="PlusTabItem" Margin="0" Foreground="{DynamicResource Foreground}"
                                          BorderBrush="{DynamicResource Border}"
                                          Background="{DynamicResource Background}"
                                          TextOptions.TextFormattingMode="Display"
-                                         Style="{DynamicResource TabItemStyle1}">
+                                         Style="{DynamicResource TabItemStyle1}" Height="30">
                                     <TabItem.ContextMenu>
                                         <ContextMenu>
                                             <MenuItem Header="_LocalExplorer" Click="MenuItem_OnClick" TabIndex="1" />
@@ -149,13 +162,21 @@
                                       BorderThickness="1" />
 
                         <Grid x:Name="consoleHost" Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="0" />
+                                <ColumnDefinition Width="716*" />
+                            </Grid.ColumnDefinitions>
                             <local:ConsoleImplementation x:Name="ConsoleW"
                                                          Background="{DynamicResource BackgroundLight}"
                                                          FontWeight="Bold"
                                                          Foreground="{DynamicResource Foreground}"
                                                          BorderBrush="{DynamicResource Border}" BorderThickness="1"
                                                          SnapsToDevicePixels="True" Width="Auto" Height="Auto"
-                                                         Margin="0" />
+                                                         Grid.Column="1" />
+                            <TextBlock Grid.Column="0" x:Name="outB" TextWrapping="Wrap" Background="#FF1D1E34"
+                                       Foreground="{DynamicResource Foreground}">
+                                <Run /><LineBreak /><Run />
+                            </TextBlock>
                         </Grid>
                         <Border Margin="0" Grid.Row="3" Background="{DynamicResource Background}" Grid.ColumnSpan="3"
                                 Grid.Column="0"
@@ -174,6 +195,5 @@
                 </Grid>
             </Grid>
         </Border>
-        <Grid HorizontalAlignment="Left" Height="558" VerticalAlignment="Top" Width="439" Margin="237,202,0,-126" />
     </Grid>
 </Window>

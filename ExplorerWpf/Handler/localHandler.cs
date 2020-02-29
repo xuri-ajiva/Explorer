@@ -2,6 +2,8 @@
 
 using Peter;
 using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
@@ -11,16 +13,19 @@ using System.IO;
 namespace ExplorerWpf.Handler {
     public sealed class LocalHandler : IHandler {
         private          string           _currentPath;
-        private readonly ShellContextMenu _shellContextMenu;
+        private ShellContextMenu _shellContextMenu;
+
+        private List<string> history;
 
         #region Implementation of IHandler
 
         ~LocalHandler() {
-            this._shellContextMenu.DestroyHandle();
-            this._currentPath = null;
+            ReleaseUnmanagedResources();
         }
 
         public LocalHandler(string currentPath = "") {
+            this.history = new List<string> { RootPath, RootPath, this._currentPath };
+
             try {
                 this.OnSetCurrentPath?.Invoke( "", currentPath );
                 this._currentPath      = string.IsNullOrEmpty( currentPath ) ? SettingsHandler.ROOT_FOLDER : currentPath;
@@ -42,10 +47,30 @@ namespace ExplorerWpf.Handler {
         }
 
         /// <inheritdoc />
-        public void SetCurrentPath(string path) {
+        public void SetCurrentPath(string path, bool noHistory = false) { SetCurrentPathInternal( path, noHistory ); }
+
+        private void SetCurrentPathInternal(string path, bool noHistory = false) {
             try {
-                this.OnSetCurrentPath?.Invoke( GetCurrentPath(), path );
+                this.OnSetCurrentPath?.Invoke( this._currentPath, path );
+
+                if ( path.EndsWith( "\\" ) )
+                    path = path.Substring( 0, path.Length - 1 );
+                if ( string.Equals( path, this._currentPath, StringComparison.CurrentCultureIgnoreCase ) ) return;
+
                 this._currentPath = path;
+
+                if ( !noHistory ) {
+                    //if ( this.HistoryHasFor ) {
+                    //    this.history      = this.history.GetRange( 0, this.HistoryIndex + 1 );
+                    //    this.HistoryIndex = this.history.Count;
+                    //}
+
+                    if ( this.history.Count > this.HistoryIndex + 1 )
+                        this.history[HistoryIndex + 1] = this._currentPath;
+                    else
+                        this.history.Add( this._currentPath );
+                    this.HistoryIndex++;
+                }
             } catch (Exception e) {
                 OnOnError( e );
             }
@@ -63,7 +88,7 @@ namespace ExplorerWpf.Handler {
         }
 
         /// <inheritdoc />
-        public void SetRemotePath(string path) {
+        public void SetRemotePath(string path, bool noHistory) {
             try {
                 this._currentPath = path;
                 this.OnSetRemotePath?.Invoke();
@@ -142,6 +167,18 @@ namespace ExplorerWpf.Handler {
         public string RootPath => SettingsHandler.ROOT_FOLDER;
 
         /// <inheritdoc />
+        public ReadOnlyCollection<string> PathHistory => this.history.AsReadOnly();
+
+        /// <inheritdoc />
+        public int HistoryIndex { get; private set; }
+
+        /// <inheritdoc />
+        public bool HistoryHasBack => this.history.Count > 0;
+
+        /// <inheritdoc />
+        public bool HistoryHasFor => this.history.Count > this.HistoryIndex;
+
+        /// <inheritdoc />
         public FileInfo[] ListFiles(string dirToList) {
             try {
                 this.OnListFiles?.Invoke();
@@ -154,6 +191,21 @@ namespace ExplorerWpf.Handler {
 
         /// <inheritdoc />
         public event Action<Exception> OnError;
+
+        /// <inheritdoc />
+        public void GoInHistoryTo(int index) {
+            if ( index >= this.history.Count ) return;
+            if ( index < 0 ) return;
+            try {
+                if ( index >= this.history.Count ) throw new ArgumentOutOfRangeException( nameof(index) );
+                if ( index < 0 ) throw new ArgumentOutOfRangeException( nameof(index) );
+
+                SetCurrentPathInternal( this.history[index], true );
+                this.HistoryIndex = index;
+            } catch (Exception e) {
+                OnOnError( e );
+            }
+        }
 
         /// <inheritdoc />
         public DirectoryInfo[] ListDirectory(string dirToList) {
@@ -203,5 +255,25 @@ namespace ExplorerWpf.Handler {
         #endregion
 
         private void OnOnError(Exception obj) { this.OnError?.Invoke( obj ); }
+
+        #region IDisposable
+
+        private void ReleaseUnmanagedResources() {
+            this._shellContextMenu.DestroyHandle();
+            this._shellContextMenu = null;
+            this._currentPath = null;
+            this.history.Clear();
+            this.history = null;
+
+        }
+
+        /// <inheritdoc />
+        public void Dispose() {
+            ReleaseUnmanagedResources();
+            GC.SuppressFinalize( this );
+        }
+
+        #endregion
+
     }
 }
