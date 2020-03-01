@@ -12,37 +12,20 @@ using System.Xml.Serialization;
 namespace ExplorerWpf {
     public static class SettingsHandler {
         private static CurrentSettings current;
+        public const   string          ROOT_FOLDER = CurrentSettings.S_ROOT_FOLDER;
 
-        public const string ROOT_FOLDER = CurrentSettings.S_ROOT_FOLDER;
-
-        public static bool ConsoleAutoChangeDisc { get => current.SConsoleAutoChangeDisc; set => current.SConsoleAutoChangeDisc = value; }
-
-        public static bool ConsoleAutoChangePath { get => current.SConsoleAutoChangePath; set => current.SConsoleAutoChangePath = value; }
-
-        public static bool ConsolePresent { get => current.SConsolePresent; set => current.SConsolePresent = value; }
-
+        public static bool   ExecuteInNewProcess   { get => current.SExecuteInNewProcess;   set => current.SExecuteInNewProcess = value; }
+        public static bool   ConsoleAutoChangeDisc { get => current.SConsoleAutoChangeDisc; set => current.SConsoleAutoChangeDisc = value; }
+        public static bool   ConsoleAutoChangePath { get => current.SConsoleAutoChangePath; set => current.SConsoleAutoChangePath = value; }
+        public static bool   ConsolePresent        { get => current.SConsolePresent;        set => current.SConsolePresent = value; }
         public static string ParentDirectoryPrefix { get => current.SParentDirectoryPrefix; set => current.SParentDirectoryPrefix = value; }
 
         public static List<string> ExtenstionWithSpecialIcons { get => current.SExtenstionWithSpecialIcons; set => current.SExtenstionWithSpecialIcons = value; }
-        public static double       TreeViewWith = 105;
 
-        public static string InitCall = Init();
 
-        static SettingsHandler() { }
-
-        private static string Init() {
+        static SettingsHandler() {
             current = new CurrentSettings( true );
-            // = new CurrentSettings {
-            //ConsoleAutoChangeDisc = true,
-            //ConsoleAutoChangePath = true,
-            //ConsolePresent        = false,
-            //ParentDirectoryPrefix = "⤴ ",
-            //};
-            // ExtenstionWithSpecialIcons = new List<string> { ".exe", ".lnk", ".url" };
-
             LoadCurrentState();
-
-            return "supersede";
         }
 
         public static void OnError(Exception ex) {
@@ -176,17 +159,19 @@ namespace ExplorerWpf {
             public bool   SConsoleAutoChangePath;
             public bool   SConsolePresent;
             public string SParentDirectoryPrefix;
+            public bool   SExecuteInNewProcess;
 
             public       List<string> SExtenstionWithSpecialIcons;
             public const string       S_ROOT_FOLDER   = "/";
             public const string       S_SETTINGS_FILE = "settimgs.xmlx";
 
             public CurrentSettings(bool defaultInit) {
+                this.SExtenstionWithSpecialIcons = new List<string> { ".exe", ".lnk", ".url" };
                 this.SConsoleAutoChangeDisc      = true;
                 this.SConsoleAutoChangePath      = true;
                 this.SConsolePresent             = false;
+                this.SExecuteInNewProcess        = false;
                 this.SParentDirectoryPrefix      = "⤴ ";
-                this.SExtenstionWithSpecialIcons = new List<string> { ".exe", ".lnk", ".url" };
             }
         }
     }

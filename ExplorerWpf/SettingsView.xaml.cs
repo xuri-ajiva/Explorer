@@ -1,15 +1,28 @@
-﻿using System.Windows;
+﻿#region using
+
+using System.Windows;
 using System.Windows.Controls;
+
+#endregion
 
 namespace ExplorerWpf {
     /// <summary>
-    /// Interaktionslogik für SettingsView.xaml
+    ///     Interaktionslogik für SettingsView.xaml
     /// </summary>
     public partial class SettingsView : UserControl, IPage {
+
         public SettingsView() {
             InitializeComponent();
             UpdateToUi();
         }
+
+
+        #region Implementation of IDisposable
+
+        /// <inheritdoc />
+        public void Dispose() { }
+
+        #endregion
 
         private void UpdateToUi() {
             this.ConsoleAutoChangeDisc.IsChecked = SettingsHandler.ConsoleAutoChangeDisc;
@@ -40,6 +53,12 @@ namespace ExplorerWpf {
             if ( isChecked != null ) SettingsHandler.ConsolePresent = isChecked.Value;
         }
 
+        private void ExecuteInNewProcess_OnClick(object sender, RoutedEventArgs e) {
+            var isChecked = this.ExecuteInNewProcess.IsChecked;
+
+            if ( isChecked != null ) SettingsHandler.ExecuteInNewProcess = isChecked.Value;
+        }
+
         private void SettingsView_OnLoaded(object sender, RoutedEventArgs e) { }
 
         #region Implementation of IPage
@@ -58,14 +77,6 @@ namespace ExplorerWpf {
 
         /// <inheritdoc />
         public void OnReFocus() { UpdateToUi(); }
-
-        #endregion
-
-
-        #region Implementation of IDisposable
-
-        /// <inheritdoc />
-        public void Dispose() { }
 
         #endregion
 

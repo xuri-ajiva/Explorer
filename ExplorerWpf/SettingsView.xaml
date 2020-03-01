@@ -7,16 +7,24 @@
              mc:Ignorable="d"
              d:DesignHeight="300" d:DesignWidth="300" Loaded="SettingsView_OnLoaded">
     <Grid>
-        <CheckBox x:Name="ConsoleAutoChangeDisc" Content="ConsoleAutoChangeDisc" HorizontalAlignment="Left"
-                  Margin="5,5,0,0" VerticalAlignment="Top" FontSize="18" Click="ConsoleAutoChangeDisc_Checked" />
-        <CheckBox x:Name="ConsoleAutoChangePath" Content="ConsoleAutoChangePath" HorizontalAlignment="Left"
-                  Margin="5,33.94,0,0" VerticalAlignment="Top" FontSize="18" Click="ConsoleAutoChangePath_Checked" />
-        <CheckBox x:Name="ConsolePresent" Content="ConsolePresent" HorizontalAlignment="Left" Margin="5,62.88,0,0"
-                  VerticalAlignment="Top" FontSize="18" Click="ConsolePresent_Checked" />
-        <Button Content="Save" Margin="0,0,10,10" VerticalAlignment="Bottom" HorizontalAlignment="Right" Height="22.96"
-                Click="Save_Click" />
-        <Button Content="Load" Margin="0,0,46.503,10" VerticalAlignment="Bottom" HorizontalAlignment="Right"
+        <Grid Margin="5,5,82,184">
+            <CheckBox x:Name="ConsoleAutoChangeDisc" Content="ConsoleAutoChangeDisc" HorizontalAlignment="Left"
+                VerticalAlignment="Top" FontSize="18" Click="ConsoleAutoChangeDisc_Checked" />
+            <CheckBox x:Name="ConsoleAutoChangePath" Content="ConsoleAutoChangePath" HorizontalAlignment="Left"
+                Margin="0,29,0,0" VerticalAlignment="Top" FontSize="18" Click="ConsoleAutoChangePath_Checked" />
+            <CheckBox x:Name="ConsolePresent" Content="ConsolePresent" HorizontalAlignment="Left" Margin="0,58,0,0"
+                VerticalAlignment="Top" FontSize="18" Click="ConsolePresent_Checked" />
+            <CheckBox x:Name="ExecuteInNewProcess" Content="ExecuteInNewProcess" HorizontalAlignment="Left" Margin="0,87,0,0"
+                VerticalAlignment="Top" FontSize="18" Click="ExecuteInNewProcess_OnClick" />
+
+        </Grid>
+        <Grid Margin="220,267,10,10">  
+            <Button Content="Save" VerticalAlignment="Bottom" HorizontalAlignment="Right" Height="23"
+                    Click="Save_Click" />
+            <Button Content="Load" Margin="0,0,37,0" VerticalAlignment="Bottom" HorizontalAlignment="Right"
                 Click="Load_Click" />
+
+        </Grid>
 
     </Grid>
 </UserControl>
