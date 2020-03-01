@@ -69,12 +69,12 @@ namespace ExplorerWpf {
 
             if ( this.Dispatcher != null )
                 this.Dispatcher.Invoke( () => {
-                    this._freePb = ( (GridView) this.MainView.View ).Columns[4];
+                    this._freePb = ( (GridView) this.MainView.View ).Columns[3];
                     List( this.Handler.GetCurrentPath() );
                 } );
             else
                 try {
-                    this._freePb = ( (GridView) this.MainView.View ).Columns[4];
+                    this._freePb = ( (GridView) this.MainView.View ).Columns[3];
                     List( this.Handler.GetCurrentPath() );
                 } catch (Exception e) {
                     SettingsHandler.OnError( e );
@@ -127,9 +127,13 @@ namespace ExplorerWpf {
             }
             else {
                 try {
-                    if ( item != null )
-                        if ( SettingsHandler.ConsoleAutoChangePath )
-                            OnDirectoryUpdate( "\"" + item.Path + "\"", false );
+                    if ( item == null ) return;
+
+                    if ( SettingsHandler.ExecuteInNewProcess )
+                        Process.Start( item.Path );
+                    else
+                        OnDirectoryUpdate( "\"" + item.Path + "\"", false );
+
                 } catch (Exception ex) {
                     MessageBox.Show( ex.Message );
                 }
@@ -141,18 +145,18 @@ namespace ExplorerWpf {
 
         private void Button_Click(object sender, RoutedEventArgs e) { ListDiscs(); }
 
-        private void MainView_OnMouseDown(object sender, MouseButtonEventArgs e) {
+        private void List_OnMouseDown(object sender, MouseButtonEventArgs e) {
             if ( e.RightButton != MouseButtonState.Pressed ) return;
         }
 
-        private void MainView_OnMouseRightButtonUp(object sender, MouseButtonEventArgs e) {
+        private void OnMouseRightButtonUp(object sender, MouseButtonEventArgs e) {
             if ( this.MainView.SelectedItems.Count == 0 ) return;
 
             var wpfP = PointToScreen( e.GetPosition( this ) );
 
             var p = new Point( (int) wpfP.X, (int) wpfP.Y );
 
-            var dirs  = this.MainView.SelectedItems.Cast<Item>().Where( l => l.Type == Item.FileType.DIRECTORY ).Select( l => l.TryGetDirectoryInfo ).ToArray();
+            var dirs  = this.MainView.SelectedItems.Cast<Item>().Where( l => l.Type == Item.FileType.DIRECTORY && l.Exists ).Select( l => l.TryGetDirectoryInfo ).ToArray();
             var files = this.MainView.SelectedItems.Cast<Item>().Where( l => l.Type == Item.FileType.FILE ).Select( l => l.TryGetFileInfo ).ToArray();
 
             if ( dirs.Any() && files.Any() ) return;
@@ -323,7 +327,7 @@ namespace ExplorerWpf {
 
                 var i = new Item( new DirectoryInfo( driveInfo.Name ) ) {
                     Name   = string.IsNullOrEmpty( driveInfo.VolumeLabel ) ? "Local Disk (NotNamed)" : driveInfo.VolumeLabel,
-                    Size   = $"{Item.GetLength( driveInfo.AvailableFreeSpace )} free of {Item.GetLength( driveInfo.TotalSize )} ~ {(double) ( driveInfo.TotalSize - driveInfo.AvailableFreeSpace ) / driveInfo.TotalSize * 100D:00.000} %",
+                    Size   = $"{Item.GetLength( driveInfo.AvailableFreeSpace )} free of {Item.GetLength( driveInfo.TotalSize )}",
                     SizePb = (double) ( driveInfo.TotalSize - driveInfo.AvailableFreeSpace ) / driveInfo.TotalSize * 100D
                 };
 
@@ -381,6 +385,31 @@ namespace ExplorerWpf {
 
         #endregion
 
+        private void HandleDoubleClick(object sender, MouseButtonEventArgs e) { Console.WriteLine( "dc" ); }
+    }
+
+
+    public class GridViewColumnSortData : GridViewColumn {
+
+        #region DependencyProperty Content
+
+        /// <summary>
+        /// Registers a dependency property as backing store for the Content property
+        /// </summary>
+        public static readonly DependencyProperty BindingForSortProperty =
+            DependencyProperty.Register( "Content", typeof(Binding), typeof(GridViewColumnSortData),
+                new FrameworkPropertyMetadata( null,
+                    FrameworkPropertyMetadataOptions.AffectsRender |
+                    FrameworkPropertyMetadataOptions.AffectsParentMeasure ) );
+
+        /// <summary>
+        /// Gets or sets the Content.
+        /// </summary>
+        /// <value>The Content.</value>
+        public Binding BindingForSort { get { return (Binding) GetValue( BindingForSortProperty ); } set { SetValue( BindingForSortProperty, value ); } }
+
+        #endregion
+
     }
 
     public class SortableListView : ListView {
@@ -396,10 +425,17 @@ namespace ExplorerWpf {
 
             if ( clickedHeader != this._lastHeaderClicked ) direction = ListSortDirection.Ascending;
             else direction                                            = this._lastDirection == ListSortDirection.Ascending ? ListSortDirection.Descending : ListSortDirection.Ascending;
+            string sortString;
 
-            if ( clickedHeader.Column.DisplayMemberBinding == null ) return;
-
-            var sortString = ( (Binding) clickedHeader.Column.DisplayMemberBinding ).Path.Path;
+            if ( clickedHeader.Column.DisplayMemberBinding == null ) {
+                if ( clickedHeader.Column is GridViewColumnSortData sortData ) {
+                    sortString = sortData.BindingForSort.Path.Path;
+                }
+                else
+                    return;
+            }
+            else
+                sortString = ( (Binding) clickedHeader.Column.DisplayMemberBinding ).Path.Path;
 
             Sort( sortString, direction );
 

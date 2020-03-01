@@ -14,17 +14,26 @@
             <GradientStop Color="#FF5A32E6" />
         </LinearGradientBrush>
         <local:ImageConverter x:Key="ImageConverter" />
+        <Style x:Key="Item-Style" TargetType="{x:Type ListViewItem}">
+            <EventSetter Event="MouseDoubleClick" Handler="BrowseAction" />
+            <EventSetter Event="MouseDown" Handler="List_OnMouseDown" />
+            <EventSetter Event="MouseRightButtonUp" Handler="OnMouseRightButtonUp"  />
+        </Style>
     </UserControl.Resources>
     <Grid x:Name="Root">
         <Grid.Resources>
-            <DataTemplate x:Key="IconTemplate">
-                <Image Source="{Binding Icon, Converter={StaticResource ImageConverter}}" Width="16" Height="16" />
+            <DataTemplate x:Key="IconTemplate" DataType="local:Item">
+                <DockPanel>
+                    <Image Source="{Binding Icon, Converter={StaticResource ImageConverter}, Mode=OneWay}" Width="16" Height="16"  DockPanel.Dock="Left"/>
+                    <Label Content="  " FontSize="5"/>
+                    <TextBlock Text="{Binding Name, Mode=OneWay}" DockPanel.Dock="Left"/>
+                </DockPanel>
             </DataTemplate>
             <DataTemplate x:Key="Pb" DataType="local:Item">
                 <ProgressBar Value="{Binding SizePb}" Minimum="0" Maximum="100" Margin="0,0,0,0"
                              Foreground="{DynamicResource Foreground}"
                              Background="{DynamicResource DefBack}" Orientation="Horizontal" Width="100" Height="16"
-                             Style="{DynamicResource ProgressBarStyle1}" />
+                             Style="{DynamicResource ProgressBarStyle1}" ToolTip="{Binding SizePb, Mode=OneWay}"/>
             </DataTemplate>
         </Grid.Resources>
 
@@ -32,31 +41,23 @@
             <RowDefinition Height="25" />
             <RowDefinition Height="404*" />
         </Grid.RowDefinitions>
-        <local:SortableListView x:Name="MainView" AutomationProperties.IsColumnHeader="True"
-                                MouseDoubleClick="BrowseAction" MouseDown="MainView_OnMouseDown"
-                                MouseRightButtonUp="MainView_OnMouseRightButtonUp"
-                                BorderBrush="{DynamicResource Border}"
-                                Foreground="{DynamicResource Foreground}"
-                                ButtonBase.Click="SortableListViewColumnHeaderClicked"
-                                Style="{DynamicResource {x:Type ListView}}" IsSynchronizedWithCurrentItem="True"
-                                Grid.Row="1" FontSize="14">
+        <local:SortableListView x:Name="MainView" AutomationProperties.IsColumnHeader="True" IsSynchronizedWithCurrentItem="True"
+                                BorderBrush="{DynamicResource Border}" Foreground="{DynamicResource Foreground}" ButtonBase.Click="SortableListViewColumnHeaderClicked" 
+                                Style="{DynamicResource {x:Type ListView}}" 
+                                Grid.Row="1" FontSize="14" d:DataContext="{d:DesignData Type=Item}" ItemContainerStyle="{StaticResource Item-Style}">
             <local:SortableListView.View>
                 <GridView>
-                    <GridViewColumn Header="Icon" CellTemplate="{StaticResource IconTemplate}" />
-                    <GridViewColumn Header="Name" Width="auto" DisplayMemberBinding="{Binding Name}" />
-                    <GridViewColumn Header="Path" Width="200" DisplayMemberBinding="{Binding Path}" />
-                    <GridViewColumn Header="Size" DisplayMemberBinding="{Binding Size}" />
-                    <GridViewColumn Header="Free Space" CellTemplate="{StaticResource Pb}" />
-                    <GridViewColumn Header="Type" Width="Auto" DisplayMemberBinding="{Binding Type}" />
-                    <GridViewColumn Header="Extension" Width="Auto" DisplayMemberBinding="{Binding Extension}" />
-                    <GridViewColumn Header="Exists" Width="Auto" DisplayMemberBinding="{Binding Exists}" />
-                    <GridViewColumn Header="IsReadOnly" Width="Auto" DisplayMemberBinding="{Binding IsReadOnly}" />
-                    <GridViewColumn Header="CreationTime" Width="Auto"
-                                    DisplayMemberBinding="{Binding CreationTime, StringFormat='yyyy-MM-dd HH:mm:ss.fff'}" />
-                    <GridViewColumn Header="LastAccessTime" Width="Auto"
-                                    DisplayMemberBinding="{Binding LastAccessTime, StringFormat='yyyy-MM-dd HH:mm:ss.fff'}" />
-                    <GridViewColumn Header="LastWriteTime" Width="Auto"
-                                    DisplayMemberBinding="{Binding LastWriteTime, StringFormat='yyyy-MM-dd HH:mm:ss.fff'}" />
+                    <local:GridViewColumnSortData Header="Name" Width="auto" CellTemplate="{StaticResource IconTemplate}" BindingForSort="{Binding Name, Mode=OneWay}"/>
+                    <local:GridViewColumnSortData Header="Path" Width="200" DisplayMemberBinding="{Binding Path, Mode=OneWay}" BindingForSort="{Binding Path, Mode=OneWay}" />
+                    <local:GridViewColumnSortData Header="Size" DisplayMemberBinding="{Binding Size, Mode=OneWay}" BindingForSort="{Binding Size, Mode=OneWay}" />
+                    <local:GridViewColumnSortData Header="Free Space" CellTemplate="{StaticResource Pb}" BindingForSort="{Binding SizePb, Mode=OneWay}"/>
+                    <local:GridViewColumnSortData Header="Type" Width="Auto" DisplayMemberBinding="{Binding Type, Mode=OneWay}" BindingForSort="{Binding Type, Mode=OneWay}" />
+                    <local:GridViewColumnSortData Header="Extension" Width="Auto" DisplayMemberBinding="{Binding Extension, Mode=OneWay}" BindingForSort="{Binding Extension, Mode=OneWay}" />
+                    <local:GridViewColumnSortData Header="Exists" Width="Auto" DisplayMemberBinding="{Binding Exists, Mode=OneWay}" BindingForSort="{Binding Exists, Mode=OneWay}" />
+                    <local:GridViewColumnSortData Header="IsReadOnly" Width="Auto" DisplayMemberBinding="{Binding IsReadOnly, Mode=OneWay}" BindingForSort="{Binding IsReadOnly, Mode=OneWay}" />
+                    <local:GridViewColumnSortData Header="CreationTime" Width="Auto" DisplayMemberBinding="{Binding CreationTime, StringFormat='yyyy-MM-dd HH:mm:ss.fff', Mode=OneWay}" BindingForSort="{Binding CreationTime, Mode=OneWay}" />
+                    <local:GridViewColumnSortData Header="LastAccessTime" Width="Auto" DisplayMemberBinding="{Binding LastAccessTime, StringFormat='yyyy-MM-dd HH:mm:ss.fff', Mode=OneWay}" BindingForSort="{Binding LastAccessTime, Mode=OneWay}" />
+                    <local:GridViewColumnSortData Header="LastWriteTime" Width="Auto" DisplayMemberBinding="{Binding LastWriteTime, StringFormat='yyyy-MM-dd HH:mm:ss.fff', Mode=OneWay}" BindingForSort="{Binding LastWriteTime, Mode=OneWay}"/>
                 </GridView>
             </local:SortableListView.View>
         </local:SortableListView>

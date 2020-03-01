@@ -127,18 +127,19 @@ namespace Peter {
         #region InvokeCommand
 
         private void InvokeCommand(IContextMenu oContextMenu, uint nCmd, string strFolder, Point pointInvoke) {
-            var invoke = new CMINVOKECOMMANDINFOEX();
-            invoke.cbSize       = cbInvokeCommand;
-            invoke.lpVerb       = (IntPtr) ( nCmd - CMD_FIRST );
-            invoke.lpDirectory  = strFolder;
-            invoke.lpVerbW      = (IntPtr) ( nCmd - CMD_FIRST );
-            invoke.lpDirectoryW = strFolder;
-            invoke.fMask = CMIC.UNICODE                                                             |
-                           CMIC.PTINVOKE                                                            |
-                           ( ( Control.ModifierKeys & Keys.Control ) != 0 ? CMIC.CONTROL_DOWN : 0 ) |
-                           ( ( Control.ModifierKeys & Keys.Shift )   != 0 ? CMIC.SHIFT_DOWN : 0 );
-            invoke.ptInvoke = new POINT( pointInvoke.X, pointInvoke.Y );
-            invoke.nShow    = SW.SHOWNORMAL;
+            var invoke = new CMINVOKECOMMANDINFOEX {
+                cbSize       = cbInvokeCommand,
+                lpVerb       = (IntPtr) ( nCmd - CMD_FIRST ),
+                lpDirectory  = strFolder,
+                lpVerbW      = (IntPtr) ( nCmd - CMD_FIRST ),
+                lpDirectoryW = strFolder,
+                fMask = CMIC.UNICODE                                                             |
+                        CMIC.PTINVOKE                                                            |
+                        ( ( Control.ModifierKeys & Keys.Control ) != 0 ? CMIC.CONTROL_DOWN : 0 ) |
+                        ( ( Control.ModifierKeys & Keys.Shift )   != 0 ? CMIC.SHIFT_DOWN : 0 ),
+                ptInvoke = new POINT( pointInvoke.X, pointInvoke.Y ),
+                nShow    = SW.SHOWNORMAL
+            };
 
             oContextMenu.InvokeCommand( ref invoke );
         }

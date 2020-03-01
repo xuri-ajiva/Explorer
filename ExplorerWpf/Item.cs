@@ -60,6 +60,7 @@ namespace ExplorerWpf {
             Icon icon;
 
             lock (CacheLock) {
+                Debug.WriteLine( Cache.Count );
                 if ( Cache.TryGetValue( ext, out icon ) )
                     return icon;
 
@@ -102,36 +103,54 @@ namespace ExplorerWpf {
         private static readonly Queue<(string, string)> CashQueue = new Queue<(string, string)>();
 
         public static void CacheIcon(string path) {
-            var ext = path;
+            string key;
 
-            if ( File.Exists( path ) ) ext = Path.GetExtension( path );
+            if ( File.Exists( path ) ) {
+                var ext = Path.GetExtension( path );
+                key = SettingsHandler.ExtenstionWithSpecialIcons.Contains( ext ) ? path : ext;
+            }
+            else {
+                key = path;
+            }
 
-            if ( SettingsHandler.ExtenstionWithSpecialIcons.Contains( ext ) ) ext = path;
+            if ( key == null ) return;
 
-            if ( ext == null ) return;
-
-            CashQueue.Enqueue( ( ext, path ) );
+            CashQueue.Enqueue( ( key, path ) );
 
             if ( CashThread != null && CashThread.ThreadState == ThreadState.Unstarted ) {
                 CashThread.Start();
             }
+
+            if ( CashThread == null || !CashThread.IsAlive ) {
+                CashThread = new Thread( CashLoop );
+                CashThread.Start();
+            }
         }
 
-        private static readonly Thread CashThread = new Thread( () => {
-            while ( CashQueue != null ) {
-                ( var ext, var path ) = CashQueue.Dequeue();
+        private static Thread CashThread = new Thread( CashLoop );
 
-                lock (CacheLock) {
-                    if ( Cache.ContainsKey( ext ) ) return;
+        public static void CashLoop() {
+            try {
+                while ( true ) {
+                    Thread.Sleep( 10 );
+                    if ( CashQueue == null || CashQueue.Count == 0) continue;
 
-                    var icon = ExtractFromPath( path );
+                    ( var ext, var path ) = CashQueue.Dequeue();
 
-                    if ( icon == null ) return;
+                    lock (CacheLock) {
+                        if ( Cache.ContainsKey( ext ) ) continue;
 
-                    Cache.Add( ext, icon );
+                        var icon = ExtractFromPath( path );
+
+                        if ( icon == null ) continue;
+
+                        Cache.Add( ext, icon );
+                    }
                 }
+            } catch (Exception e) {
+                Console.WriteLine( e.Message );
             }
-        } );
+        }
     }
 
     public class TreePathItem : Item {
@@ -226,13 +245,13 @@ namespace ExplorerWpf {
 
         [DebuggerStepThrough]
         public static string GetLength(long length) {
-            if ( length > Math.Pow( 10, 15 ) ) return ( length / Math.Pow( 10, 15 ) ).ToString( "0.00" ) + "Pb";
-            if ( length > Math.Pow( 10, 12 ) ) return ( length / Math.Pow( 10, 12 ) ).ToString( "0.00" ) + "Tb";
-            if ( length > Math.Pow( 10, 9 ) ) return ( length / Math.Pow( 10, 9 ) ).ToString( "0.00" )   + "Gb";
-            if ( length > Math.Pow( 10, 6 ) ) return ( length / Math.Pow( 10, 6 ) ).ToString( "0.00" )   + "Mb";
-            if ( length > Math.Pow( 10, 3 ) ) return ( length / Math.Pow( 10, 3 ) ).ToString( "0.00" )   + "Kb";
+            if ( length > Math.Pow( 10, 15 ) ) return ( length / Math.Pow( 10, 15 ) ).ToString( "000.00" ) + " Pb";
+            if ( length > Math.Pow( 10, 12 ) ) return ( length / Math.Pow( 10, 12 ) ).ToString( "000.00" ) + " Tb";
+            if ( length > Math.Pow( 10, 9 ) ) return ( length / Math.Pow( 10, 9 ) ).ToString( "000.00" )   + " Gb";
+            if ( length > Math.Pow( 10, 6 ) ) return ( length / Math.Pow( 10, 6 ) ).ToString( "000.00" )   + " Mb";
+            if ( length > Math.Pow( 10, 3 ) ) return ( length / Math.Pow( 10, 3 ) ).ToString( "000.00" )   + " Kb";
 
-            return length + "b";
+            return length + " b";
         }
 
         private void CreateIcon() {
