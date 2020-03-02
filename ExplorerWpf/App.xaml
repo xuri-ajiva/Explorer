@@ -1,9 +1,6 @@
 ﻿<Application
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:local="clr-namespace:ExplorerWpf"
-    xmlns:Themes="clr-namespace:Microsoft.Windows.Themes;assembly=PresentationFramework.Classic"
-    xmlns:system="clr-namespace:System;assembly=mscorlib"
     x:Class="ExplorerWpf.App"
     StartupUri="MainWindow.xaml">
 
@@ -31,12 +28,60 @@
                 <GradientStop Color="#FFAE54F0" Offset="1" />
                 <GradientStop Color="#FF5A32E6" />
             </LinearGradientBrush>
+            <SolidColorBrush x:Key="ScrollBarBackground" Color="#FF303651" />
+            <SolidColorBrush x:Key="DefBack" Color="#FF181B28" />
             <SolidColorBrush x:Key="Border" Color="#FF111421" />
-            <SolidColorBrush x:Key="Aczent" Color="#E6141721" />
+            <SolidColorBrush x:Key="Accent" Color="#E6141721" />
             <SolidColorBrush x:Key="WindowBorder" Color="#7F090E1D" />
             <LinearGradientBrush x:Key="BackgroundLight" EndPoint="0.5,1" StartPoint="0.5,0">
                 <GradientStop Color="#F3181B28" />
                 <GradientStop Color="#CC181B28" Offset="1" />
+            </LinearGradientBrush>
+
+
+            <!--Control colors.-->
+            <Color x:Key="WindowColor">#153685</Color>
+            <Color x:Key="ContentAreaColorLight">#212650</Color>
+            <Color x:Key="ContentAreaColorDark">#242953</Color>
+
+            <Color x:Key="DisabledControlLightColor">#212650</Color>
+            <Color x:Key="DisabledControlDarkColor">#212650</Color>
+            <Color x:Key="DisabledForegroundColor">#212650</Color>
+
+            <Color x:Key="SelectedBackgroundColor">#212650</Color>
+            <Color x:Key="SelectedUnfocusedColor">#2B305E</Color>
+
+            <Color x:Key="ControlLightColor">#F3181B28</Color>
+            <Color x:Key="ControlMediumColor">#F3181B29</Color>
+            <Color x:Key="ControlDarkColor">#EB00FF</Color>
+
+            <Color x:Key="ControlMouseOverColor">#F31E2234</Color>
+            <Color x:Key="ControlPressedColor">#F31D2132</Color>
+
+
+            <Color x:Key="GlyphColor">#FF186884</Color>
+            <Color x:Key="GlyphMouseOver">sc#1, 0.004391443, 0.002428215, 0.242281124</Color>
+            
+            <LinearGradientBrush x:Key="MenuPopupBrush" EndPoint="0.5,1" StartPoint="0.5,0">
+                <GradientStop Color="{DynamicResource ControlLightColor}"
+                              Offset="0" />
+                <GradientStop Color="{DynamicResource ControlMediumColor}"
+                              Offset="0.5" />
+                <GradientStop Color="{DynamicResource ControlLightColor}"
+                              Offset="1" />
+            </LinearGradientBrush>
+
+            <LinearGradientBrush x:Key="ProgressBarIndicatorAnimatedFill"
+                                 StartPoint="0,0"
+                                 EndPoint="1,0">
+                <LinearGradientBrush.GradientStops>
+                    <GradientStopCollection>
+                        <GradientStop Color="#000000FF" Offset="0" />
+                        <GradientStop Color="#600000FF" Offset="0.4" />
+                        <GradientStop Color="#600000FF" Offset="0.6" />
+                        <GradientStop Color="#000000FF" Offset="1" />
+                    </GradientStopCollection>
+                </LinearGradientBrush.GradientStops>
             </LinearGradientBrush>
 
         </ResourceDictionary>

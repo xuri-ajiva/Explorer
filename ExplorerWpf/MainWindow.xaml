@@ -7,8 +7,8 @@
         Title="MainWindow" Background="{x:Null}"
         Loaded="MainWindow_OnLoaded" Closed="MainWindow_OnClosed" Activated="MainWindow_OnActivated"
         WindowState="Normal" ResizeMode="CanResizeWithGrip" WindowStyle="None" AllowsTransparency="True"
-        WindowStartupLocation="CenterOwner"
-        Icon="8788.png" MinWidth="400" MinHeight="300" Height="500" Width="800">
+        WindowStartupLocation="CenterScreen"
+        Icon="Icon\ExploereIcon.png" MinWidth="400" MinHeight="300" Height="750" Width="1000">
     <Window.Resources>
         <local:ImageConverter x:Key="Conv" />
     </Window.Resources>
@@ -140,8 +140,8 @@
                                         <ContextMenu>
                                             <MenuItem Header="_LocalExplorer" Click="MenuItem_OnClick" TabIndex="1" />
                                             <MenuItem Header="_SettingsView" Click="MenuItem_OnClick" TabIndex="2" />
-                                            <MenuItem Header="_Test" IsCheckable="True" IsChecked="False"
-                                                      Click="MenuItem_OnClick" TabIndex="99" />
+                                            <MenuItem Header="_ThemeViewView" Click="MenuItem_OnClick" TabIndex="3" />
+                                            <MenuItem Header="_Test" Click="MenuItem_OnClick" TabIndex="99" />
                                         </ContextMenu>
                                     </TabItem.ContextMenu>
                                     <TabItem.Header>

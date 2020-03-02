@@ -4,25 +4,24 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:local="clr-namespace:ExplorerWpf"
-             mc:Ignorable="d"
-             d:DesignHeight="300" d:DesignWidth="300" Loaded="SettingsView_OnLoaded">
+             mc:Ignorable="d" Loaded="SettingsView_OnLoaded" Height="364" Width="458" Margin="0,0,0,5">
     <Grid>
-        <Grid Margin="5,5,82,184">
+        <Grid Margin="5">
             <CheckBox x:Name="ConsoleAutoChangeDisc" Content="ConsoleAutoChangeDisc" HorizontalAlignment="Left"
-                VerticalAlignment="Top" FontSize="18" Click="ConsoleAutoChangeDisc_Checked" />
+                VerticalAlignment="Top" FontSize="18" Click="ConsoleAutoChangeDisc_Checked" Background="{x:Null}" BorderBrush="{DynamicResource Border}" Foreground="{DynamicResource Foreground}" />
             <CheckBox x:Name="ConsoleAutoChangePath" Content="ConsoleAutoChangePath" HorizontalAlignment="Left"
-                Margin="0,29,0,0" VerticalAlignment="Top" FontSize="18" Click="ConsoleAutoChangePath_Checked" />
+                Margin="0,29,0,0" VerticalAlignment="Top" FontSize="18" Click="ConsoleAutoChangePath_Checked" Background="{x:Null}" BorderBrush="{DynamicResource Border}" Foreground="{DynamicResource Foreground}" />
             <CheckBox x:Name="ConsolePresent" Content="ConsolePresent" HorizontalAlignment="Left" Margin="0,58,0,0"
-                VerticalAlignment="Top" FontSize="18" Click="ConsolePresent_Checked" />
+                VerticalAlignment="Top" FontSize="18" Click="ConsolePresent_Checked" Background="{x:Null}" BorderBrush="{DynamicResource Border}" Foreground="{DynamicResource Foreground}" />
             <CheckBox x:Name="ExecuteInNewProcess" Content="ExecuteInNewProcess" HorizontalAlignment="Left" Margin="0,87,0,0"
-                VerticalAlignment="Top" FontSize="18" Click="ExecuteInNewProcess_OnClick" />
+                VerticalAlignment="Top" FontSize="18" Click="ExecuteInNewProcess_OnClick" Background="{x:Null}" BorderBrush="{DynamicResource Border}" Foreground="{DynamicResource Foreground}" />
 
         </Grid>
-        <Grid Margin="220,267,10,10">  
-            <Button Content="Save" VerticalAlignment="Bottom" HorizontalAlignment="Right" Height="23"
-                    Click="Save_Click" />
-            <Button Content="Load" Margin="0,0,37,0" VerticalAlignment="Bottom" HorizontalAlignment="Right"
-                Click="Load_Click" />
+        <Grid Margin="0,0,10,10" HorizontalAlignment="Right" VerticalAlignment="Bottom">
+            <Button Content="Save" Height="23"
+                    Click="Save_Click" Template="{DynamicResource ButtonBaseControalBar1}" Background="{DynamicResource Background}" BorderBrush="{DynamicResource Border}" Foreground="{DynamicResource Foreground}" Width="33" Margin="37,0,0,0" />
+            <Button Content="Load" Margin="0,0,37,0"
+                Click="Load_Click" Height="23" Template="{DynamicResource ButtonBaseControalBar1}" Background="{DynamicResource Background}" BorderBrush="{DynamicResource Border}" Foreground="{DynamicResource Foreground}" Width="33" />
 
         </Grid>
 

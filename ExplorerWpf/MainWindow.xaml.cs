@@ -18,10 +18,12 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Interop;
+using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
 using Brush = System.Windows.Media.Brush;
 using MessageBox = System.Windows.Forms.MessageBox;
+using Point = System.Windows.Point;
 
 #endregion
 
@@ -91,7 +93,7 @@ namespace ExplorerWpf {
                     var line = p.StandardError.ReadLine();
                     Console.ForegroundColor = ConsoleColor.Red;
                     Console.WriteLine( line );
-                    Console.ResetColor();
+                    Console.ForegroundColor = ConsoleColor.Yellow;
                 }
             } );
             this._outReaderThread = new Thread( () => {
@@ -100,7 +102,7 @@ namespace ExplorerWpf {
                 Console.Clear();
                 Console.ForegroundColor = ConsoleColor.Magenta;
                 Console.WriteLine( "Console Support Online" );
-                Console.ResetColor();
+                Console.ForegroundColor = ConsoleColor.White; //TODO: Setting
 
                 while ( !p.StandardOutput.EndOfStream ) {
                     var line = p.StandardOutput.ReadLine();
@@ -328,6 +330,9 @@ namespace ExplorerWpf {
                 case 2:
                     AddTab( TapType.Settings );
                     break;
+                case 3:
+                    AddTab( TapType.Theme );
+                    break;
                 case 99:
                     if ( me.IsChecked )
                         MessageBox.Show( "Test" );
@@ -360,7 +365,8 @@ namespace ExplorerWpf {
             Settings,
 
             //TODO:: Theams,
-            Empty
+            Empty,
+            Theme
         }
 
         #region Buttons
@@ -537,6 +543,7 @@ namespace ExplorerWpf {
 
         private SettingsView CreateSettings() => new SettingsView();
 
+        private IPage CreateTheme() => new ThemeView();
         private ExplorerView CreateExplorer(string path = SettingsHandler.ROOT_FOLDER) {
             var h = new LocalHandler( path );
             h.OnError          += HandlerOnOnError;
@@ -560,7 +567,7 @@ namespace ExplorerWpf {
             var newTabItem = new TabItem {
                 Header  = l,
                 Name    = name,
-                Content =  (UserControl) page,
+                Content = (UserControl) page,
                 //Background  = this.ColorExample.Background,
                 //Foreground  = this.ColorExample.Foreground,
                 //BorderBrush = this.ColorExample.BorderBrush,
@@ -595,11 +602,15 @@ namespace ExplorerWpf {
                 case TapType.Empty:
                     page = CreateEmpty();
                     break;
+                case TapType.Theme:
+                    page = CreateTheme();
+                    break;
                 default: throw new ArgumentOutOfRangeException( nameof(type), type, null );
             }
 
             AddTabToTabControl( CreateTabItem( page, type.ToString() ) );
         }
+
 
         private void CloseTap(TabItem tp) {
             if ( !( tp.Content is IPage page ) ) return;

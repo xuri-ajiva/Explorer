@@ -4,60 +4,6 @@
                     xmlns:Themes="clr-namespace:Microsoft.Windows.Themes;assembly=PresentationFramework.Classic"
                     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
                     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="d">
-    <!--Control colors.-->
-    <Color x:Key="WindowColor">#153685</Color>
-    <Color x:Key="ContentAreaColorLight">#212650</Color>
-    <Color x:Key="ContentAreaColorDark">#242953</Color>
-
-    <Color x:Key="DisabledControlLightColor">#212650</Color>
-    <Color x:Key="DisabledControlDarkColor">#212650</Color>
-    <Color x:Key="DisabledForegroundColor">#212650</Color>
-
-    <Color x:Key="SelectedBackgroundColor">#212650</Color>
-    <Color x:Key="SelectedUnfocusedColor">#1A1F48</Color>
-
-    <Color x:Key="ControlLightColor">#F3181B28</Color>
-    <Color x:Key="ControlMediumColor">#F3181B29</Color>
-    <Color x:Key="ControlDarkColor">#EB00FF</Color>
-
-    <Color x:Key="ControlMouseOverColor">#F31E2234</Color>
-    <Color x:Key="ControlPressedColor">#F31D2132</Color>
-
-
-    <Color x:Key="GlyphColor">#FF186884</Color>
-    <Color x:Key="GlyphMouseOver">sc#1, 0.004391443, 0.002428215, 0.242281124</Color>
-
-    <SolidColorBrush x:Key="ScrolBarbackground" Color="#FF303651" />
-    <SolidColorBrush x:Key="DefBack" Color="#FF181B28" />
-
-    <LinearGradientBrush x:Key="MenuPopupBrush"
-                         EndPoint="0.5,1"
-                         StartPoint="0.5,0">
-        <GradientStop Color="{DynamicResource ControlLightColor}"
-                      Offset="0" />
-        <GradientStop Color="{DynamicResource ControlMediumColor}"
-                      Offset="0.5" />
-        <GradientStop Color="{DynamicResource ControlLightColor}"
-                      Offset="1" />
-    </LinearGradientBrush>
-
-    <LinearGradientBrush x:Key="ProgressBarIndicatorAnimatedFill"
-                         StartPoint="0,0"
-                         EndPoint="1,0">
-        <LinearGradientBrush.GradientStops>
-            <GradientStopCollection>
-                <GradientStop Color="#000000FF"
-                              Offset="0" />
-                <GradientStop Color="#600000FF"
-                              Offset="0.4" />
-                <GradientStop Color="#600000FF"
-                              Offset="0.6" />
-                <GradientStop Color="#000000FF"
-                              Offset="1" />
-            </GradientStopCollection>
-        </LinearGradientBrush.GradientStops>
-    </LinearGradientBrush>
-
 
     <Style x:Key="{x:Type TreeView}"
            TargetType="{x:Type TreeView}">
@@ -79,7 +25,7 @@
                         <ScrollViewer Focusable="False" CanContentScroll="False" Padding="4"
                                       BorderBrush="{TemplateBinding BorderBrush}"
                                       Foreground="{TemplateBinding Foreground}"
-                                      OpacityMask="{DynamicResource ScrolBarbackground}"
+                                      OpacityMask="{DynamicResource ScrollBarBackground}"
                                       Template="{DynamicResource ScrollViewerControlTemplate1}">
                             <ItemsPresenter />
                         </ScrollViewer>
@@ -197,7 +143,7 @@
                                         <ColorAnimationUsingKeyFrames Storyboard.TargetName="Bd"
                                                                       Storyboard.TargetProperty="(Panel.Background).                     (SolidColorBrush.Color)">
                                             <EasingColorKeyFrame KeyTime="0"
-                                                                 Value="{StaticResource SelectedBackgroundColor}" />
+                                                                 Value="{DynamicResource SelectedBackgroundColor}" />
                                         </ColorAnimationUsingKeyFrames>
                                     </Storyboard>
                                 </VisualState>
@@ -207,7 +153,7 @@
                                         <ColorAnimationUsingKeyFrames Storyboard.TargetName="Bd"
                                                                       Storyboard.TargetProperty="(Panel.Background).                     (SolidColorBrush.Color)">
                                             <EasingColorKeyFrame KeyTime="0"
-                                                                 Value="{StaticResource SelectedUnfocusedColor}" />
+                                                                 Value="{DynamicResource SelectedUnfocusedColor}" />
                                         </ColorAnimationUsingKeyFrames>
                                     </Storyboard>
                                 </VisualState>
@@ -1194,7 +1140,7 @@
                                             Storyboard.TargetProperty="(Panel.Background).                     (GradientBrush.GradientStops)[1].(GradientStop.Color)"
                                             Storyboard.TargetName="HeaderBorder">
                                             <EasingColorKeyFrame KeyTime="0"
-                                                                 Value="{StaticResource ControlMouseOverColor}" />
+                                                                 Value="{DynamicResource ControlMouseOverColor}" />
                                         </ColorAnimationUsingKeyFrames>
                                     </Storyboard>
                                 </VisualState>
@@ -1321,7 +1267,7 @@
                             Style="{DynamicResource ScrollViewerStyle3}"
                             Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}"
                             Foreground="{TemplateBinding Foreground}"
-                            OpacityMask="{DynamicResource ScrolBarbackground}" Margin="0">
+                            OpacityMask="{DynamicResource ScrollBarBackground}" Margin="0">
                             <ItemsPresenter Style="{DynamicResource ItemsPresenterStyle1}" />
                         </ScrollViewer>
                     </Border>
@@ -1372,7 +1318,7 @@
                                         <ColorAnimationUsingKeyFrames Storyboard.TargetName="Border"
                                                                       Storyboard.TargetProperty="(Panel.Background).                     (SolidColorBrush.Color)">
                                             <EasingColorKeyFrame KeyTime="0"
-                                                                 Value="{StaticResource SelectedBackgroundColor}" />
+                                                                 Value="{DynamicResource SelectedBackgroundColor}" />
                                         </ColorAnimationUsingKeyFrames>
                                     </Storyboard>
                                 </VisualState>
@@ -1381,7 +1327,7 @@
                                         <ColorAnimationUsingKeyFrames Storyboard.TargetName="Border"
                                                                       Storyboard.TargetProperty="(Panel.Background).                     (SolidColorBrush.Color)">
                                             <EasingColorKeyFrame KeyTime="0"
-                                                                 Value="{StaticResource SelectedUnfocusedColor}" />
+                                                                 Value="{DynamicResource SelectedUnfocusedColor}" />
                                         </ColorAnimationUsingKeyFrames>
                                     </Storyboard>
                                 </VisualState>
@@ -1427,7 +1373,7 @@
                             <Themes:ClassicBorderDecorator BorderBrush="{TemplateBinding BorderBrush}"
                                                            BorderThickness="{TemplateBinding BorderThickness}"
                                                            BorderStyle="Raised"
-                                                           Background="{TemplateBinding Background}"/>
+                                                           Background="{TemplateBinding Background}" />
                         </Grid>
                     </Grid>
                     <ControlTemplate.Triggers>
@@ -1850,70 +1796,84 @@
         </Setter>
     </Style>
     <Style x:Key="TabControlStyle2" TargetType="{x:Type TabControl}">
-        <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"/>
-        <Setter Property="Background" Value="{DynamicResource {x:Static SystemColors.ControlBrushKey}}"/>
-        <Setter Property="BorderBrush" Value="#00000000"/>
-        <Setter Property="BorderThickness" Value="3"/>
-        <Setter Property="Margin" Value="0"/>
-        <Setter Property="Padding" Value="1"/>
-        <Setter Property="MinWidth" Value="10"/>
-        <Setter Property="MinHeight" Value="10"/>
-        <Setter Property="HorizontalContentAlignment" Value="Center"/>
-        <Setter Property="VerticalContentAlignment" Value="Center"/>
+        <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}" />
+        <Setter Property="Background" Value="{DynamicResource {x:Static SystemColors.ControlBrushKey}}" />
+        <Setter Property="BorderBrush" Value="#00000000" />
+        <Setter Property="BorderThickness" Value="3" />
+        <Setter Property="Margin" Value="0" />
+        <Setter Property="Padding" Value="1" />
+        <Setter Property="MinWidth" Value="10" />
+        <Setter Property="MinHeight" Value="10" />
+        <Setter Property="HorizontalContentAlignment" Value="Center" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type TabControl}">
                     <Grid ClipToBounds="True" SnapsToDevicePixels="True" KeyboardNavigation.TabNavigation="Local">
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition x:Name="ColumnDefinition0"/>
-                            <ColumnDefinition x:Name="ColumnDefinition1" Width="0"/>
+                            <ColumnDefinition x:Name="ColumnDefinition0" />
+                            <ColumnDefinition x:Name="ColumnDefinition1" Width="0" />
                         </Grid.ColumnDefinitions>
                         <Grid.RowDefinitions>
-                            <RowDefinition x:Name="RowDefinition0" Height="Auto"/>
-                            <RowDefinition x:Name="RowDefinition1" Height="*"/>
+                            <RowDefinition x:Name="RowDefinition0" Height="Auto" />
+                            <RowDefinition x:Name="RowDefinition1" Height="*" />
                         </Grid.RowDefinitions>
                         <Grid x:Name="HeaderPanel1">
-                            <Rectangle HorizontalAlignment="Stretch" Height="Auto" Stroke="{x:Null}" VerticalAlignment="Stretch" Width="Auto" Margin="0,30,0,0" Fill="{TemplateBinding Background}"/>
-                            <TabPanel x:Name="HeaderPanel" Background="{x:Null}" Grid.Column="0" IsItemsHost="True" Margin="0,0,120,0" Grid.Row="0" KeyboardNavigation.TabIndex="1" Panel.ZIndex="1"/>
+                            <Rectangle HorizontalAlignment="Stretch" Height="Auto" Stroke="{x:Null}"
+                                       VerticalAlignment="Stretch" Width="Auto" Margin="0,30,0,0"
+                                       Fill="{TemplateBinding Background}" />
+                            <TabPanel x:Name="HeaderPanel" Background="{x:Null}" Grid.Column="0" IsItemsHost="True"
+                                      Margin="0,0,120,0" Grid.Row="0" KeyboardNavigation.TabIndex="1" Panel.ZIndex="1" />
                         </Grid>
-                        <Grid x:Name="ContentPanel" Grid.Column="0" KeyboardNavigation.DirectionalNavigation="Contained" Grid.Row="1" KeyboardNavigation.TabIndex="2" KeyboardNavigation.TabNavigation="Local">
-                            <Themes:ClassicBorderDecorator BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" BorderStyle="Raised" Background="{TemplateBinding Background}">
-                                <ContentPresenter x:Name="PART_SelectedContentHost" ContentTemplate="{TemplateBinding SelectedContentTemplate}" Content="{TemplateBinding SelectedContent}" ContentStringFormat="{TemplateBinding SelectedContentStringFormat}" ContentSource="SelectedContent" Margin="0" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"/>
+                        <Grid x:Name="ContentPanel" Grid.Column="0"
+                              KeyboardNavigation.DirectionalNavigation="Contained" Grid.Row="1"
+                              KeyboardNavigation.TabIndex="2" KeyboardNavigation.TabNavigation="Local">
+                            <Themes:ClassicBorderDecorator BorderBrush="{TemplateBinding BorderBrush}"
+                                                           BorderThickness="{TemplateBinding BorderThickness}"
+                                                           BorderStyle="Raised"
+                                                           Background="{TemplateBinding Background}">
+                                <ContentPresenter x:Name="PART_SelectedContentHost"
+                                                  ContentTemplate="{TemplateBinding SelectedContentTemplate}"
+                                                  Content="{TemplateBinding SelectedContent}"
+                                                  ContentStringFormat="{TemplateBinding SelectedContentStringFormat}"
+                                                  ContentSource="SelectedContent" Margin="0"
+                                                  SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
                             </Themes:ClassicBorderDecorator>
                         </Grid>
                     </Grid>
                     <ControlTemplate.Triggers>
                         <Trigger Property="TabStripPlacement" Value="Bottom">
-                            <Setter Property="Grid.Row" TargetName="HeaderPanel" Value="1"/>
-                            <Setter Property="Grid.Row" TargetName="ContentPanel" Value="0"/>
-                            <Setter Property="Height" TargetName="RowDefinition0" Value="*"/>
-                            <Setter Property="Height" TargetName="RowDefinition1" Value="Auto"/>
-                            <Setter Property="Margin" TargetName="HeaderPanel" Value="2,0,2,2"/>
+                            <Setter Property="Grid.Row" TargetName="HeaderPanel" Value="1" />
+                            <Setter Property="Grid.Row" TargetName="ContentPanel" Value="0" />
+                            <Setter Property="Height" TargetName="RowDefinition0" Value="*" />
+                            <Setter Property="Height" TargetName="RowDefinition1" Value="Auto" />
+                            <Setter Property="Margin" TargetName="HeaderPanel" Value="2,0,2,2" />
                         </Trigger>
                         <Trigger Property="TabStripPlacement" Value="Left">
-                            <Setter Property="Grid.Row" TargetName="HeaderPanel" Value="0"/>
-                            <Setter Property="Grid.Row" TargetName="ContentPanel" Value="0"/>
-                            <Setter Property="Grid.Column" TargetName="HeaderPanel" Value="0"/>
-                            <Setter Property="Grid.Column" TargetName="ContentPanel" Value="1"/>
-                            <Setter Property="Width" TargetName="ColumnDefinition0" Value="Auto"/>
-                            <Setter Property="Width" TargetName="ColumnDefinition1" Value="*"/>
-                            <Setter Property="Height" TargetName="RowDefinition0" Value="*"/>
-                            <Setter Property="Height" TargetName="RowDefinition1" Value="0"/>
-                            <Setter Property="Margin" TargetName="HeaderPanel" Value="2,2,0,2"/>
+                            <Setter Property="Grid.Row" TargetName="HeaderPanel" Value="0" />
+                            <Setter Property="Grid.Row" TargetName="ContentPanel" Value="0" />
+                            <Setter Property="Grid.Column" TargetName="HeaderPanel" Value="0" />
+                            <Setter Property="Grid.Column" TargetName="ContentPanel" Value="1" />
+                            <Setter Property="Width" TargetName="ColumnDefinition0" Value="Auto" />
+                            <Setter Property="Width" TargetName="ColumnDefinition1" Value="*" />
+                            <Setter Property="Height" TargetName="RowDefinition0" Value="*" />
+                            <Setter Property="Height" TargetName="RowDefinition1" Value="0" />
+                            <Setter Property="Margin" TargetName="HeaderPanel" Value="2,2,0,2" />
                         </Trigger>
                         <Trigger Property="TabStripPlacement" Value="Right">
-                            <Setter Property="Grid.Row" TargetName="HeaderPanel" Value="0"/>
-                            <Setter Property="Grid.Row" TargetName="ContentPanel" Value="0"/>
-                            <Setter Property="Grid.Column" TargetName="HeaderPanel" Value="1"/>
-                            <Setter Property="Grid.Column" TargetName="ContentPanel" Value="0"/>
-                            <Setter Property="Width" TargetName="ColumnDefinition0" Value="*"/>
-                            <Setter Property="Width" TargetName="ColumnDefinition1" Value="Auto"/>
-                            <Setter Property="Height" TargetName="RowDefinition0" Value="*"/>
-                            <Setter Property="Height" TargetName="RowDefinition1" Value="0"/>
-                            <Setter Property="Margin" TargetName="HeaderPanel" Value="0,2,2,2"/>
+                            <Setter Property="Grid.Row" TargetName="HeaderPanel" Value="0" />
+                            <Setter Property="Grid.Row" TargetName="ContentPanel" Value="0" />
+                            <Setter Property="Grid.Column" TargetName="HeaderPanel" Value="1" />
+                            <Setter Property="Grid.Column" TargetName="ContentPanel" Value="0" />
+                            <Setter Property="Width" TargetName="ColumnDefinition0" Value="*" />
+                            <Setter Property="Width" TargetName="ColumnDefinition1" Value="Auto" />
+                            <Setter Property="Height" TargetName="RowDefinition0" Value="*" />
+                            <Setter Property="Height" TargetName="RowDefinition1" Value="0" />
+                            <Setter Property="Margin" TargetName="HeaderPanel" Value="0,2,2,2" />
                         </Trigger>
                         <Trigger Property="IsEnabled" Value="False">
-                            <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"/>
+                            <Setter Property="Foreground"
+                                    Value="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}" />
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>

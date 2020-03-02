@@ -4,7 +4,7 @@
          xmlns:t="clr-namespace:ExplorerWpf.TexTBox"
          Style="{DynamicResource autoCompleteTextBox}"
          Height="22" MinWidth="200" Background="{DynamicResource Background}" BorderBrush="{DynamicResource Border}"
-         Foreground="{DynamicResource Foreground}" SelectionBrush="{DynamicResource Aczent}">
+         Foreground="{DynamicResource Foreground}" SelectionBrush="{DynamicResource Accent}">
     <TextBox.Resources>
         <ResourceDictionary>
             <Style x:Key="autoCompleteTextBox" TargetType="{x:Type TextBox}">
