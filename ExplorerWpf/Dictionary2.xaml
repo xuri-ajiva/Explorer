@@ -1260,7 +1260,7 @@
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type ListView}">
                     <Border x:Name="Border"
-                            BorderThickness="1" Background="{TemplateBinding Background}"
+                            BorderThickness="0" Background="{TemplateBinding Background}"
                             BorderBrush="{TemplateBinding BorderBrush}" OpacityMask="{TemplateBinding OpacityMask}">
                         <ScrollViewer
                             Style="{DynamicResource ScrollViewerStyle3}"

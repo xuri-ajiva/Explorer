@@ -71,7 +71,7 @@
                                 ButtonBase.Click="SortableListViewColumnHeaderClicked"
                                 Style="{DynamicResource {x:Type ListView}}"
                                 Grid.Row="1" FontSize="14" d:DataContext="{d:DesignData Type=Item}"
-                                ItemContainerStyle="{StaticResource Item-Style}">
+                                ItemContainerStyle="{StaticResource Item-Style}" Margin="0,0,0,1">
             <local:SortableListView.View>
                 <GridView>
                     <local:GridViewColumnSortData Header="Name" Width="auto"
@@ -112,10 +112,10 @@
                                      BorderBrush="{DynamicResource Border}"
                                      OpacityMask="Black" Foreground="{DynamicResource Foreground}"
                                      RenderTransformOrigin="0.5,0.5" FontSize="14" Text="/" Height="Auto"
-                                     KeyDown="PathBar_OnKeyDown" />
-        <Button Grid.Row="0" Content="LocalDisks" HorizontalAlignment="Right" Width="60" Click="Button_Click"
+                                     KeyDown="PathBar_OnKeyDown" BorderThickness="2" />
+        <Button Grid.Row="0" Content="LocalDisks" HorizontalAlignment="Right" Click="Button_Click"
                 RenderTransformOrigin="0.5,0.5" FontSize="10" Background="{DynamicResource Background}"
-                BorderBrush="{DynamicResource Border}" Foreground="{DynamicResource Foreground}" />
+                BorderBrush="{DynamicResource Border}" Foreground="{DynamicResource Foreground}" BorderThickness="1" Width="60" />
 
     </Grid>
 </UserControl>

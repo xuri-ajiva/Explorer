@@ -45,7 +45,7 @@
 
                                     <DockPanel x:Name="dockWarning" Visibility="Collapsed" LastChildFill="False">
                                         <Border DockPanel.Dock="Right" BorderBrush="Red" Background="Red"
-                                                BorderThickness="2" CornerRadius="2,2,0,0">
+                                                BorderThickness="2" CornerRadius="0">
                                             <TextBlock x:Name="txtWarning" DockPanel.Dock="Right"
                                                        Text="{TemplateBinding ToolTip}" VerticalAlignment="Top"
                                                        Background="Red" Foreground="White" FontSize="10" />
