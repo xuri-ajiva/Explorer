@@ -50,6 +50,9 @@ namespace ExplorerWpf {
             this.ClrPeckerBorder.SelectedColor              = ( (SolidColorBrush) Application.Current.Resources["Border"] ).Color;
             this.ClrPeckerWindowBorder.SelectedColor        = ( (SolidColorBrush) Application.Current.Resources["WindowBorder"] ).Color;
             this.ClrPeckerScrollBarBackground.SelectedColor = ( (SolidColorBrush) Application.Current.Resources["ScrollBarBackground"] ).Color;
+            this.ClrHeaderOver.SelectedColor                = (Color) Application.Current.Resources["ControlLightColor"];
+            this.ClrPeckerSelected.SelectedColor            = (Color) Application.Current.Resources["SelectedBackgroundColor"];
+            this.ClrExpander.SelectedColor                  = (Color) Application.Current.Resources["GlyphColor"];
 
             var foreG = (LinearGradientBrush) Application.Current.Resources["Foreground"];
 
@@ -60,6 +63,10 @@ namespace ExplorerWpf {
 
             this.ClrPeckerBackgroundGrad1.SelectedColor = backG.GradientStops[0].Color;
             this.ClrPeckerBackgroundGrad2.SelectedColor = backG.GradientStops[1].Color;
+
+            this.TxtHeader.Foreground   = new SolidColorBrush( ClrHeaderOver.SelectedColor.Value );
+            this.TxtSelected.Foreground = new SolidColorBrush( ClrPeckerSelected.SelectedColor.Value );
+            this.TxtExpander.Foreground = new SolidColorBrush( ClrExpander.SelectedColor.Value );
         }
 
         #endregion
@@ -89,21 +96,58 @@ namespace ExplorerWpf {
             }
         }
 
-
         private void ClrPcker_ForegroundGRAD_OnSelectedColorChanged(object sender, RoutedPropertyChangedEventArgs<Color?> e) {
             if ( this.ClrPeckerForegroundGrad1.SelectedColor.HasValue && this.ClrPeckerForegroundGrad2.SelectedColor.HasValue )
                 Application.Current.Resources["Foreground"] = new LinearGradientBrush( this.ClrPeckerForegroundGrad1.SelectedColor.Value, this.ClrPeckerForegroundGrad2.SelectedColor.Value, new Point( 0, 0 ), new Point( 1, 0 ) );
         }
 
-
         private void ClrPcker_BackgroundGRAD_OnSelectedColorChanged(object sender, RoutedPropertyChangedEventArgs<Color?> e) {
-            if ( this.ClrPeckerBackgroundGrad1.SelectedColor.HasValue && this.ClrPeckerBackgroundGrad2.SelectedColor.HasValue )
-                Application.Current.Resources["Background"] = new LinearGradientBrush( this.ClrPeckerBackgroundGrad1.SelectedColor.Value, this.ClrPeckerBackgroundGrad2.SelectedColor.Value, new Point( 0, 0 ), new Point( 1, 0 ) );
+            if ( this.ClrPeckerBackgroundGrad1.SelectedColor.HasValue && this.ClrPeckerBackgroundGrad2.SelectedColor.HasValue ) {
+                var v1 = this.ClrPeckerBackgroundGrad1.SelectedColor.Value;
+                var v2 = this.ClrPeckerBackgroundGrad2.SelectedColor.Value;
+                Application.Current.Resources["Background"] = new LinearGradientBrush( v1, v2, new Point( 0, 0 ), new Point( 1, 0 ) );
+                Application.Current.Resources["BackgroundLight"] = new LinearGradientBrush( Color.Subtract( v1, Color.FromArgb( SettingsHandler.ConTransSub,1,1,0 ) ), Color.Subtract( v2, Color.FromArgb( SettingsHandler.ConTransSub, 1,1,1) ), new Point( 0, 0 ), new Point( 1, 0 ) );
+            }
         }
 
-        private void Image_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
-        {
-              System.Diagnostics.Process.Start("https://github.com/xceedsoftware/wpftoolkit/blob/master/license.md");
+        private void ClrPcker_Header_SelectedColorChanged(object sender, RoutedPropertyChangedEventArgs<Color?> e) {
+            if ( e.NewValue.HasValue ) {
+                Application.Current.Resources["ControlLightColor"]              = e.NewValue.Value;
+                Application.Current.Resources["ControlMediumColor"]             = e.NewValue.Value;
+                Application.Current.Resources["DynamicResourceControlBrushKey"] = e.NewValue.Value;
+                Application.Current.Resources["ControlMouseOverColor"]          = e.NewValue.Value;
+
+                //Application.Current.Resources["GlyphColor"]                     = e.NewValue.Value; treeView expander
+
+                //Application.Current.Resources["BackgroundLight"] = new LinearGradientBrush( Colors.Transparent, Color.Add( e.NewValue.Value, Color.FromArgb( 255, 30, 30, 03 ) ), new Point( .5, 0 ), new Point( .5, 1 ) );
+
+                this.TxtHeader.Foreground = new SolidColorBrush( e.NewValue.Value );
+            }
         }
+
+        private void ClrPcker_Selected_SelectedColorChanged(object sender, RoutedPropertyChangedEventArgs<Color?> e) {
+            if ( e.NewValue.HasValue ) {
+                Application.Current.Resources["SelectedBackgroundColor"] = e.NewValue.Value;
+                Application.Current.Resources["SelectedUnfocusedColor"]  = e.NewValue.Value;
+                //Application.Current.Resources["DynamicResourceControlBrushKey"] = new SolidColorBrush( e.NewValue.Value );
+
+                this.TxtSelected.Foreground = new SolidColorBrush( e.NewValue.Value );
+            }
+        }
+
+        private void ClrPcker_Expander_SelectedColorChanged(object sender, RoutedPropertyChangedEventArgs<Color?> e) {
+            if ( e.NewValue.HasValue ) {
+                Application.Current.Resources["GlyphColor"] = e.NewValue.Value;
+                //Application.Current.Resources["DynamicResourceControlBrushKey"] = new SolidColorBrush( e.NewValue.Value );
+
+                this.TxtExpander.Foreground = new SolidColorBrush( e.NewValue.Value );
+            }
+        }
+
+        private void Image_MouseLeftButtonDown(object sender, MouseButtonEventArgs e) { System.Diagnostics.Process.Start( "https://github.com/xceedsoftware/wpftoolkit/blob/master/license.md" ); }
+
+        private void Save_Click(object sender, RoutedEventArgs e) { SettingsHandler.SaveCurrentColor(); }
+
+        private void Load_Click(object sender, RoutedEventArgs e) { SettingsHandler.LoadCurrentColor(); }
     }
 }
