@@ -99,7 +99,6 @@ namespace ExplorerWpf {
             this._outReaderThread = new Thread( () => {
                 p.StandardInput.WriteLine( "@echo off" );
                 p.StandardInput.WriteLine( "cd /" );
-                Console.Clear();
                 Console.ForegroundColor = ConsoleColor.Magenta;
                 Console.WriteLine( "Console Support Online" );
                 Console.ForegroundColor = ConsoleColor.White; //TODO: Setting
@@ -544,6 +543,7 @@ namespace ExplorerWpf {
         private SettingsView CreateSettings() => new SettingsView();
 
         private IPage CreateTheme() => new ThemeView();
+
         private ExplorerView CreateExplorer(string path = SettingsHandler.ROOT_FOLDER) {
             var h = new LocalHandler( path );
             h.OnError          += HandlerOnOnError;

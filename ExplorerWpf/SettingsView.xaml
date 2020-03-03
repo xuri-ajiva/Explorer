@@ -16,12 +16,17 @@
             <CheckBox x:Name="ExecuteInNewProcess" Content="ExecuteInNewProcess" HorizontalAlignment="Left" Margin="0,87,0,0"
                 VerticalAlignment="Top" FontSize="18" Click="ExecuteInNewProcess_OnClick" Background="{x:Null}" BorderBrush="{DynamicResource Border}" Foreground="{DynamicResource Foreground}" />
 
-        </Grid>
-        <Grid Margin="0,0,10,10" HorizontalAlignment="Right" VerticalAlignment="Bottom">
-            <Button Content="Save" Height="23"
-                    Click="Save_Click" Template="{DynamicResource ButtonBaseControalBar1}" Background="{DynamicResource Background}" BorderBrush="{DynamicResource Border}" Foreground="{DynamicResource Foreground}" Width="33" Margin="37,0,0,0" />
-            <Button Content="Load" Margin="0,0,37,0"
-                Click="Load_Click" Height="23" Template="{DynamicResource ButtonBaseControalBar1}" Background="{DynamicResource Background}" BorderBrush="{DynamicResource Border}" Foreground="{DynamicResource Foreground}" Width="33" />
+        </Grid>         
+        <Grid Margin="10,0,0,10" VerticalAlignment="Bottom" HorizontalAlignment="Left">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="auto"/>
+                <ColumnDefinition Width="auto"/>
+            </Grid.ColumnDefinitions>
+
+            <Button Content="Save"
+                Click="Save_Click" Template="{DynamicResource ButtonBaseControalBar1}" Background="{DynamicResource Background}" BorderBrush="{DynamicResource Border}" Foreground="{DynamicResource Foreground}" Margin="5,0,0,0" FontSize="14" Grid.Column="1" />
+            <Button Content="Load" Margin="0,0,5,0"
+                Click="Load_Click" Template="{DynamicResource ButtonBaseControalBar1}" Background="{DynamicResource Background}" BorderBrush="{DynamicResource Border}" Foreground="{DynamicResource Foreground}" FontSize="14" />
 
         </Grid>
 
