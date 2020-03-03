@@ -196,7 +196,7 @@ namespace Peter {
 
             if ( null == this._oDesktopFolder ) {
                 // Get desktop IShellFolder
-                var nResult = SettingsHandler.NativeMethods.SHGetDesktopFolder( out pUnkownDesktopFolder );
+                var nResult = NativeMethods.SHGetDesktopFolder( out pUnkownDesktopFolder );
                 if ( S_OK != nResult ) throw new ShellContextMenuException( "Failed to get the desktop shell folder" );
 
                 this._oDesktopFolder = (IShellFolder) Marshal.GetTypedObjectForIUnknown( pUnkownDesktopFolder, typeof(IShellFolder) );
@@ -230,7 +230,7 @@ namespace Peter {
                 Marshal.WriteInt32( pStrRet, 0, 0 );
                 nResult = this._oDesktopFolder.GetDisplayNameOf( pPIDL, SHGNO.FORPARSING, pStrRet );
                 var strFolder = new StringBuilder( MAX_PATH );
-                SettingsHandler.NativeMethods.StrRetToBuf( pStrRet, pPIDL, strFolder, MAX_PATH );
+                NativeMethods.StrRetToBuf( pStrRet, pPIDL, strFolder, MAX_PATH );
                 Marshal.FreeCoTaskMem( pStrRet );
                 pStrRet               = IntPtr.Zero;
                 this._strParentFolder = strFolder.ToString();
@@ -289,7 +289,7 @@ namespace Peter {
                     return;
                 }
 
-                pMenu = SettingsHandler.NativeMethods.CreatePopupMenu();
+                pMenu = NativeMethods.CreatePopupMenu();
 
                 var nResult = this._oContextMenu.QueryContextMenu( pMenu,
                     0,
@@ -298,13 +298,13 @@ namespace Peter {
                     CMF.DEFAULTONLY |
                     ( ( Control.ModifierKeys & Keys.Shift ) != 0 ? CMF.EXTENDEDVERBS : 0 ) );
 
-                var nDefaultCmd = (uint) SettingsHandler.NativeMethods.GetMenuDefaultItem( pMenu, false, 0 );
+                var nDefaultCmd = (uint) NativeMethods.GetMenuDefaultItem( pMenu, false, 0 );
                 if ( nDefaultCmd >= CMD_FIRST ) InvokeCommand( this._oContextMenu, nDefaultCmd, arrFI[0].DirectoryName, Control.MousePosition );
 
-                SettingsHandler.NativeMethods.DestroyMenu( pMenu );
+                NativeMethods.DestroyMenu( pMenu );
                 pMenu = IntPtr.Zero;
             } finally {
-                if ( pMenu != IntPtr.Zero ) SettingsHandler.NativeMethods.DestroyMenu( pMenu );
+                if ( pMenu != IntPtr.Zero ) NativeMethods.DestroyMenu( pMenu );
                 ReleaseAll();
             }
         }
@@ -542,7 +542,7 @@ namespace Peter {
                     return;
                 }
 
-                pMenu = SettingsHandler.NativeMethods.CreatePopupMenu();
+                pMenu = NativeMethods.CreatePopupMenu();
 
                 var nResult = this._oContextMenu.QueryContextMenu( pMenu,
                     0,
@@ -565,13 +565,13 @@ namespace Peter {
                     this.Handle,
                     IntPtr.Zero );
 
-                SettingsHandler.NativeMethods.DestroyMenu( pMenu );
+                NativeMethods.DestroyMenu( pMenu );
                 pMenu = IntPtr.Zero;
 
                 if ( nSelected != 0 ) InvokeCommand( this._oContextMenu, nSelected, this._strParentFolder, pointScreen );
             } finally {
                 //hook.Uninstall();
-                if ( pMenu != IntPtr.Zero ) SettingsHandler.NativeMethods.DestroyMenu( pMenu );
+                if ( pMenu != IntPtr.Zero ) NativeMethods.DestroyMenu( pMenu );
 
                 if ( iContextMenuPtr != IntPtr.Zero )
                     Marshal.Release( iContextMenuPtr );

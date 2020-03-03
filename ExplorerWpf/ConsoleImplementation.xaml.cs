@@ -4,7 +4,6 @@ using System.Threading;
 using System.Windows;
 using System.Windows.Forms;
 using System.Windows.Input;
-using static ExplorerWpf.SettingsHandler.NativeMethods;
 using UserControl = System.Windows.Controls.UserControl;
 
 namespace ExplorerWpf {
@@ -19,23 +18,23 @@ namespace ExplorerWpf {
         private IntPtr hWndOParent;
 
         void MakeBorderless() {
-            RECT rect;
-            GetWindowRect( this.hWndDocked, out rect );
-            IntPtr HWND_DESKTOP = GetDesktopWindow();
+            NativeMethods.RECT rect;
+            NativeMethods.GetWindowRect( this.hWndDocked, out rect );
+            IntPtr HWND_DESKTOP = NativeMethods.GetDesktopWindow();
 
             if ( SettingsHandler.ConsolePresent ) Thread.Sleep( 400 );
-            MapWindowPoints( HWND_DESKTOP, this.hWndDocked, ref rect, 2 );
+            NativeMethods.MapWindowPoints( HWND_DESKTOP, this.hWndDocked, ref rect, 2 );
 
             if ( SettingsHandler.ConsolePresent ) Thread.Sleep( 400 );
-            SetWindowLong( this.hWndDocked, GWL_STYLE, WS_CAPTION );
-            SetWindowPos( this.hWndDocked, -2, 200, 150, rect.bottom, rect.right, 0x0040 );
+            NativeMethods.SetWindowLong( this.hWndDocked, NativeMethods.GWL_STYLE, NativeMethods.WS_CAPTION );
+            NativeMethods.SetWindowPos( this.hWndDocked, -2, 200, 150, rect.bottom, rect.right, 0x0040 );
 
             if ( SettingsHandler.ConsolePresent ) Thread.Sleep( 800 );
-            SetWindowLong( this.hWndDocked, GWL_STYLE, WS_SYSMENU );
-            SetWindowPos( this.hWndDocked, -2, 100, 75, rect.bottom, rect.right, 0x0040 );
+            NativeMethods.SetWindowLong( this.hWndDocked, NativeMethods.GWL_STYLE, NativeMethods.WS_SYSMENU );
+            NativeMethods.SetWindowPos( this.hWndDocked, -2, 100, 75, rect.bottom, rect.right, 0x0040 );
 
             if ( SettingsHandler.ConsolePresent ) Thread.Sleep( 400 );
-            DrawMenuBar( this.hWndDocked );
+            NativeMethods.DrawMenuBar( this.hWndDocked );
 
             if ( SettingsHandler.ConsolePresent ) Thread.Sleep( 400 );
         }
@@ -54,32 +53,32 @@ namespace ExplorerWpf {
             this.MouseDown                 += MouseDownFocusWindow;
         }
 
-        public void MouseDownFocusWindow(object sender, MouseButtonEventArgs e) { SetForegroundWindow( this.hWndDocked ); }
+        public void MouseDownFocusWindow(object sender, MouseButtonEventArgs e) { NativeMethods.SetForegroundWindow( this.hWndDocked ); }
 
-        private void undockIt() { SetParent( this.hWndDocked, this.hWndOriginalParent ); }
+        private void undockIt() { NativeMethods.SetParent( this.hWndDocked, this.hWndOriginalParent ); }
 
 
         void SetParrent() {
-            this.hWndOriginalParent = SetParent( this.hWndDocked, this.hWndOParent );
+            this.hWndOriginalParent = NativeMethods.SetParent( this.hWndDocked, this.hWndOParent );
 
             if ( SettingsHandler.ConsolePresent ) Thread.Sleep( 400 );
-            this.SizeChanged += ( (sender, args) => MoveWindow( this.hWndDocked, 0, 0, this.rot.Width, this.rot.Height, true ) );
+            this.SizeChanged += ( (sender, args) => NativeMethods.MoveWindow( this.hWndDocked, 0, 0, this.rot.Width, this.rot.Height, true ) );
 
-            MoveWindow( this.hWndDocked, 0, 0, this.rot.Width, this.rot.Height, true );
-
-            if ( SettingsHandler.ConsolePresent ) Thread.Sleep( 400 );
-            SetWindowLong( this.hWndDocked, -20, 524288 ); //GWL_EXSTYLE=-20; WS_EX_LAYERED=524288=&h80000, WS_EX_TRANSPARENT=32=0x00000020L
+            NativeMethods.MoveWindow( this.hWndDocked, 0, 0, this.rot.Width, this.rot.Height, true );
 
             if ( SettingsHandler.ConsolePresent ) Thread.Sleep( 400 );
+            NativeMethods.SetWindowLong( this.hWndDocked, -20, 524288 ); //GWL_EXSTYLE=-20; WS_EX_LAYERED=524288=&h80000, WS_EX_TRANSPARENT=32=0x00000020L
 
-            SetLayeredWindowAttributes( hWndDocked, 0, 75, 2 ); // Transparency=51=20%, LWA_ALPHA=2
+            if ( SettingsHandler.ConsolePresent ) Thread.Sleep( 400 );
+
+            NativeMethods.SetLayeredWindowAttributes( hWndDocked, 0, 75, 2 ); // Transparency=51=20%, LWA_ALPHA=2
 
             if ( SettingsHandler.ConsolePresent ) Thread.Sleep( 400 );
         }
 
         public void Init() {
-            AllocConsole();
-            Init( GetConsoleWindow() );
+            NativeMethods.AllocConsole();
+            Init( NativeMethods.GetConsoleWindow() );
         }
 
         public void Init(IntPtr hWnd) {
@@ -92,16 +91,16 @@ namespace ExplorerWpf {
             this.hWndDocked = hWnd;
             this.Dispatcher.Invoke( MakeBorderless );
             this.Dispatcher.Invoke( () => {
-                SetWindowLong( this.hWndDocked, -20, ( 524288 ) );
-                SetLayeredWindowAttributes( hWndDocked, 0, 95, 2 );
+                NativeMethods.SetWindowLong( this.hWndDocked, -20, ( 524288 ) );
+                NativeMethods.SetLayeredWindowAttributes( hWndDocked, 0, 95, 2 );
             } );
         }
 
         ~ConsoleImplementation() { Dispose( false ); }
 
-        public void HideConsole() { ShowWindowAsync( this.hWndDocked, SW_HIDE ); }
+        public void HideConsole() { NativeMethods.ShowWindowAsync( this.hWndDocked, NativeMethods.SW_HIDE ); }
 
-        public void ShowConsole() { ShowWindowAsync( this.hWndDocked, SW_SHOWNORMAL ); }
+        public void ShowConsole() { NativeMethods.ShowWindowAsync( this.hWndDocked, NativeMethods.SW_SHOWNORMAL ); }
 
         public void MoveConsole() {
             this.Dispatcher.Invoke( () => {
@@ -109,7 +108,7 @@ namespace ExplorerWpf {
                     var p = this.PointToScreen( new Point( 0, 0 ) );
                     var h = new Point( this.RenderSize.Width, this.RenderSize.Height );
                     Debug.WriteLine( p + " " + h );
-                    MoveWindow( this.hWndDocked, (int) p.X, (int) p.Y, (int) h.X, (int) h.Y, true );
+                    NativeMethods.MoveWindow( this.hWndDocked, (int) p.X, (int) p.Y, (int) h.X, (int) h.Y, true );
                 } catch { }
             } );
         }

@@ -6,6 +6,6 @@
              xmlns:local="clr-namespace:ExplorerWpf"
              mc:Ignorable="d" Height="420.384" Width="477.514" Loaded="ConsoleImplemantation_OnLoaded">
     <Grid x:Name="ParterreControl">
-        <WindowsFormsHost x:Name="host" />
+        <WindowsFormsHost x:Name="host" Background="Transparent" />
     </Grid>
 </UserControl>
