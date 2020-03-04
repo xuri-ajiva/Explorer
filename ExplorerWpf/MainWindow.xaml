@@ -140,7 +140,7 @@
                                         <ContextMenu>
                                             <MenuItem Header="_LocalExplorer" Click="MenuItem_OnClick" TabIndex="1" />
                                             <MenuItem Header="_SettingsView" Click="MenuItem_OnClick" TabIndex="2" />
-                                            <MenuItem Header="_ThemeViewView" Click="MenuItem_OnClick" TabIndex="3" />
+                                            <MenuItem Header="_ThemeView" Click="MenuItem_OnClick" TabIndex="3" />
                                             <MenuItem Header="_Test" Click="MenuItem_OnClick" TabIndex="99" />
                                         </ContextMenu>
                                     </TabItem.ContextMenu>
