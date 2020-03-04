@@ -4,7 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:local="clr-namespace:ExplorerWpf"
-             mc:Ignorable="d" Loaded="SettingsView_OnLoaded" Height="364" Width="458" Margin="0,0,0,5">
+             mc:Ignorable="d" Loaded="SettingsView_OnLoaded" Margin="0,0,0,5" MinHeight="200" MinWidth="250">
     <Grid>
         <Grid Margin="5">
             <CheckBox x:Name="ConsoleAutoChangeDisc" Content="ConsoleAutoChangeDisc" HorizontalAlignment="Left"
@@ -16,7 +16,7 @@
             <CheckBox x:Name="ExecuteInNewProcess" Content="ExecuteInNewProcess" HorizontalAlignment="Left" Margin="0,87,0,0"
                 VerticalAlignment="Top" FontSize="18" Click="ExecuteInNewProcess_OnClick" Background="{x:Null}" BorderBrush="{DynamicResource Border}" Foreground="{DynamicResource Foreground}" />
 
-        </Grid>         
+        </Grid>
         <Grid Margin="10,0,0,10" VerticalAlignment="Bottom" HorizontalAlignment="Left">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="auto"/>
