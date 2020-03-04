@@ -67,7 +67,7 @@ namespace ExplorerWpf {
 
         private TreePathItem _root;
 
-        private bool _skipOneWrite;
+        private int _linesToSkip;
 
         public MainWindow() {
             InitializeComponent();
@@ -99,6 +99,7 @@ namespace ExplorerWpf {
             this._outReaderThread = new Thread( () => {
                 p.StandardInput.WriteLine( "@echo off" );
                 p.StandardInput.WriteLine( "cd /" );
+                this._linesToSkip       = 5;
                 Console.ForegroundColor = ConsoleColor.Magenta;
                 Console.WriteLine( "Console Support Online" );
                 Console.ForegroundColor = ConsoleColor.White; //TODO: Setting
@@ -107,35 +108,41 @@ namespace ExplorerWpf {
                     var line = p.StandardOutput.ReadLine();
 
                     try {
-                        var parches = Regex.Match( line, "[^\"]?[A-Za-z]:\\\\[^\"]*" );
+                        var parches = Regex.Match( line, "[^\"^ ^\t]?[A-Za-z]:\\\\[^\"]*" );
+                        Debug.WriteLine( line );
 
                         if ( parches.Success ) {
                             var path = parches.Value.Substring( 0, parches.Length );
 
                             if ( Directory.Exists( path ) )
                                 if ( this.Handler.GetCurrentPath() != path ) {
-                                    //Console.ForegroundColor = ConsoleColor.DarkGreen;
-                                    //Console.WriteLine( path );
-                                    //Console.ResetColor();
-                                    this.Handler.SetCurrentPath( path );
-                                    this._currentExplorerView.ListP( this.Handler.GetCurrentPath(), true );
+                                    Console.ForegroundColor = ConsoleColor.DarkGreen;
+                                    Console.Write( path + "> " );
+                                    Console.ForegroundColor = ConsoleColor.White;
+
+                                    if ( SettingsHandler.ConsoleAutoChangePath ) {
+                                        this.Handler.SetCurrentPath( path );
+                                        this._currentExplorerView.ListP( this.Handler.GetCurrentPath(), true );
+                                    }
+
+                                    this._linesToSkip++;
                                 }
                         }
                     } catch { }
 
-                    if ( !this._skipOneWrite ) {
+                    if ( this._linesToSkip <= 0 ) {
                         if ( line != "echo %cd%" )
                             Console.WriteLine( line );
                     }
                     else {
-                        this._skipOneWrite = false;
+                        this._linesToSkip--;
                     }
                 }
             } );
             this._inWriteThread = new Thread( () => {
                 while ( true ) {
                     var line = Console.In.ReadLine();
-                    this._skipOneWrite = true;
+                    this._linesToSkip++;
                     WriteCmd( line );
                 }
             } );
@@ -284,6 +291,7 @@ namespace ExplorerWpf {
         }
 
         private void WriteCmd(string command, bool echo = true) {
+            Debug.WriteLine( echo + ": " + command );
             if ( this._mainProcess == null || this._mainProcess.HasExited ) return;
 
             this._mainProcess.StandardInput.WriteLine( command );
@@ -304,6 +312,28 @@ namespace ExplorerWpf {
         }
 
         private void HOnOnSetCurrentPath(string arg1, string arg2) {
+            if ( SettingsHandler.ConsoleAutoChangeDisc )
+                if ( arg1.Length > 1 && arg2.Length > 1 ) {
+                    if ( !string.Equals( arg1.Substring( 0, 2 ), arg2.Substring( 0, 2 ), StringComparison.CurrentCultureIgnoreCase ) ) {
+                        WriteCmd( arg2.Substring( 0, 2 ), false );
+                    }
+                    else if ( SettingsHandler.ConsoleAutoChangePath && arg2.Length <= 3 && arg1 != arg2 ) {
+                        var parches = Regex.Match( arg2, "[^\"^ ^\t]?[A-Za-z]:\\\\?" );
+
+                        if ( parches.Success ) {
+                            this._linesToSkip++;
+                            WriteCmd( "cd /", false );
+                            var path = parches.Value.Substring( 0, 2 );
+                            Console.WriteLine( "cd " + path + "\\" );
+                            Console.ForegroundColor = ConsoleColor.DarkGreen;
+                            Console.Write( path + "> " );
+                            Console.ForegroundColor = ConsoleColor.White;
+                        }
+                    }
+                }
+
+                
+
             if ( this._currentExplorerView == null ) return;
 
             this.Dispatcher?.Invoke( () => {

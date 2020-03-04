@@ -12,16 +12,14 @@ using System.IO;
 
 namespace ExplorerWpf.Handler {
     public sealed class LocalHandler : IHandler {
-        private          string           _currentPath;
+        private string           _currentPath;
         private ShellContextMenu _shellContextMenu;
 
         private List<string> history;
 
         #region Implementation of IHandler
 
-        ~LocalHandler() {
-            ReleaseUnmanagedResources();
-        }
+        ~LocalHandler() { ReleaseUnmanagedResources(); }
 
         public LocalHandler(string currentPath = "") {
             this.history = new List<string> { RootPath, RootPath, this._currentPath };
@@ -53,7 +51,12 @@ namespace ExplorerWpf.Handler {
             try {
                 this.OnSetCurrentPath?.Invoke( this._currentPath, path );
 
-                if ( path.EndsWith( "\\" ) )
+                if ( string.IsNullOrEmpty( path ) ) {
+                    this._currentPath = this.RootPath;
+                    return;
+                }
+
+                while ( path.EndsWith( "\\" ) )
                     path = path.Substring( 0, path.Length - 1 );
                 if ( string.Equals( path, this._currentPath, StringComparison.CurrentCultureIgnoreCase ) ) return;
 
@@ -118,7 +121,11 @@ namespace ExplorerWpf.Handler {
             try {
                 this.OnValidatePath?.Invoke();
 
-                this._currentPath = Path.GetFullPath( string.IsNullOrEmpty( this._currentPath ) ? SettingsHandler.ROOT_FOLDER : this._currentPath );
+                var pInput = string.IsNullOrEmpty( this._currentPath ) ? SettingsHandler.ROOT_FOLDER : this._currentPath;
+                while ( pInput.EndsWith( "\\" ) )
+                    pInput = pInput.Substring( 0, pInput.Length - 1 );
+                pInput            += "\\";
+                this._currentPath =  Path.GetFullPath( pInput );
             } catch (Exception e) {
                 OnOnError( e );
                 this._currentPath = cp;
@@ -196,6 +203,7 @@ namespace ExplorerWpf.Handler {
         public void GoInHistoryTo(int index) {
             if ( index >= this.history.Count ) return;
             if ( index < 0 ) return;
+
             try {
                 if ( index >= this.history.Count ) throw new ArgumentOutOfRangeException( nameof(index) );
                 if ( index < 0 ) throw new ArgumentOutOfRangeException( nameof(index) );
@@ -261,10 +269,9 @@ namespace ExplorerWpf.Handler {
         private void ReleaseUnmanagedResources() {
             this._shellContextMenu.DestroyHandle();
             this._shellContextMenu = null;
-            this._currentPath = null;
+            this._currentPath      = null;
             this.history.Clear();
             this.history = null;
-
         }
 
         /// <inheritdoc />

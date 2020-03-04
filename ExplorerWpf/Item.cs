@@ -60,7 +60,6 @@ namespace ExplorerWpf {
             Icon icon;
 
             lock (CacheLock) {
-                Debug.WriteLine( Cache.Count );
                 if ( Cache.TryGetValue( ext, out icon ) )
                     return icon;
 
@@ -133,7 +132,7 @@ namespace ExplorerWpf {
             try {
                 while ( true ) {
                     Thread.Sleep( 10 );
-                    if ( CashQueue == null || CashQueue.Count == 0) continue;
+                    if ( CashQueue == null || CashQueue.Count == 0 ) continue;
 
                     ( var ext, var path ) = CashQueue.Dequeue();
 
@@ -190,7 +189,7 @@ namespace ExplorerWpf {
 
             this.Type = FileType.FILE;
 
-            Icon = DefaultIcons.LoadingIcon;
+            this.Icon = DefaultIcons.LoadingIcon;
             PreLoadIcon();
             //CreateIcon();
             this.TryGetFileInfo = f;
@@ -211,10 +210,19 @@ namespace ExplorerWpf {
 
             this.Type = FileType.DIRECTORY;
 
-            Icon = DefaultIcons.LoadingIcon;
+            this.Icon = DefaultIcons.LoadingIcon;
             PreLoadIcon();
+            ApplyFixes();
             //CreateIcon();
             this.TryGetDirectoryInfo = d;
+        }
+
+        public void ApplyFixes() {
+            if ( this.Type == FileType.DIRECTORY ) {
+                while ( this.Path.EndsWith( "\\" ) ) {
+                    this.Path = this.Path.Substring( 0, this.Path.Length - 1 );
+                }
+            }
         }
 
         protected Item() {
@@ -238,6 +246,7 @@ namespace ExplorerWpf {
                 var i = new Item { Path = SettingsHandler.ROOT_FOLDER, Name = SettingsHandler.ROOT_FOLDER, Type = FileType.DIRECTORY, Size = long.MaxValue + $" ({GetLength( long.MaxValue )})" };
                 i.Icon.Dispose();
                 i.Icon = DefaultIcons.ShieldIcon;
+                i.ApplyFixes();
                 return i;
             }
         }

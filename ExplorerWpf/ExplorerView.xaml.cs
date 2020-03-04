@@ -119,7 +119,7 @@ namespace ExplorerWpf {
                 if ( this.Handler.GetCurrentPath() == SettingsHandler.ROOT_FOLDER )
                     if ( item.Path.Length >= 2 )
                         if ( SettingsHandler.ConsoleAutoChangeDisc )
-                            OnDirectoryUpdate( item.Path.Substring( 0, 2 ) );
+                            OnDirectoryUpdate( item.Path.Substring( 0, 2 ), false );
 
                 this.Handler.SetCurrentPath( item.Path + ( item.Path == SettingsHandler.ROOT_FOLDER ? "" : @"\" ) );
 
@@ -133,7 +133,6 @@ namespace ExplorerWpf {
                         Process.Start( item.Path );
                     else
                         OnDirectoryUpdate( "\"" + item.Path + "\"", false );
-
                 } catch (Exception ex) {
                     MessageBox.Show( ex.Message );
                 }
@@ -210,7 +209,7 @@ namespace ExplorerWpf {
 
             foreach ( var directoryInfo in subDirectory ) {
                 var item = new Item( directoryInfo );
-
+                item.ApplyFixes();
                 AddList( item );
             }
         }
@@ -280,6 +279,7 @@ namespace ExplorerWpf {
                 ClearList();
                 Add_Parent_Dir();
                 this.Handler.ValidatePath();
+                dirToScan = this.Handler.GetCurrentPath();
                 List_Dir( dirToScan );
                 List_Files( dirToScan );
 
@@ -330,6 +330,8 @@ namespace ExplorerWpf {
                     Size   = $"{Item.GetLength( driveInfo.AvailableFreeSpace )} free of {Item.GetLength( driveInfo.TotalSize )}",
                     SizePb = (double) ( driveInfo.TotalSize - driveInfo.AvailableFreeSpace ) / driveInfo.TotalSize * 100D
                 };
+
+                i.ApplyFixes();
 
                 AddList( i );
 

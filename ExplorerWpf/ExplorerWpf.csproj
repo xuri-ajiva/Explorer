@@ -96,6 +96,13 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="ColorPicker\CopyBox.cs" />
+    <Compile Include="ColorPicker\MouseCliping.cs" />
+    <Compile Include="ColorPicker\MouseControling.cs" />
+    <Compile Include="ColorPicker\ValueBox.cs" />
+    <Compile Include="ColorPicker\_ColorPicker.xaml.cs">
+      <DependentUpon>_ColorPicker.xaml</DependentUpon>
+    </Compile>
     <Compile Include="ConsoleImplementation.xaml.cs">
       <DependentUpon>ConsoleImplementation.xaml</DependentUpon>
     </Compile>
@@ -118,6 +125,10 @@
     <Compile Include="ThemeView.xaml.cs">
       <DependentUpon>ThemeView.xaml</DependentUpon>
     </Compile>
+    <Page Include="ColorPicker\_ColorPicker.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="ConsoleImplementation.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
