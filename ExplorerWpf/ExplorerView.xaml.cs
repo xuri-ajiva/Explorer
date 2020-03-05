@@ -49,7 +49,6 @@ namespace ExplorerWpf {
                 this.Root          = null;
                 this._devInfo      = default;
                 this._freePb       = null;
-                this.PathBar       = null;
                 this.MainView      = null;
                 this.Handler       = null;
                 this._hWnd         = default;
@@ -140,10 +139,9 @@ namespace ExplorerWpf {
         }
 
         public event Action<object, string, bool>  SendDirectoryUpdateAsCmd;
-        public event Action<object, string, Brush> UpdateStatusBar;
-
-        private void Button_Click(object sender, RoutedEventArgs e) { ListDiscs(); }
-
+        public event Action<object, string, Brush> UpdateStatusBar;     
+        public event Action<object, string> UpdatePathBarDirect;
+                                                                                      
         private void List_OnMouseDown(object sender, MouseButtonEventArgs e) {
             if ( e.RightButton != MouseButtonState.Pressed ) return;
         }
@@ -167,14 +165,7 @@ namespace ExplorerWpf {
         private void SortableListViewColumnHeaderClicked(object sender, RoutedEventArgs e) {
             if ( sender is SortableListView sl ) sl.GridViewColumnHeaderClicked( e.OriginalSource as GridViewColumnHeader );
         }
-
-        private void PathBar_OnKeyDown(object sender, KeyEventArgs e) {
-            if ( e.Key != Key.Enter ) return;
-
-            this.Handler.SetCurrentPath( ( sender as TextBox )?.Text );
-            List( this.Handler.GetCurrentPath() );
-        }
-
+        
         [DebuggerStepThrough] private void OnUpdateStatusBar(string e, Brush c) { this.UpdateStatusBar?.Invoke( this, e, c ); }
 
         [DebuggerStepThrough] private void OnDirectoryUpdate(string e, bool cd = true) { this.SendDirectoryUpdateAsCmd?.Invoke( this, e, cd ); }
@@ -294,11 +285,12 @@ namespace ExplorerWpf {
                         OnDirectoryUpdate( "cd \"" + p + "\"" );
 
                 Set_Status( "Listed: " + p, true );
-                SetPath( p );
+                OnUpdatePathBarDirect( p );
             } catch (Exception e) {
                 Set_Status( e.Message, false );
             }
         }
+
 
         #endregion
 
@@ -339,18 +331,12 @@ namespace ExplorerWpf {
 
                 this._pb = true;
             }
-
-            SetPath( SettingsHandler.ROOT_FOLDER );
+            
+            OnUpdatePathBarDirect( SettingsHandler.ROOT_FOLDER );
 
             this.Handler.SetCurrentPath( "" );
         }
-
-        private void SetPath(string path) {
-            this.PathBar.Text = path;
-            if ( this.PathBar.Popup != null )
-                this.PathBar.Popup.IsOpen = false;
-        }
-
+        
         #endregion
 
         #region Implementation of IPage
@@ -363,6 +349,9 @@ namespace ExplorerWpf {
 
         /// <inheritdoc />
         public bool HideNavigation => false;
+
+        /// <inheritdoc />
+        public bool HideExplorerNavigation => false;
 
         /// <inheritdoc />
         public TabItem ParentTapItem { get; set; }
@@ -387,7 +376,7 @@ namespace ExplorerWpf {
 
         #endregion
 
-        private void HandleDoubleClick(object sender, MouseButtonEventArgs e) { Console.WriteLine( "dc" ); }
+        private void OnUpdatePathBarDirect(string path) { this.UpdatePathBarDirect?.Invoke( this, path ); }
     }
 
 

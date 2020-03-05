@@ -3,10 +3,11 @@ using System.Windows.Controls;
 
 namespace ExplorerWpf {
     public interface IPage : IDisposable {
-        bool    ShowTreeView   { get; }
-        bool    HideConsole    { get; }
-        bool    HideNavigation { get; }
-        TabItem ParentTapItem  { get; set; }
+        bool    ShowTreeView           { get; }
+        bool    HideConsole            { get; }
+        bool    HideNavigation         { get; }
+        bool    HideExplorerNavigation { get; }
+        TabItem ParentTapItem          { get; set; }
 
         void OnReFocus();
     }
@@ -22,6 +23,9 @@ namespace ExplorerWpf {
 
         /// <inheritdoc />
         public bool HideNavigation => false;
+
+        /// <inheritdoc />
+        public bool HideExplorerNavigation => true;
 
         /// <inheritdoc />
         public TabItem ParentTapItem { get; set; }

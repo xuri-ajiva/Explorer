@@ -131,8 +131,7 @@ namespace ExplorerWpf {
         public static void CashLoop() {
             try {
                 while ( true ) {
-                    Thread.Sleep( 10 );
-                    if ( CashQueue == null || CashQueue.Count == 0 ) continue;
+                    while ( CashQueue == null || CashQueue.Count == 0 ) Thread.Sleep( 20 );
 
                     ( var ext, var path ) = CashQueue.Dequeue();
 

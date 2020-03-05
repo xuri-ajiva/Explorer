@@ -13,6 +13,7 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -21,6 +22,7 @@ using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
+using ExplorerWpf.TexTBox;
 using Brush = System.Windows.Media.Brush;
 using MessageBox = System.Windows.Forms.MessageBox;
 using Point = System.Windows.Point;
@@ -152,10 +154,8 @@ namespace ExplorerWpf {
 
             this.ConsoleW.Init();
             this._mainProcess          =  p;
-            this.consoleHost.MouseDown += this.ConsoleW.MouseDownFocusWindow;
+            this.ConsoleHost.MouseDown += this.ConsoleW.MouseDownFocusWindow;
         }
-
-        private static void HandlerOnOnError(Exception obj) { SettingsHandler.OnError( obj ); }
 
         private void MoveWindow(object sender, MouseButtonEventArgs e) {
             if ( e.LeftButton != MouseButtonState.Pressed ) return;
@@ -171,6 +171,7 @@ namespace ExplorerWpf {
 
         private void MainWindow_OnLoaded(object sender, RoutedEventArgs e) {
             EnableBlur();
+            GetControls();
 
             if ( SettingsHandler.ConsolePresent )
                 StartConsole();
@@ -239,7 +240,37 @@ namespace ExplorerWpf {
             t.Start();
         #endif
 
-            AddTab( TapType.Explorer );
+            AddTab( TapType.EXPLORER );
+        }
+
+        private SelectFolderTextBox pathBar;
+        private RowDefinition       explorerNavigationBarRow;
+
+        private void GetControls() {
+            var pathNode   = this.TabControl.Template.FindName( "PathBarX",             this.TabControl );
+            var reloadNode = this.TabControl.Template.FindName( "ReloadButtonX",        this.TabControl );
+            var rootNode   = this.TabControl.Template.FindName( "RootButtonX",          this.TabControl );
+            var naviCNode  = this.TabControl.Template.FindName( "NavigationBarColumnX", this.TabControl );
+
+            if ( pathNode is SelectFolderTextBox box ) {
+                box.KeyDown  += BoxOnKeyDown;
+                this.pathBar =  box;
+                Console.WriteLine( "PathBar Support" );
+            }
+
+            if ( reloadNode is Button reload ) {
+                reload.Click += ReloadOnClick;
+                Console.WriteLine( "Reload Support" );
+            }
+
+            if ( rootNode is Button root ) {
+                root.Click += RootOnClick;
+                Console.WriteLine( "Disk List Support" );
+            }
+
+            if ( naviCNode is RowDefinition row ) {
+                this.explorerNavigationBarRow = row;
+            }
         }
 
         private void DcChange(object sender, DependencyPropertyChangedEventArgs e) { Console.WriteLine( e ); }
@@ -258,10 +289,12 @@ namespace ExplorerWpf {
                 page.OnReFocus();
 
                 if ( !page.ShowTreeView ) {
-                    this.TreeControl.Visibility  = Visibility.Hidden;
-                    this._drag                   = this.TreeColumn.Width.Value;
-                    this.TreeColumn.Width        = new GridLength( 0 );
-                    this.VerticalSplitter1.Width = new GridLength( 0 );
+                    if ( this.TreeControl.Visibility == Visibility.Visible ) {
+                        this.TreeControl.Visibility  = Visibility.Hidden;
+                        this._drag                   = this.TreeColumn.Width.Value;
+                        this.TreeColumn.Width        = new GridLength( 0 );
+                        this.VerticalSplitter1.Width = new GridLength( 0 );
+                    }
                 }
                 else if ( this.TreeControl.Visibility == Visibility.Hidden ) {
                     this.TreeControl.Visibility  = Visibility.Visible;
@@ -269,9 +302,11 @@ namespace ExplorerWpf {
                     this.VerticalSplitter1.Width = new GridLength( 6 );
                 }
 
-                this.NaviGation.Visibility = page.HideNavigation ? Visibility.Hidden : Visibility.Visible;
+                this.Navigation.Visibility = page.HideNavigation ? Visibility.Hidden : Visibility.Visible;
 
-                this.consoleHost.Visibility = page.HideConsole ? Visibility.Hidden : Visibility.Visible;
+                this.ConsoleHost.Visibility = page.HideConsole ? Visibility.Hidden : Visibility.Visible;
+
+                this.explorerNavigationBarRow.Height = page.HideExplorerNavigation ? new GridLength( 0 ) : GridLength.Auto;
 
                 switch (page) {
                     case EmptyPage ep:
@@ -281,6 +316,9 @@ namespace ExplorerWpf {
                         this._currentExplorerView = explorer;
                         break;
                     case SettingsView sp:
+                        //Console.WriteLine();
+                        break;
+                    case ThemeView ep:
                         //Console.WriteLine();
                         break;
                 }
@@ -299,18 +337,70 @@ namespace ExplorerWpf {
                 this._mainProcess.StandardInput.WriteLine( "echo %cd%" );
         }
 
-        private void XOnSendDirectoryUpdateAsCmd(object sender, string e, bool cd) {
-            if ( sender.Equals( this._currentExplorerView ) )
-                WriteCmd( e, cd );
+
+        #region WindowEvents
+
+        private void MenuItem_OnClick(object sender, RoutedEventArgs e) {
+            var me = (MenuItem) sender;
+
+            switch (( (MenuItem) sender ).TabIndex) {
+                case 1:
+                    AddTab( TapType.EXPLORER );
+                    break;
+                case 2:
+                    AddTab( TapType.SETTINGS );
+                    break;
+                case 3:
+                    AddTab( TapType.THEME );
+                    break;
+                case 99:
+                    if ( me.IsChecked )
+                        MessageBox.Show( "Test" );
+                    break;
+
+                case 100:
+                    if ( ( (ContextMenu) me.Parent ).PlacementTarget is Control parent )
+                        if ( parent.Parent is TabItem tp && tp.Content != null )
+                            CloseTap( tp );
+
+                    break;
+            }
         }
 
-        private void XOnUpdateStatusBar(object arg1, string arg2, Brush arg3) {
-            this.Dispatcher?.Invoke( () => {
-                this.StatusBar.Foreground = arg3;
-                this.StatusBar.Text       = arg2;
-            } );
+        private void TabItem_MouseLeftButtonDown(object sender, MouseButtonEventArgs e) { AddTab( TapType.EXPLORER ); }
+
+        private void MainWindow_OnClosed(object sender, EventArgs e) {
+            WriteCmd( "exit" );
+            this._mainProcess?.Close();
+            this._outReaderThread?.Abort();
+            this._inWriteThread?.Abort();
+            Environment.Exit( 0 );
         }
 
+        // ReSharper disable once UnusedMember.Local
+        private void DragMoveX(object sender, MouseButtonEventArgs e) { MoveWindow( sender, e ); }
+
+        #endregion
+
+        #region EventListener
+
+        //Explorer Navigation Bar Events
+        private void RootOnClick(object sender, RoutedEventArgs e) { this._currentExplorerView?.ListP( SettingsHandler.ROOT_FOLDER, false ); }
+
+        private async void ReloadOnClick(object sender, RoutedEventArgs e) {
+            this._currentExplorerView.MainView.Items.Clear();
+            await Task.Delay( 10 );
+            this._currentExplorerView?.ListP( this.Handler.GetCurrentPath(), true );
+        }
+
+        private void BoxOnKeyDown(object sender, KeyEventArgs e) {
+            if ( e.Key != Key.Enter || this.Handler == null ) return;
+
+            this.Handler.SetCurrentPath( ( sender as TextBox )?.Text );
+            this._currentExplorerView.ListP( this.Handler.GetCurrentPath() );
+        }
+
+        //Handler Events  
         private void HOnOnSetCurrentPath(string arg1, string arg2) {
             if ( SettingsHandler.ConsoleAutoChangeDisc )
                 if ( arg1.Length > 1 && arg2.Length > 1 ) {
@@ -332,71 +422,33 @@ namespace ExplorerWpf {
                     }
                 }
 
-                
-
             if ( this._currentExplorerView == null ) return;
+        }
 
+        private static void HandlerOnOnError(Exception obj) { SettingsHandler.OnError( obj ); }
+
+        //ExplorerView Events
+        private void XOnSendDirectoryUpdateAsCmd(object sender, string e, bool cd) {
+            if ( sender.Equals( this._currentExplorerView ) )
+                WriteCmd( e, cd );
+        }
+
+        private void XOnUpdatePathBarDirect(object sender, string path) {
+            if ( !sender.Equals( this._currentExplorerView ) ) return;
+
+            this.pathBar.Text = path;
+            if ( this.pathBar.Popup != null )
+                this.pathBar.Popup.IsOpen = false;
+        }
+
+        private void XOnUpdateStatusBar(object arg1, string arg2, Brush arg3) {
             this.Dispatcher?.Invoke( () => {
-                this.outB.Text =  "";
-                this.outB.Text += ( "-------------------------------\n" );
-
-                for ( var i = 0; i < this.Handler.PathHistory.Count; i++ ) {
-                    var v = this.Handler.PathHistory[i];
-                    this.outB.Text += ( $"[{( this.Handler.HistoryIndex == i + 1 ? "*" : " " )}]: " + v + "\n" );
-                }
-
-                this.outB.Text += ( "-------------------------------\n" );
+                this.StatusBar.Foreground = arg3;
+                this.StatusBar.Text       = arg2;
             } );
         }
 
-        private void MenuItem_OnClick(object sender, RoutedEventArgs e) {
-            var me = (MenuItem) sender;
-
-            switch (( (MenuItem) sender ).TabIndex) {
-                case 1:
-                    AddTab( TapType.Explorer );
-                    break;
-                case 2:
-                    AddTab( TapType.Settings );
-                    break;
-                case 3:
-                    AddTab( TapType.Theme );
-                    break;
-                case 99:
-                    if ( me.IsChecked )
-                        MessageBox.Show( "Test" );
-                    break;
-
-                case 100:
-                    if ( ( (ContextMenu) me.Parent ).PlacementTarget is Control parent )
-                        if ( parent.Parent is TabItem tp && tp.Content != null )
-                            CloseTap( tp );
-
-                    break;
-            }
-        }
-
-        private void TabItem_MouseLeftButtonDown(object sender, MouseButtonEventArgs e) { AddTab( TapType.Explorer ); }
-
-        // ReSharper disable once UnusedMember.Local
-        private void DragMoveX(object sender, MouseButtonEventArgs e) { MoveWindow( sender, e ); }
-
-        private void MainWindow_OnClosed(object sender, EventArgs e) {
-            WriteCmd( "exit" );
-            this._mainProcess?.Close();
-            this._outReaderThread?.Abort();
-            this._inWriteThread?.Abort();
-            Environment.Exit( 0 );
-        }
-
-        private enum TapType {
-            Explorer,
-            Settings,
-
-            //TODO:: Theams,
-            Empty,
-            Theme
-        }
+        #endregion
 
         #region Buttons
 
@@ -554,6 +606,13 @@ namespace ExplorerWpf {
 
         #region TabS
 
+        private enum TapType {
+            EXPLORER,
+            SETTINGS,
+            EMPTY,
+            THEME
+        }
+
         private ContextMenu _contextMenu;
 
         private void CreateContextMenu() {
@@ -568,11 +627,11 @@ namespace ExplorerWpf {
             }
         }
 
-        private EmptyPage CreateEmpty() => new EmptyPage();
+        private static EmptyPage CreateEmpty() => new EmptyPage();
 
-        private SettingsView CreateSettings() => new SettingsView();
+        private static SettingsView CreateSettings() => new SettingsView();
 
-        private IPage CreateTheme() => new ThemeView();
+        private static ThemeView CreateTheme() => new ThemeView();
 
         private ExplorerView CreateExplorer(string path = SettingsHandler.ROOT_FOLDER) {
             var h = new LocalHandler( path );
@@ -585,10 +644,12 @@ namespace ExplorerWpf {
 
             x.SendDirectoryUpdateAsCmd += XOnSendDirectoryUpdateAsCmd;
             x.UpdateStatusBar          += XOnUpdateStatusBar;
+            x.UpdatePathBarDirect      += XOnUpdatePathBarDirect;
 
             x.Margin = new Thickness( 0, 0, 0, 0 );
             return x;
         }
+
 
         private TabItem CreateTabItem(IPage page, string name) {
             var ex = (Label) this.PlusTabItem.Header;
@@ -623,16 +684,16 @@ namespace ExplorerWpf {
             IPage page;
 
             switch (type) {
-                case TapType.Explorer:
+                case TapType.EXPLORER:
                     page = CreateExplorer( path );
                     break;
-                case TapType.Settings:
+                case TapType.SETTINGS:
                     page = CreateSettings();
                     break;
-                case TapType.Empty:
+                case TapType.EMPTY:
                     page = CreateEmpty();
                     break;
-                case TapType.Theme:
+                case TapType.THEME:
                     page = CreateTheme();
                     break;
                 default: throw new ArgumentOutOfRangeException( nameof(type), type, null );
@@ -640,7 +701,6 @@ namespace ExplorerWpf {
 
             AddTabToTabControl( CreateTabItem( page, type.ToString() ) );
         }
-
 
         private void CloseTap(TabItem tp) {
             if ( !( tp.Content is IPage page ) ) return;
@@ -673,6 +733,5 @@ namespace ExplorerWpf {
 
         #endregion
 
-        private void MainWindow_OnActivated(object sender, EventArgs e) { }
     }
 }

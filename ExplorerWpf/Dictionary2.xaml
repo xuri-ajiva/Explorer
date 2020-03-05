@@ -3,7 +3,7 @@
                     xmlns:local="clr-namespace:ExplorerWpf"
                     xmlns:Themes="clr-namespace:Microsoft.Windows.Themes;assembly=PresentationFramework.Classic"
                     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-                    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="d">
+                    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:TexTBox="clr-namespace:ExplorerWpf.TexTBox" mc:Ignorable="d">
 
     <Style x:Key="{x:Type TreeView}"
            TargetType="{x:Type TreeView}">
@@ -1514,6 +1514,117 @@
         </Setter>
     </Style>
 
+    
+    <ControlTemplate x:Key="ButtonBaseButtonNormalThinBorder" TargetType="{x:Type ButtonBase}">
+        <ControlTemplate.Resources>
+            <Storyboard x:Key="Storyboard1">
+                <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.Opacity)"
+                                               Storyboard.TargetName="ContentContainer">
+                    <EasingDoubleKeyFrame KeyTime="0" Value="1" />
+                    <EasingDoubleKeyFrame KeyTime="0:0:0.8" Value="0.8" />
+                </DoubleAnimationUsingKeyFrames>
+                <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.Opacity)"
+                                               Storyboard.TargetName="contentPresenter">
+                    <EasingDoubleKeyFrame KeyTime="0" Value="1" />
+                    <EasingDoubleKeyFrame KeyTime="0:0:0.8" Value="0.8" />
+                </DoubleAnimationUsingKeyFrames>
+            </Storyboard>
+            <Storyboard x:Key="Storyboard2">
+                <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.Opacity)"
+                                               Storyboard.TargetName="ContentContainer">
+                    <EasingDoubleKeyFrame KeyTime="0" Value="0.8" />
+                    <EasingDoubleKeyFrame KeyTime="0:0:0.8" Value="1" />
+                </DoubleAnimationUsingKeyFrames>
+                <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.Opacity)"
+                                               Storyboard.TargetName="contentPresenter">
+                    <EasingDoubleKeyFrame KeyTime="0" Value="0.8" />
+                    <EasingDoubleKeyFrame KeyTime="0:0:0.8" Value="1" />
+                </DoubleAnimationUsingKeyFrames>
+            </Storyboard>
+            <Storyboard x:Key="OnMouseEnter1">
+                <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.Opacity)"
+                                               Storyboard.TargetName="ContentContainer">
+                    <EasingDoubleKeyFrame KeyTime="0" Value="0.8" />
+                    <EasingDoubleKeyFrame KeyTime="0:0:0.2" Value="0.9" />
+                </DoubleAnimationUsingKeyFrames>
+                <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.Opacity)"
+                                               Storyboard.TargetName="contentPresenter">
+                    <EasingDoubleKeyFrame KeyTime="0" Value="0.8" />
+                    <EasingDoubleKeyFrame KeyTime="0:0:0.2" Value="0.9" />
+                </DoubleAnimationUsingKeyFrames>
+            </Storyboard>
+            <Storyboard x:Key="OnMouseLeave1">
+                <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.Opacity)"
+                                               Storyboard.TargetName="ContentContainer">
+                    <EasingDoubleKeyFrame KeyTime="0" Value="0.9" />
+                    <EasingDoubleKeyFrame KeyTime="0:0:0.2" Value="0.8" />
+                </DoubleAnimationUsingKeyFrames>
+                <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.Opacity)"
+                                               Storyboard.TargetName="contentPresenter">
+                    <EasingDoubleKeyFrame KeyTime="0" Value="0.9" />
+                    <EasingDoubleKeyFrame KeyTime="0:0:0.2" Value="0.8" />
+                </DoubleAnimationUsingKeyFrames>
+            </Storyboard>
+        </ControlTemplate.Resources>
+        <Themes:ClassicBorderDecorator x:Name="ContentContainer" BorderBrush="{TemplateBinding BorderBrush}"
+                                       BorderThickness="1" BorderStyle="Raised"
+                                       Background="{TemplateBinding Background}" SnapsToDevicePixels="True">
+            <ContentPresenter x:Name="contentPresenter" ContentTemplate="{TemplateBinding ContentTemplate}"
+                              Content="{TemplateBinding Content}"
+                              ContentStringFormat="{TemplateBinding ContentStringFormat}"
+                              HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                              Margin="{TemplateBinding Padding}" RecognizesAccessKey="True"
+                              SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"
+                              VerticalAlignment="{TemplateBinding VerticalContentAlignment}" />
+        </Themes:ClassicBorderDecorator>
+        <ControlTemplate.Triggers>
+            <Trigger Property="IsKeyboardFocused" Value="True">
+                <Trigger.ExitActions>
+                    <BeginStoryboard x:Name="Storyboard1_BeginStoryboard1" Storyboard="{StaticResource Storyboard1}" />
+                </Trigger.ExitActions>
+                <Trigger.EnterActions>
+                    <BeginStoryboard x:Name="Storyboard2_BeginStoryboard3" Storyboard="{StaticResource Storyboard2}" />
+                </Trigger.EnterActions>
+                <Setter Property="BorderStyle" TargetName="ContentContainer" Value="RaisedFocused" />
+            </Trigger>
+            <Trigger Property="Button.IsDefaulted" Value="True">
+                <Setter Property="BorderStyle" TargetName="ContentContainer" Value="RaisedFocused" />
+            </Trigger>
+            <Trigger Property="IsPressed" Value="True">
+                <Trigger.ExitActions>
+                    <BeginStoryboard x:Name="Storyboard1_BeginStoryboard" Storyboard="{StaticResource Storyboard1}" />
+                </Trigger.ExitActions>
+                <Trigger.EnterActions>
+                    <BeginStoryboard x:Name="Storyboard2_BeginStoryboard" Storyboard="{StaticResource Storyboard2}" />
+                </Trigger.EnterActions>
+                <Setter Property="BorderStyle" TargetName="ContentContainer" Value="RaisedPressed" />
+            </Trigger>
+            <EventTrigger RoutedEvent="ButtonBase.Click">
+                <BeginStoryboard x:Name="Storyboard1_BeginStoryboard2" Storyboard="{StaticResource Storyboard1}" />
+            </EventTrigger>
+            <Trigger Property="IsEnabled" Value="False">
+                <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}" />
+            </Trigger>
+            <Trigger Property="IsMouseDirectlyOver" Value="True">
+                <Trigger.ExitActions>
+                    <BeginStoryboard x:Name="Storyboard1_BeginStoryboard3" Storyboard="{StaticResource Storyboard1}" />
+                </Trigger.ExitActions>
+                <Trigger.EnterActions>
+                    <BeginStoryboard x:Name="Storyboard2_BeginStoryboard2" Storyboard="{StaticResource Storyboard2}" />
+                </Trigger.EnterActions>
+            </Trigger>
+            <EventTrigger RoutedEvent="FrameworkElement.Loaded">
+                <BeginStoryboard x:Name="Storyboard1_BeginStoryboard4" Storyboard="{StaticResource Storyboard1}" />
+            </EventTrigger>
+            <EventTrigger RoutedEvent="UIElement.MouseEnter">
+                <BeginStoryboard x:Name="OnMouseEnter1_BeginStoryboard" Storyboard="{StaticResource OnMouseEnter1}" />
+            </EventTrigger>
+            <EventTrigger RoutedEvent="UIElement.MouseLeave">
+                <BeginStoryboard x:Name="OnMouseLeave1_BeginStoryboard" Storyboard="{StaticResource OnMouseLeave1}" />
+            </EventTrigger>
+        </ControlTemplate.Triggers>
+    </ControlTemplate>
+
     <ControlTemplate x:Key="ButtonBaseControalBar1" TargetType="{x:Type ButtonBase}">
         <ControlTemplate.Resources>
             <Storyboard x:Key="Storyboard1">
@@ -1741,18 +1852,30 @@
                             <ColumnDefinition x:Name="ColumnDefinition1" Width="0" />
                         </Grid.ColumnDefinitions>
                         <Grid.RowDefinitions>
-                            <RowDefinition x:Name="RowDefinition0" Height="Auto" />
-                            <RowDefinition x:Name="RowDefinition1" Height="*" />
+                            <RowDefinition x:Name="RowDefinition0" Height="auto" MinHeight="30" />
+                            <RowDefinition Height="25" x:Name="NavigationBarColumnX"/>
+                            <RowDefinition x:Name="RowDefinition1" />
                         </Grid.RowDefinitions>
-                        <Grid x:Name="HeaderPanel1">
+                        <Grid x:Name="HeaderPanel1" Grid.RowSpan="1">
                             <Rectangle HorizontalAlignment="Stretch" Height="Auto" Stroke="{x:Null}"
                                        VerticalAlignment="Stretch" Width="Auto" Margin="0,30,0,0"
                                        Fill="{TemplateBinding Background}" />
                             <TabPanel x:Name="HeaderPanel" Background="{x:Null}" Grid.Column="0" IsItemsHost="True"
                                       Margin="0,0,120,0" Grid.Row="0" KeyboardNavigation.TabIndex="1" Panel.ZIndex="1" />
                         </Grid>
+                        <Grid HorizontalAlignment="Stretch" Height="Auto" Margin="0"  Width="Auto" Grid.RowSpan="1"
+                              Grid.Column="0" Grid.Row="1">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="auto"/>
+                                <ColumnDefinition Width="auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TexTBox:SelectFolderTextBox x:Name="PathBarX" Height="Auto" TextWrapping="Wrap" Text="/" VerticalAlignment="Stretch" Width="Auto" FontSize="14" Grid.Column="0" UseLayoutRounding="False" Padding="0" Background="{DynamicResource Background}" BorderBrush="{DynamicResource Border}" Foreground="{DynamicResource Foreground}" MinWidth="100" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch" />
+                            <Button x:Name="ReloadButtonX" Content="🔄" HorizontalAlignment="Stretch" Height="Auto" Margin="0" Grid.Row="0" VerticalAlignment="Stretch" Width="Auto" Grid.Column="1" UseLayoutRounding="True" Background="{DynamicResource Background}" BorderBrush="{DynamicResource Border}" Foreground="{DynamicResource Foreground}" Template="{DynamicResource ButtonBaseButtonNormalThinBorder}"  />
+                            <Button x:Name="RootButtonX" Content="Root" HorizontalAlignment="Stretch" Height="Auto" Margin="0" Grid.Row="0" VerticalAlignment="Stretch" Width="Auto" Grid.Column="2" UseLayoutRounding="True" Background="{DynamicResource Background}" BorderBrush="{DynamicResource Border}" Foreground="{DynamicResource Foreground}" Template="{DynamicResource ButtonBaseButtonNormalThinBorder}"/>
+                        </Grid>
                         <Grid x:Name="ContentPanel" Grid.Column="0"
-                              KeyboardNavigation.DirectionalNavigation="Contained" Grid.Row="1"
+                              KeyboardNavigation.DirectionalNavigation="Contained" Grid.Row="2"
                               KeyboardNavigation.TabIndex="2" KeyboardNavigation.TabNavigation="Local">
                             <Themes:ClassicBorderDecorator BorderBrush="{TemplateBinding BorderBrush}"
                                                            BorderThickness="{TemplateBinding BorderThickness}"

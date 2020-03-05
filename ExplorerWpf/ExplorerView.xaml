@@ -3,10 +3,9 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:local="clr-namespace:ExplorerWpf"
-             xmlns:texTBox="clr-namespace:ExplorerWpf.TexTBox"
-             x:Name="userControl" x:Class="ExplorerWpf.ExplorerView"
+             x:Name="UserControl" x:Class="ExplorerWpf.ExplorerView"
              mc:Ignorable="d"
-             d:DesignHeight="450" d:DesignWidth="800">
+             d:DesignHeight="450" d:DesignWidth="800" Foreground="{DynamicResource Foreground}">
     <UserControl.Resources>                                    
         <local:ImageConverter x:Key="ImageConverter" />
         <Style x:Key="Item-Style" TargetType="{x:Type ListViewItem}">
@@ -60,23 +59,18 @@
                              Style="{DynamicResource ProgressBarStyle1}" ToolTip="{Binding SizePb, Mode=OneWay}" />
             </DataTemplate>
         </Grid.Resources>
-
-        <Grid.RowDefinitions>
-            <RowDefinition Height="25" />
-            <RowDefinition Height="404*" />
-        </Grid.RowDefinitions>
         <local:SortableListView x:Name="MainView" AutomationProperties.IsColumnHeader="True"
                                 IsSynchronizedWithCurrentItem="True"
                                 BorderBrush="{DynamicResource Border}" Foreground="{DynamicResource Foreground}"
                                 ButtonBase.Click="SortableListViewColumnHeaderClicked"
                                 Style="{DynamicResource {x:Type ListView}}"
-                                Grid.Row="1" FontSize="14" d:DataContext="{d:DesignData Type=Item}"
-                                ItemContainerStyle="{StaticResource Item-Style}" Margin="0,0,0,1">
+                                FontSize="14" d:DataContext="{d:DesignData Type=Item}"
+                                ItemContainerStyle="{StaticResource Item-Style}" Margin="0,0,0,0">
             <local:SortableListView.View>
                 <GridView>
                     <local:GridViewColumnSortData Header="Name" Width="auto"
                                                   CellTemplate="{StaticResource IconTemplate}"
-                                                  BindingForSort="{Binding Name, Mode=OneWay}" />
+                                                  BindingForSort="{Binding Name, Mode=OneWay}"/>
                     <local:GridViewColumnSortData Header="Path" Width="200"
                                                   DisplayMemberBinding="{Binding Path, Mode=OneWay}"
                                                   BindingForSort="{Binding Path, Mode=OneWay}" />
@@ -108,14 +102,6 @@
                 </GridView>
             </local:SortableListView.View>
         </local:SortableListView>
-        <texTBox:SelectFolderTextBox Grid.Row="0" x:Name="PathBar" Margin="0,0,60,0" Background="{x:Null}"
-                                     BorderBrush="{DynamicResource Border}"
-                                     OpacityMask="Black" Foreground="{DynamicResource Foreground}"
-                                     RenderTransformOrigin="0.5,0.5" FontSize="14" Text="/" Height="Auto"
-                                     KeyDown="PathBar_OnKeyDown" BorderThickness="2" />
-        <Button Grid.Row="0" Content="LocalDisks" HorizontalAlignment="Right" Click="Button_Click"
-                RenderTransformOrigin="0.5,0.5" FontSize="10" Background="{DynamicResource Background}"
-                BorderBrush="{DynamicResource Border}" Foreground="{DynamicResource Foreground}" BorderThickness="1" Width="60" />
 
     </Grid>
 </UserControl>

@@ -42,6 +42,9 @@ namespace ExplorerWpf {
         public bool HideNavigation => true;
 
         /// <inheritdoc />
+        public bool HideExplorerNavigation => true;
+
+        /// <inheritdoc />
         public TabItem ParentTapItem { get; set; }
 
         /// <inheritdoc />
