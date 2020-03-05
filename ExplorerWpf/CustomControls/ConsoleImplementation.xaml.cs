@@ -27,8 +27,7 @@ namespace ExplorerWpf.CustomControls {
         public ConsoleImplementation() {
             InitializeComponent();
 
-            this._rot                      =  new Panel();
-            this._rot.Dock                 =  DockStyle.Fill;
+            this._rot = new Panel { Dock = DockStyle.Fill };
             this.Host.Child                =  this._rot;
             this._hWndOParent              =  this._rot.Handle;
             this.Host.MouseDown            += MouseDownFocusWindow;
@@ -63,7 +62,8 @@ namespace ExplorerWpf.CustomControls {
         private void UndockIt() { NativeMethods.SetParent( this._hWndDocked, this._hWndOriginalParent ); }
 
 
-        private void SetParrent() {
+        private void SetParent() {
+
             this._hWndOriginalParent = NativeMethods.SetParent( this._hWndDocked, this._hWndOParent );
 
             if ( SettingsHandler.ConsolePresent ) Thread.Sleep( 400 );
@@ -71,14 +71,14 @@ namespace ExplorerWpf.CustomControls {
 
             NativeMethods.MoveWindow( this._hWndDocked, 0, 0, this._rot.Width, this._rot.Height, true );
 
-            if ( SettingsHandler.ConsolePresent ) Thread.Sleep( 400 );
-            NativeMethods.SetWindowLong( this._hWndDocked, -20, 524288 ); //GWL_EXSTYLE=-20; WS_EX_LAYERED=524288=&h80000, WS_EX_TRANSPARENT=32=0x00000020L
-
-            if ( SettingsHandler.ConsolePresent ) Thread.Sleep( 400 );
-
-            NativeMethods.SetLayeredWindowAttributes( this._hWndDocked, 0, 75, 2 ); // Transparency=51=20%, LWA_ALPHA=2
-
-            if ( SettingsHandler.ConsolePresent ) Thread.Sleep( 400 );
+            //if ( SettingsHandler.ConsolePresent ) Thread.Sleep( 400 );
+            //NativeMethods.SetWindowLong( this._hWndDocked, -20, 524288 ); //GWL_EXSTYLE=-20; WS_EX_LAYERED=524288=&h80000, WS_EX_TRANSPARENT=32=0x00000020L
+            //
+            //if ( SettingsHandler.ConsolePresent ) Thread.Sleep( 400 );
+            //
+            //NativeMethods.SetLayeredWindowAttributes( this._hWndDocked, 0, 75, 2 ); // Transparency=51=20%, LWA_ALPHA=2
+            //
+            //if ( SettingsHandler.ConsolePresent ) Thread.Sleep( 400 );
         }
 
         public void Init() {
@@ -87,9 +87,12 @@ namespace ExplorerWpf.CustomControls {
         }
 
         private void Init(IntPtr hWnd) {
-            this._hWndDocked = hWnd;
-            this.Dispatcher.Invoke( MakeBorderless );
-            this.Dispatcher.Invoke( SetParrent );
+            this._hWndDocked = hWnd;                   
+            if ( SettingsHandler.ConsolePresent ) Thread.Sleep( 400 );
+            NativeMethods.EnableBlur( this._hWndDocked );      
+            if ( SettingsHandler.ConsolePresent ) Thread.Sleep( 400 );
+            this.Dispatcher.Invoke( MakeBorderless );  
+            this.Dispatcher.Invoke( SetParent );
         }
 
         public void Init(IntPtr hWnd, bool noparent) {
@@ -101,10 +104,7 @@ namespace ExplorerWpf.CustomControls {
             } );
         }
 
-        ~ConsoleImplementation() {
-            UndockIt();
-            Dispose( false );
-        }
+        ~ConsoleImplementation() { Dispose( false ); }
 
         public void HideConsole() { NativeMethods.ShowWindowAsync( this._hWndDocked, NativeMethods.SW_HIDE ); }
 
@@ -125,8 +125,15 @@ namespace ExplorerWpf.CustomControls {
 
         #region IDisposable
 
-        private void ReleaseUnmanagedResources() {
-            // TODO release unmanaged resources here
+        private void ReleaseUnmanagedResources() {       
+            NativeMethods.ShowWindowAsync( this._hWndDocked, NativeMethods.SW_HIDE );
+            UndockIt();
+            NativeMethods.SetWindowLong( this._hWndDocked, NativeMethods.GWL_STYLE, NativeMethods.WS_SYSMENU | NativeMethods.WS_CAPTION | NativeMethods.WS_THICKFRAME | NativeMethods.WS_MINIMIZEBOX | NativeMethods.WS_MAXIMIZEBOX );
+            
+            NativeMethods.SetLayeredWindowAttributes( this._hWndDocked, 0, 254, 2 );
+            Thread.Sleep( 100 );
+            NativeMethods.SetWindowPos( this._hWndDocked, -2, 200, 150, 800, 800, 0x0040 );
+            NativeMethods.ShowWindowAsync( this._hWndDocked, NativeMethods.SW_SHOWNORMAL );
         }
 
         private void Dispose(bool disposing) {

@@ -6,14 +6,41 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Imaging;
+using System.Globalization;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading;
+using System.Windows.Data;
+using System.Windows.Media.Imaging;
 using ThreadState = System.Threading.ThreadState;
 
 #endregion
 
 namespace ExplorerWpf {
+    public class ImageConverter : IValueConverter {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture) {
+            try {
+                if ( value is Bitmap bitmap1 ) {
+                    var stream = new MemoryStream();
+                    bitmap1.Save( stream, ImageFormat.Png );
+
+                    var bitmap = new BitmapImage();
+                    bitmap.BeginInit();
+                    bitmap.StreamSource = stream;
+                    bitmap.EndInit();
+
+                    return bitmap;
+                }
+            } catch (Exception e) {
+                Debug.WriteLine( e );
+                //SettingsHandler.OnError( e );
+            }
+
+            return value;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture) => throw new NotImplementedException();
+    }
     public static class DefaultIcons {
 
         private const uint SHGFI_ICON      = 0x100;
@@ -58,14 +85,10 @@ namespace ExplorerWpf {
 
             if ( SettingsHandler.ExtenstionWithSpecialIcons.Contains( ext ) ) ext = path;
 
-            if ( ext == null )
-                return null;
-
-            Icon icon;
+            if ( ext == null ) return null;
 
             lock (CacheLock) {
-                if ( Cache.TryGetValue( ext, out icon ) )
-                    return icon;
+                if ( Cache.TryGetValue( ext, out var icon ) ) return icon;
 
                 icon = ExtractFromPath( path );
 
@@ -113,8 +136,12 @@ namespace ExplorerWpf {
 
         public static void CashLoop() {
             try {
-                while ( true ) {
-                    while ( CashQueue == null || CashQueue.Count == 0 ) Thread.Sleep( 20 );
+                while ( Program.Running ) {
+                    while ( CashQueue == null || CashQueue.Count == 0 ) {
+                        if ( !Program.Running ) return;
+
+                        Thread.Sleep( 20 );
+                    }
 
                     ( var ext, var path ) = CashQueue.Dequeue();
 
@@ -148,7 +175,6 @@ namespace ExplorerWpf {
             public readonly string szTypeName;
         }
     }
-
     public class TreePathItem : Item {
 
         public TreePathItem(DirectoryInfo d) : base( d ) { Init( false ); }
@@ -163,11 +189,9 @@ namespace ExplorerWpf {
 
         private void Init(bool noSubNode) {
             this.Items = new ObservableCollection<TreePathItem>();
-            if ( !noSubNode )
-                this.Items.Add( Empty );
+            if ( !noSubNode ) this.Items.Add( Empty );
         }
     }
-
     public class Item {
         public enum FileType {
             DIRECTORY, FILE, NONE

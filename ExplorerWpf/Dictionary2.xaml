@@ -27,7 +27,6 @@
                         <ScrollViewer Focusable="False" CanContentScroll="False" Padding="4"
                                       BorderBrush="{TemplateBinding BorderBrush}"
                                       Foreground="{TemplateBinding Foreground}"
-                                      OpacityMask="{DynamicResource ScrollBarBackground}"
                                       Template="{DynamicResource ScrollViewerControlTemplate1}">
                             <ItemsPresenter />
                         </ScrollViewer>
@@ -1277,8 +1276,7 @@
                         <ScrollViewer
                             Style="{DynamicResource ScrollViewerStyle3}"
                             Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}"
-                            Foreground="{TemplateBinding Foreground}"
-                            OpacityMask="{DynamicResource ScrollBarBackground}" Margin="0">
+                            Foreground="{TemplateBinding Foreground}" Margin="0">
                             <ItemsPresenter Style="{DynamicResource ItemsPresenterStyle1}" />
                         </ScrollViewer>
                     </Border>
@@ -1821,16 +1819,14 @@
                                    Value="{Binding HorizontalOffset, Mode=OneWay, RelativeSource={RelativeSource TemplatedParent}}"
                                    ViewportSize="{TemplateBinding ViewportWidth}"
                                    Style="{DynamicResource ScrollBarStyleH}" Background="{TemplateBinding Background}"
-                                   BorderBrush="{TemplateBinding BorderBrush}"
-                                   Foreground="{TemplateBinding OpacityMask}" />
+                                   BorderBrush="{TemplateBinding BorderBrush}" Foreground="{DynamicResource ScrollBarBackground}" />
                         <ScrollBar x:Name="PART_VerticalScrollBar" Cursor="Arrow" Grid.Column="1"
                                    Maximum="{TemplateBinding ScrollableHeight}" Minimum="0" Orientation="Vertical"
                                    Visibility="{TemplateBinding ComputedVerticalScrollBarVisibility}"
                                    Value="{Binding VerticalOffset, Mode=OneWay, RelativeSource={RelativeSource TemplatedParent}}"
                                    ViewportSize="{TemplateBinding ViewportHeight}"
                                    Style="{DynamicResource ScrollBarStyleV}" Background="{TemplateBinding Background}"
-                                   BorderBrush="{TemplateBinding BorderBrush}"
-                                   Foreground="{TemplateBinding OpacityMask}" />
+                                   BorderBrush="{TemplateBinding BorderBrush}" Foreground="{DynamicResource ScrollBarBackground}" />
                         <DockPanel Background="{Binding Background, ElementName=PART_VerticalScrollBar}"
                                    Grid.Column="1" LastChildFill="False" Grid.Row="1">
                             <Rectangle DockPanel.Dock="Left" Fill="{TemplateBinding BorderBrush}"

@@ -10,6 +10,7 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -30,156 +31,227 @@ using MessageBox = System.Windows.Forms.MessageBox;
 
 
 namespace ExplorerWpf {
-    public class ImageConverter : IValueConverter {
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture) {
-            try {
-                if ( value is Bitmap bitmap1 ) {
-                    var stream = new MemoryStream();
-                    bitmap1.Save( stream, ImageFormat.Png );
-
-                    var bitmap = new BitmapImage();
-                    bitmap.BeginInit();
-                    bitmap.StreamSource = stream;
-                    bitmap.EndInit();
-
-                    return bitmap;
-                }
-            } catch (Exception e) {
-                Debug.WriteLine( e );
-                //SettingsHandler.OnError( e );
-            }
-
-            return value;
-        }
-
-        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture) => throw new NotImplementedException();
-    }
-
     public partial class MainWindow : Window, IDisposable {
         private ExplorerView _currentExplorerView;
         private IPage        _currentPage = new EmptyPage();
 
         private double _drag;
+        private int    _linesToSkip;
 
-        private Thread _errReaderThread;
-        private Thread _inWriteThread;
-
-        private int     _linesToSkip;
-        private Process _mainProcess;
-        private Thread  _outReaderThread;
-
-        private TreePathItem  _root;
-        private RowDefinition explorerNavigationBarRow;
-
-        private SelectFolderTextBox pathBar;
+        private TreePathItem        _root;
+        private RowDefinition       _explorerNavigationBarRow;
+        private SelectFolderTextBox _pathBar;
 
         public MainWindow() {
             InitializeComponent();
             this.CopyRightTextBox.Text = Program.Version + "    " + Program.CopyRight;
         }
 
+
         private IHandler Handler => this._currentExplorerView.Handler;
 
         private void StartConsole() {
-            var p = new Process { StartInfo = new ProcessStartInfo( SettingsHandler.UserPowerShell ? "C:\\windows\\system32\\windowspowershell\\v1.0\\powershell.exe" : "cmd.exe" ) };
-            p.StartInfo.RedirectStandardInput  = true;
-            p.StartInfo.RedirectStandardOutput = true;
-            p.StartInfo.RedirectStandardError  = true;
-            p.StartInfo.CreateNoWindow         = true;
-            p.StartInfo.UseShellExecute        = false;
-            p.Start();
-            p.StandardInput.AutoFlush = true;
+            this._mainProcess = new Process {
+                StartInfo = new ProcessStartInfo( SettingsHandler.UserPowerShell ? "C:\\windows\\system32\\windowspowershell\\v1.0\\powershell.exe" : "cmd.exe" ) {
+                    RedirectStandardInput  = true,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError  = true,
+                    CreateNoWindow         = true,
+                    UseShellExecute        = false
+                }
+            };
+            this._mainProcess.Start();
+            this._mainProcess.StandardInput.AutoFlush = true;
 
             //p.BeginErrorReadLine();
             //p.BeginOutputReadLine();
-            this._errReaderThread = new Thread( () => {
-                while ( !p.StandardError.EndOfStream ) {
-                    var line = p.StandardError.ReadLine();
-                    Console.ForegroundColor = ConsoleColor.Red;
-                    Console.WriteLine( line );
-                    Console.ForegroundColor = ConsoleColor.Yellow;
-                }
-            } );
-            this._outReaderThread = new Thread( () => {
-                const int negativeBegin = -100;
-
-                p.StandardInput.WriteLine( SettingsHandler.UserPowerShell ? "function prompt {}" : "@echo off" );
-                p.StandardInput.WriteLine( "cd /" );
-                this._linesToSkip       = negativeBegin;
-                Console.ForegroundColor = ConsoleColor.Magenta;
-                Console.WriteLine( "Console Support Online" );
-                Console.ForegroundColor = ConsoleColor.White; //TODO: Setting
-
-                while ( !p.StandardOutput.EndOfStream ) {
-                    var line = p.StandardOutput.ReadLine();
-
-                    if ( this._linesToSkip <= negativeBegin ) {
-                        Console.ForegroundColor = ConsoleColor.Yellow;
-                        Console.Write( line );
-                        Console.ForegroundColor = ConsoleColor.White;
-                        this._linesToSkip       = SettingsHandler.UserPowerShell ? 6 : 4;
-                        continue;
-                    }
-
-                    try {
-                        var parches = Regex.Match( line, SettingsHandler.UserPowerShell ? "^[A-Za-z]:\\\\[^\r\n\"]*" : "[^\"^ ^\t]?[A-Za-z]:\\\\[^\"]*" );
-                        Debug.WriteLine( line );
-
-                        if ( parches.Success ) {
-                            var path = parches.Value.Substring( 0, parches.Length );
-
-                            while ( path.EndsWith( " " ) ) {
-                                path = path.Substring( 0, path.Length - 1 );
-                            }
-
-                            if ( Directory.Exists( path ) )
-                                if ( this.Handler.GetCurrentPath() != path ) {
-                                    Console.ForegroundColor = ConsoleColor.DarkGreen;
-                                    Console.Write( path + "> " );
-                                    Console.ForegroundColor = ConsoleColor.White;
-
-                                    if ( SettingsHandler.ConsoleAutoChangePath ) {
-                                        this.Handler.SetCurrentPath( path );
-                                        this._currentExplorerView.ListP( this.Handler.GetCurrentPath(), true );
-                                    }
-
-                                    if ( !SettingsHandler.UserPowerShell )
-                                        this._linesToSkip++;
-                                }
-                        }
-                        else if ( SettingsHandler.UserPowerShell ) {
-                            if ( this._linesToSkip <= 0 )
-                                if ( !string.IsNullOrEmpty( line ) && !line.StartsWith( "Path" ) && !line.StartsWith( "----" ) && line != ( "PS>pwd" ) ) {
-                                    //Console.ForegroundColor = ConsoleColor.w;
-                                    Console.WriteLine( line );
-                                    //Console.ForegroundColor = ConsoleColor.White;
-                                }
-                        }
-                    } catch { }
-
-                    if ( !SettingsHandler.UserPowerShell )
-                        if ( this._linesToSkip <= 0 ) {
-                            if ( line != "echo %cd%" )
-                                Console.WriteLine( line );
-                        }
-
-                    if ( this._linesToSkip > 0 ) this._linesToSkip--;
-                }
-            } );
-            this._inWriteThread = new Thread( () => {
-                while ( true ) {
-                    var line = Console.In.ReadLine();
-                    this._linesToSkip++;
-                    WriteCmd( line );
-                }
-            } );
+            this._errReaderThread = new Thread( ConsoleError );
+            this._outReaderThread = new Thread( ConsoleRead );
+            this._inWriteThread   = new Thread( ConsoleWrite );
             this._errReaderThread.Start();
             this._outReaderThread.Start();
             this._inWriteThread.Start();
 
             this.ConsoleW.Init();
-            this._mainProcess          =  p;
             this.ConsoleHost.MouseDown += this.ConsoleW.MouseDownFocusWindow;
+        }
+
+        private void GetControls() {
+            var pathNode   = this.TabControl.Template.FindName( "PathBarX",             this.TabControl );
+            var reloadNode = this.TabControl.Template.FindName( "ReloadButtonX",        this.TabControl );
+            var rootNode   = this.TabControl.Template.FindName( "RootButtonX",          this.TabControl );
+            var naviCNode  = this.TabControl.Template.FindName( "NavigationBarColumnX", this.TabControl );
+
+            if ( pathNode is SelectFolderTextBox box ) {
+                box.KeyDown  += BoxOnKeyDown;
+                this._pathBar =  box;
+                //Console.WriteLine( "PathBar Support" );
+            }
+
+            if ( reloadNode is Button reload ) reload.Click += ReloadOnClick;
+            //Console.WriteLine( "Reload Support" );
+
+            if ( rootNode is Button root ) root.Click += RootOnClick;
+            //Console.WriteLine( "Disk List Support" );
+
+            if ( naviCNode is RowDefinition row ) this._explorerNavigationBarRow = row;
+            //Console.WriteLine( "Path bar hide support" );
+        }
+
+        private void WriteCmd(string command, bool echo = true) {
+            Debug.WriteLine( echo + ": " + command );
+            if ( this._mainProcess == null || this._mainProcess.HasExited ) return;
+
+            this._mainProcess.StandardInput.WriteLine( command );
+            if ( echo && SettingsHandler.ConsoleAutoChangePath )
+                this._mainProcess.StandardInput.WriteLine( SettingsHandler.UserPowerShell ? "pwd" : "echo %cd%" );
+        }
+
+        #region ConsoleThreads
+
+        private Thread  _errReaderThread;
+        private Thread  _inWriteThread;
+        private Thread  _outReaderThread;
+        private Process _mainProcess;
+
+
+        private void ConsoleRead() {
+            const int negativeBegin = -100;
+
+            this._mainProcess.StandardInput.WriteLine( SettingsHandler.UserPowerShell ? "function prompt {}" : "@echo off" );
+            this._mainProcess.StandardInput.WriteLine( "cd /" );
+            this._linesToSkip       = negativeBegin;
+            Console.ForegroundColor = ConsoleColor.Magenta;
+            Console.WriteLine( "Console Support Online" );
+            Console.ForegroundColor = ConsoleColor.White; //TODO: Setting
+
+            while ( !this._mainProcess.StandardOutput.EndOfStream && Program.Running ) {
+                var line = this._mainProcess.StandardOutput.ReadLine();
+
+                if ( this._linesToSkip <= negativeBegin ) {
+                    Console.ForegroundColor = ConsoleColor.Yellow;
+                    Console.Write( line );
+                    Console.ForegroundColor = ConsoleColor.White;
+                    this._linesToSkip       = SettingsHandler.UserPowerShell ? 6 : 4;
+                    continue;
+                }
+
+                try {
+                    var parches = Regex.Match( line, SettingsHandler.UserPowerShell ? "^[A-Za-z]:\\\\[^\r\n\"]*" : "[^\"^ ^\t]?[A-Za-z]:\\\\[^\"]*" );
+                    Debug.WriteLine( line );
+
+                    if ( parches.Success ) {
+                        var path = parches.Value.Substring( 0, parches.Length );
+
+                        while ( path.EndsWith( " " ) ) path = path.Substring( 0, path.Length - 1 );
+
+                        if ( Directory.Exists( path ) )
+                            if ( this.Handler.GetCurrentPath() != path ) {
+                                Console.ForegroundColor = ConsoleColor.DarkGreen;
+                                Console.Write( path + "> " );
+                                Console.ForegroundColor = ConsoleColor.White;
+
+                                if ( SettingsHandler.ConsoleAutoChangePath ) {
+                                    this.Handler.SetCurrentPath( path );
+                                    this._currentExplorerView.ListP( this.Handler.GetCurrentPath(), true );
+                                }
+
+                                if ( !SettingsHandler.UserPowerShell )
+                                    this._linesToSkip++;
+                            }
+                    }
+                    else if ( SettingsHandler.UserPowerShell ) {
+                        if ( this._linesToSkip <= 0 )
+                            if ( !string.IsNullOrEmpty( line ) && !line.StartsWith( "Path" ) && !line.StartsWith( "----" ) && line != "PS>pwd" ) //Console.ForegroundColor = ConsoleColor.w;
+                                Console.WriteLine( line );
+                        //Console.ForegroundColor = ConsoleColor.White;
+                    }
+                } catch { }
+
+                if ( !SettingsHandler.UserPowerShell )
+                    if ( this._linesToSkip <= 0 )
+                        if ( line != "echo %cd%" )
+                            Console.WriteLine( line );
+
+                if ( this._linesToSkip > 0 ) this._linesToSkip--;
+            }
+        }
+
+        private void ConsoleWrite() {
+            while ( Program.Running ) {
+                var line = Console.In.ReadLine();
+                this._linesToSkip++;
+                WriteCmd( line );
+            }
+        }
+
+        private void ConsoleError() {
+            while ( !this._mainProcess.StandardError.EndOfStream && Program.Running ) {
+                var line = this._mainProcess.StandardError.ReadLine();
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine( line );
+                Console.ForegroundColor = ConsoleColor.Yellow;
+            }
+        }
+
+        #endregion
+
+
+        #region WindowEvents
+
+        private void DcChange(object sender, DependencyPropertyChangedEventArgs e) { Console.WriteLine( e ); }
+
+        private void taps_SelectionChanged(object sender, SelectionChangedEventArgs e) {
+            if ( this.TabControl.Items.Count == 1 ) return;
+
+            if ( !( this.TabControl.SelectedItem is TabItem tp ) ) return;
+
+            if ( tp.Content != null ) {
+                if ( !( tp.Content is IPage page ) ) return;
+
+                if ( page.Equals( this._currentPage ) ) return;
+
+                this._currentPage = page;
+                page.OnReFocus();
+
+                if ( !page.ShowTreeView ) {
+                    if ( this.TreeControl.Visibility == Visibility.Visible ) {
+                        this.TreeControl.Visibility  = Visibility.Hidden;
+                        this._drag                   = this.TreeColumn.Width.Value;
+                        this.TreeColumn.Width        = new GridLength( 0 );
+                        this.VerticalSplitter1.Width = new GridLength( 0 );
+                    }
+                }
+                else if ( this.TreeControl.Visibility == Visibility.Hidden ) {
+                    this.TreeControl.Visibility  = Visibility.Visible;
+                    this.TreeColumn.Width        = new GridLength( this._drag );
+                    this.VerticalSplitter1.Width = new GridLength( 6 );
+                }
+
+                this.Navigation.Visibility = page.HideNavigation ? Visibility.Hidden : Visibility.Visible;
+
+                this.ConsoleHost.Visibility = page.HideConsole ? Visibility.Hidden : Visibility.Visible;
+
+                this._explorerNavigationBarRow.Height = page.HideExplorerNavigation ? new GridLength( 0 ) : GridLength.Auto;
+
+                switch (page) {
+                    case EmptyPage ep:
+                        //Console.WriteLine();
+                        break;
+                    case ExplorerView explorer:
+                        this._currentExplorerView = explorer;
+                        break;
+                    case SettingsView sp:
+                        //Console.WriteLine();
+                        break;
+                    case ThemeView ep:
+                        //Console.WriteLine();
+                        break;
+                }
+            }
+            else {
+                if ( this.TabControl.Items.Count > 1 ) this.TabControl.SelectedIndex = this.TabControl.Items.Count - 2;
+            }
         }
 
         private void MoveWindow(object sender, MouseButtonEventArgs e) {
@@ -195,7 +267,7 @@ namespace ExplorerWpf {
         }
 
         private void MainWindow_OnLoaded(object sender, RoutedEventArgs e) {
-            EnableBlur();
+            NativeMethods.EnableBlur( new WindowInteropHelper( this ).Handle );
             GetControls();
 
             if ( SettingsHandler.ConsolePresent ) {
@@ -232,7 +304,7 @@ namespace ExplorerWpf {
 
                 var r = new Random();
 
-                while ( true ) {
+                while ( true && Program.Running) {
                     Thread.Sleep( 2000 );
 
                     for ( int i = 0; i < MaxTaps; i++ ) {
@@ -269,101 +341,6 @@ namespace ExplorerWpf {
             AddTab( TapType.EXPLORER );
         }
 
-        private void GetControls() {
-            var pathNode   = this.TabControl.Template.FindName( "PathBarX",             this.TabControl );
-            var reloadNode = this.TabControl.Template.FindName( "ReloadButtonX",        this.TabControl );
-            var rootNode   = this.TabControl.Template.FindName( "RootButtonX",          this.TabControl );
-            var naviCNode  = this.TabControl.Template.FindName( "NavigationBarColumnX", this.TabControl );
-
-            if ( pathNode is SelectFolderTextBox box ) {
-                box.KeyDown  += BoxOnKeyDown;
-                this.pathBar =  box;
-                //Console.WriteLine( "PathBar Support" );
-            }
-
-            if ( reloadNode is Button reload ) {
-                reload.Click += ReloadOnClick;
-                //Console.WriteLine( "Reload Support" );
-            }
-
-            if ( rootNode is Button root ) {
-                root.Click += RootOnClick;
-                //Console.WriteLine( "Disk List Support" );
-            }
-
-            if ( naviCNode is RowDefinition row ) {
-                this.explorerNavigationBarRow = row;
-                //Console.WriteLine( "Path bar hide support" );
-            }
-        }
-
-        private void DcChange(object sender, DependencyPropertyChangedEventArgs e) { Console.WriteLine( e ); }
-
-        private void taps_SelectionChanged(object sender, SelectionChangedEventArgs e) {
-            if ( this.TabControl.Items.Count == 1 ) return;
-
-            if ( !( this.TabControl.SelectedItem is TabItem tp ) ) return;
-
-            if ( tp.Content != null ) {
-                if ( !( tp.Content is IPage page ) ) return;
-
-                if ( page.Equals( this._currentPage ) ) return;
-
-                this._currentPage = page;
-                page.OnReFocus();
-
-                if ( !page.ShowTreeView ) {
-                    if ( this.TreeControl.Visibility == Visibility.Visible ) {
-                        this.TreeControl.Visibility  = Visibility.Hidden;
-                        this._drag                   = this.TreeColumn.Width.Value;
-                        this.TreeColumn.Width        = new GridLength( 0 );
-                        this.VerticalSplitter1.Width = new GridLength( 0 );
-                    }
-                }
-                else if ( this.TreeControl.Visibility == Visibility.Hidden ) {
-                    this.TreeControl.Visibility  = Visibility.Visible;
-                    this.TreeColumn.Width        = new GridLength( this._drag );
-                    this.VerticalSplitter1.Width = new GridLength( 6 );
-                }
-
-                this.Navigation.Visibility = page.HideNavigation ? Visibility.Hidden : Visibility.Visible;
-
-                this.ConsoleHost.Visibility = page.HideConsole ? Visibility.Hidden : Visibility.Visible;
-
-                this.explorerNavigationBarRow.Height = page.HideExplorerNavigation ? new GridLength( 0 ) : GridLength.Auto;
-
-                switch (page) {
-                    case EmptyPage ep:
-                        //Console.WriteLine();
-                        break;
-                    case ExplorerView explorer:
-                        this._currentExplorerView = explorer;
-                        break;
-                    case SettingsView sp:
-                        //Console.WriteLine();
-                        break;
-                    case ThemeView ep:
-                        //Console.WriteLine();
-                        break;
-                }
-            }
-            else {
-                if ( this.TabControl.Items.Count > 1 ) this.TabControl.SelectedIndex = this.TabControl.Items.Count - 2;
-            }
-        }
-
-        private void WriteCmd(string command, bool echo = true) {
-            Debug.WriteLine( echo + ": " + command );
-            if ( this._mainProcess == null || this._mainProcess.HasExited ) return;
-
-            this._mainProcess.StandardInput.WriteLine( command );
-            if ( echo && SettingsHandler.ConsoleAutoChangePath )
-                this._mainProcess.StandardInput.WriteLine( SettingsHandler.UserPowerShell ? "pwd" : "echo %cd%" );
-        }
-
-
-        #region WindowEvents
-
         private void MenuItem_OnClick(object sender, RoutedEventArgs e) {
             var me = (MenuItem) sender;
 
@@ -394,11 +371,20 @@ namespace ExplorerWpf {
         private void TabItem_MouseLeftButtonDown(object sender, MouseButtonEventArgs e) { AddTab( TapType.EXPLORER ); }
 
         private void MainWindow_OnClosed(object sender, EventArgs e) {
+            try {
+                foreach ( var item in this.TabControl.Items.Cast<TabItem>().Select( x => (IPage) x.Content ) ) item?.Dispose();
+            } catch (Exception ex) {
+                Console.WriteLine( ex.Message );
+            }
+
             WriteCmd( "exit" );
+            this.ConsoleW?.Dispose();
             this._mainProcess?.Close();
             this._outReaderThread?.Abort();
             this._inWriteThread?.Abort();
-            Environment.Exit( 0 );
+            Close();
+            Dispose();
+            //Environment.Exit( 0 );
         }
 
         // ReSharper disable once UnusedMember.Local
@@ -459,9 +445,9 @@ namespace ExplorerWpf {
         private void XOnUpdatePathBarDirect(object sender, string path) {
             if ( !sender.Equals( this._currentExplorerView ) ) return;
 
-            this.pathBar.Text = path;
-            if ( this.pathBar.Popup != null )
-                this.pathBar.Popup.IsOpen = false;
+            this._pathBar.Text = path;
+            if ( this._pathBar.Popup != null )
+                this._pathBar.Popup.IsOpen = false;
         }
 
         private void XOnUpdateStatusBar(object arg1, string arg2, Brush arg3) {
@@ -568,62 +554,6 @@ namespace ExplorerWpf {
         }
 
         private void trvMenu_Collapsed(object sender, RoutedEventArgs e) { }
-
-        #endregion
-
-        #region Blur
-
-        [DllImport( "user32.dll" )] private static extern int SetWindowCompositionAttribute(IntPtr hWnd, ref WindowCompositionAttributeData data);
-
-        [StructLayout( LayoutKind.Sequential )]
-        private struct WindowCompositionAttributeData {
-            public WindowCompositionAttribute Attribute;
-            public IntPtr                     Data;
-            public int                        SizeOfData;
-        }
-
-        private enum WindowCompositionAttribute {
-            // ...
-            WCA_ACCENT_POLICY = 19
-            // ...
-        }
-
-        private enum AccentState {
-            // ReSharper disable UnusedMember.Local
-
-            ACCENT_DISABLED                   = 0,
-            ACCENT_ENABLE_GRADIENT            = 1,
-            ACCENT_ENABLE_TRANSPARENTGRADIENT = 2,
-            ACCENT_ENABLE_BLURBEHIND          = 3,
-            ACCENT_INVALID_STATE              = 4
-
-            // ReSharper restore UnusedMember.Local
-        }
-
-        [StructLayout( LayoutKind.Sequential )]
-        private struct AccentPolicy {
-            public           AccentState AccentState;
-            private readonly int         AccentFlags;
-            private readonly int         GradientColor;
-            private readonly int         AnimationId;
-        }
-
-        private void EnableBlur() {
-            var windowHelper = new WindowInteropHelper( this );
-
-            var accent           = new AccentPolicy();
-            var accentStructSize = Marshal.SizeOf( accent );
-            accent.AccentState = AccentState.ACCENT_ENABLE_BLURBEHIND;
-
-            var accentPtr = Marshal.AllocHGlobal( accentStructSize );
-            Marshal.StructureToPtr( accent, accentPtr, false );
-
-            var data = new WindowCompositionAttributeData { Attribute = WindowCompositionAttribute.WCA_ACCENT_POLICY, SizeOfData = accentStructSize, Data = accentPtr };
-
-            SetWindowCompositionAttribute( windowHelper.Handle, ref data );
-
-            Marshal.FreeHGlobal( accentPtr );
-        }
 
         #endregion
 

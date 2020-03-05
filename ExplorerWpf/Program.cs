@@ -11,6 +11,7 @@ namespace ExplorerWpf {
     internal class Program {
         public static readonly string CopyRight = FileVersionInfo.GetVersionInfo( Assembly.GetEntryAssembly()?.Location ).LegalCopyright;
         public static readonly string Version   = FileVersionInfo.GetVersionInfo( Assembly.GetEntryAssembly()?.Location ).ProductVersion;
+        public static          bool   Running { get; private set; }
 
         private static ConsoleColor ClosestConsoleColor(byte r, byte g, byte b) {
             ConsoleColor ret = 0;
@@ -36,29 +37,23 @@ namespace ExplorerWpf {
         public static void Main(string[] args) {
             if ( !SettingsHandler.ConsolePresent )
                 NativeMethods.ShowWindowAsync( NativeMethods.GetConsoleWindow(), NativeMethods.SW_HIDE );
+
+            Running = true;
             var app = new App();
             app.InitializeComponent();
 
             var c = SettingsHandler.Color1.Border.ToColor();
 
-            //var conColor = ClosestConsoleColor( c.R, c.G, c.B );
-
+            //var conColor = ClosestConsoleColor( c.R, c.G, c.B );  
             Console.BackgroundColor = ConsoleColor.Black;
             //Console.BackgroundColor = conColor;
             //Console.WriteLine( "Console Color: " + conColor );
 
             SettingsHandler.LoadCurrentColor();
-
-            //Application.Current.Resources["Background"]   = new SolidColorBrush( Colors.DarkCyan );
-            //Application.Current.Resources["DefBack"]      = new SolidColorBrush( Colors.DarkGreen );
-            //Application.Current.Resources["Accent"]       = new SolidColorBrush( Colors.Chartreuse );
-            //Application.Current.Resources["WindowBorder"] = new SolidColorBrush( Colors.DodgerBlue );
-            //Application.Current.Resources["Border"] = new SolidColorBrush( Colors.Crimson );
-            //Application.Current.Resources["ScrollBarBackground"] = new SolidColorBrush( Colors.DarkOrange );
-
-            //Application.Current.Resources["Foreground"] = new LinearGradientBrush( Colors.Aqua, Colors.Magenta, new Point( 0, 0 ), new Point( 1, 1 ) );
-
             app.Run();
+            Running = false;
+            //Console.WriteLine( "Exit" );
+            //Console.ReadLine();
         }
     }
 }

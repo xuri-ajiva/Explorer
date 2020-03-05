@@ -229,6 +229,60 @@ namespace ExplorerWpf {
 // ReSharper disable InconsistentNaming
     public struct NativeMethods {
 
+        #region Blur
+
+        [DllImport( "user32.dll" )] private static extern int SetWindowCompositionAttribute(IntPtr hWnd, ref WindowCompositionAttributeData data);
+
+        [StructLayout( LayoutKind.Sequential )]
+        private struct WindowCompositionAttributeData {
+            public WindowCompositionAttribute Attribute;
+            public IntPtr                     Data;
+            public int                        SizeOfData;
+        }
+
+        private enum WindowCompositionAttribute {
+            // ...
+            WCA_ACCENT_POLICY = 19
+            // ...
+        }
+
+        private enum AccentState {
+            // ReSharper disable UnusedMember.Local
+
+            ACCENT_DISABLED                   = 0,
+            ACCENT_ENABLE_GRADIENT            = 1,
+            ACCENT_ENABLE_TRANSPARENTGRADIENT = 2,
+            ACCENT_ENABLE_BLURBEHIND          = 3,
+            ACCENT_INVALID_STATE              = 4
+
+            // ReSharper restore UnusedMember.Local
+        }
+
+        [StructLayout( LayoutKind.Sequential )]
+        private struct AccentPolicy {
+            public           AccentState AccentState;
+            private readonly int         AccentFlags;
+            private readonly int         GradientColor;
+            private readonly int         AnimationId;
+        }
+
+        public static void EnableBlur(IntPtr handle) {
+            var accent           = new AccentPolicy();
+            var accentStructSize = Marshal.SizeOf( accent );
+            accent.AccentState = AccentState.ACCENT_ENABLE_BLURBEHIND;
+
+            var accentPtr = Marshal.AllocHGlobal( accentStructSize );
+            Marshal.StructureToPtr( accent, accentPtr, false );
+
+            var data = new WindowCompositionAttributeData { Attribute = WindowCompositionAttribute.WCA_ACCENT_POLICY, SizeOfData = accentStructSize, Data = accentPtr };
+
+            SetWindowCompositionAttribute( handle, ref data );
+
+            Marshal.FreeHGlobal( accentPtr );
+        }
+
+        #endregion
+
         #region ContextMenu
 
         // Retrieves the IShellFolder interface for the desktop folder, which is the root of the Shell's namespace.
@@ -302,7 +356,9 @@ namespace ExplorerWpf {
         internal const int WS_BORDER      = 0x00800000; //window with border
         internal const int WS_CAPTION     = 0x00C00000; //window with a title bar
         internal const int WS_SYSMENU     = 0x00080000; //window with no borders etc.
-        internal const int WS_MINIMIZEBOX = 0x00020000; //window with minimizebox
+        internal const int WS_MINIMIZEBOX = 0x00020000; //window with minimizebox   
+        internal const int WS_MAXIMIZEBOX = 0x00010000; //window with MAXIMIZEBOX   
+        internal const int WS_THICKFRAME  = 0x00040000; //The window has a sizing border. Same as the WS_SIZEBOX style.
         internal const int SW_HIDE        = 0;
         internal const int SW_SHOWNORMAL  = 1;
         internal const int SW_RESTORE     = 9;
