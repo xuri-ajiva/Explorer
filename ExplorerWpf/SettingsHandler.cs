@@ -10,8 +10,6 @@ using System.Windows;
 using System.Windows.Media;
 using System.Xml.Serialization;
 
-// ReSharper disable InconsistentNaming
-
 #endregion
 
 namespace ExplorerWpf {
@@ -29,8 +27,13 @@ namespace ExplorerWpf {
             } catch (Exception ex) {
                 OnError( ex );
             }
+
+            UserPowerShell = _current.SUserPowerShell;
         }
 
+        public static readonly bool UserPowerShell;
+
+        public static bool   ChangeUserPowerShell  { get => _current.SUserPowerShell;        set => _current.SUserPowerShell = value; }
         public static bool   ExecuteInNewProcess   { get => _current.SExecuteInNewProcess;   set => _current.SExecuteInNewProcess = value; }
         public static bool   ConsoleAutoChangeDisc { get => _current.SConsoleAutoChangeDisc; set => _current.SConsoleAutoChangeDisc = value; }
         public static bool   ConsoleAutoChangePath { get => _current.SConsoleAutoChangePath; set => _current.SConsoleAutoChangePath = value; }
@@ -118,6 +121,7 @@ namespace ExplorerWpf {
             public bool   SConsolePresent;
             public string SParentDirectoryPrefix;
             public bool   SExecuteInNewProcess;
+            public bool   SUserPowerShell;
 
             public       List<string> SExtenstionWithSpecialIcons;
             public const string       S_ROOT_FOLDER   = "/";
@@ -127,6 +131,7 @@ namespace ExplorerWpf {
                 this.SExtenstionWithSpecialIcons = new List<string> { ".exe", ".lnk", ".url" };
                 this.SConsoleAutoChangeDisc      = true;
                 this.SConsoleAutoChangePath      = true;
+                this.SUserPowerShell             = true;
                 this.SConsolePresent             = false;
                 this.SExecuteInNewProcess        = false;
                 this.SParentDirectoryPrefix      = "⤴ ";
@@ -221,6 +226,7 @@ namespace ExplorerWpf {
 
     #region NativeMethods
 
+// ReSharper disable InconsistentNaming
     public struct NativeMethods {
 
         #region ContextMenu

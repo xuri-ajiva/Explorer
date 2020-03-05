@@ -81,7 +81,7 @@ namespace ExplorerWpf {
         private IHandler Handler => this._currentExplorerView.Handler;
 
         private void StartConsole() {
-            var p = new Process { StartInfo = new ProcessStartInfo( "cmd.exe" ) };
+            var p = new Process { StartInfo = new ProcessStartInfo( SettingsHandler.UserPowerShell ? "C:\\windows\\system32\\windowspowershell\\v1.0\\powershell.exe" : "cmd.exe" ) };
             p.StartInfo.RedirectStandardInput  = true;
             p.StartInfo.RedirectStandardOutput = true;
             p.StartInfo.RedirectStandardError  = true;
@@ -101,9 +101,11 @@ namespace ExplorerWpf {
                 }
             } );
             this._outReaderThread = new Thread( () => {
-                p.StandardInput.WriteLine( "@echo off" );
+                const int negativeBegin = -100;
+
+                p.StandardInput.WriteLine( SettingsHandler.UserPowerShell ? "function prompt {}" : "@echo off" );
                 p.StandardInput.WriteLine( "cd /" );
-                this._linesToSkip       = 5;
+                this._linesToSkip       = negativeBegin;
                 Console.ForegroundColor = ConsoleColor.Magenta;
                 Console.WriteLine( "Console Support Online" );
                 Console.ForegroundColor = ConsoleColor.White; //TODO: Setting
@@ -111,12 +113,24 @@ namespace ExplorerWpf {
                 while ( !p.StandardOutput.EndOfStream ) {
                     var line = p.StandardOutput.ReadLine();
 
+                    if ( this._linesToSkip <= negativeBegin ) {
+                        Console.ForegroundColor = ConsoleColor.Yellow;
+                        Console.Write( line );
+                        Console.ForegroundColor = ConsoleColor.White;
+                        this._linesToSkip       = SettingsHandler.UserPowerShell ? 6 : 4;
+                        continue;
+                    }
+
                     try {
-                        var parches = Regex.Match( line, "[^\"^ ^\t]?[A-Za-z]:\\\\[^\"]*" );
+                        var parches = Regex.Match( line, SettingsHandler.UserPowerShell ? "^[A-Za-z]:\\\\[^\r\n\"]*" : "[^\"^ ^\t]?[A-Za-z]:\\\\[^\"]*" );
                         Debug.WriteLine( line );
 
                         if ( parches.Success ) {
                             var path = parches.Value.Substring( 0, parches.Length );
+
+                            while ( path.EndsWith( " " ) ) {
+                                path = path.Substring( 0, path.Length - 1 );
+                            }
 
                             if ( Directory.Exists( path ) )
                                 if ( this.Handler.GetCurrentPath() != path ) {
@@ -129,18 +143,27 @@ namespace ExplorerWpf {
                                         this._currentExplorerView.ListP( this.Handler.GetCurrentPath(), true );
                                     }
 
-                                    this._linesToSkip++;
+                                    if ( !SettingsHandler.UserPowerShell )
+                                        this._linesToSkip++;
+                                }
+                        }
+                        else if ( SettingsHandler.UserPowerShell ) {
+                            if ( this._linesToSkip <= 0 )
+                                if ( !string.IsNullOrEmpty( line ) && !line.StartsWith( "Path" ) && !line.StartsWith( "----" ) && line != ( "PS>pwd" ) ) {
+                                    //Console.ForegroundColor = ConsoleColor.w;
+                                    Console.WriteLine( line );
+                                    //Console.ForegroundColor = ConsoleColor.White;
                                 }
                         }
                     } catch { }
 
-                    if ( this._linesToSkip <= 0 ) {
-                        if ( line != "echo %cd%" )
-                            Console.WriteLine( line );
-                    }
-                    else {
-                        this._linesToSkip--;
-                    }
+                    if ( !SettingsHandler.UserPowerShell )
+                        if ( this._linesToSkip <= 0 ) {
+                            if ( line != "echo %cd%" )
+                                Console.WriteLine( line );
+                        }
+
+                    if ( this._linesToSkip > 0 ) this._linesToSkip--;
                 }
             } );
             this._inWriteThread = new Thread( () => {
@@ -335,7 +358,7 @@ namespace ExplorerWpf {
 
             this._mainProcess.StandardInput.WriteLine( command );
             if ( echo && SettingsHandler.ConsoleAutoChangePath )
-                this._mainProcess.StandardInput.WriteLine( "echo %cd%" );
+                this._mainProcess.StandardInput.WriteLine( SettingsHandler.UserPowerShell ? "pwd" : "echo %cd%" );
         }
 
 
@@ -409,10 +432,9 @@ namespace ExplorerWpf {
                         WriteCmd( arg2.Substring( 0, 2 ), false );
                     }
                     else if ( SettingsHandler.ConsoleAutoChangePath && arg2.Length <= 3 && arg1 != arg2 ) {
-                        var parches = Regex.Match( arg2, "[^\"^ ^\t]?[A-Za-z]:\\\\?" );
+                        var parches = Regex.Match( arg2, SettingsHandler.UserPowerShell ? "[A-Za-z]:\\\\?" : "[^\"^ ^\t]?[A-Za-z]:\\\\?" );
 
                         if ( parches.Success ) {
-                            this._linesToSkip++;
                             WriteCmd( "cd /", false );
                             var path = parches.Value.Substring( 0, 2 );
                             Console.WriteLine( "cd " + path + "\\" );

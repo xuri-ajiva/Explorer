@@ -28,6 +28,8 @@ namespace ExplorerWpf.Pages {
             this.ConsoleAutoChangeDisc.IsChecked = SettingsHandler.ConsoleAutoChangeDisc;
             this.ConsoleAutoChangePath.IsChecked = SettingsHandler.ConsoleAutoChangeDisc;
             this.ConsolePresent.IsChecked        = SettingsHandler.ConsolePresent;
+            this.UserPowerShell.IsChecked        = SettingsHandler.ChangeUserPowerShell;
+            this.ExecuteInNewProcess.IsChecked   = SettingsHandler.ExecuteInNewProcess;
         }
 
         private void Save_Click(object sender, RoutedEventArgs e) { SettingsHandler.SaveCurrentState(); }
@@ -83,5 +85,10 @@ namespace ExplorerWpf.Pages {
 
         #endregion
 
+        private void UserPowerShell_OnClick(object sender, RoutedEventArgs e) {
+            var isChecked = this.UserPowerShell.IsChecked;
+
+            if ( isChecked != null ) SettingsHandler.ChangeUserPowerShell = isChecked.Value;
+        }
     }
 }

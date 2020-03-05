@@ -21,6 +21,10 @@
                       Margin="0,87,0,0"
                       VerticalAlignment="Top" FontSize="18" Click="ExecuteInNewProcess_OnClick" Background="{x:Null}"
                       BorderBrush="{DynamicResource Border}" Foreground="{DynamicResource Foreground}" />
+            <CheckBox x:Name="UserPowerShell" Content="UserPowerShell" HorizontalAlignment="Left"
+                Margin="0,116,0,0" ToolTip="Requests Restart!"
+                VerticalAlignment="Top" FontSize="18" Click="UserPowerShell_OnClick" Background="{x:Null}"
+                BorderBrush="{DynamicResource Border}" Foreground="{DynamicResource Foreground}" />
 
         </Grid>
         <Grid Margin="10,0,0,10" VerticalAlignment="Bottom" HorizontalAlignment="Left">
