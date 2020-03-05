@@ -255,20 +255,23 @@ namespace ExplorerWpf {
             if ( pathNode is SelectFolderTextBox box ) {
                 box.KeyDown  += BoxOnKeyDown;
                 this.pathBar =  box;
-                Console.WriteLine( "PathBar Support" );
+                //Console.WriteLine( "PathBar Support" );
             }
 
             if ( reloadNode is Button reload ) {
                 reload.Click += ReloadOnClick;
-                Console.WriteLine( "Reload Support" );
+                //Console.WriteLine( "Reload Support" );
             }
 
             if ( rootNode is Button root ) {
                 root.Click += RootOnClick;
-                Console.WriteLine( "Disk List Support" );
+                //Console.WriteLine( "Disk List Support" );
             }
 
-            if ( naviCNode is RowDefinition row ) this.explorerNavigationBarRow = row;
+            if ( naviCNode is RowDefinition row ) {
+                this.explorerNavigationBarRow = row;
+                //Console.WriteLine( "Path bar hide support" );
+            }
         }
 
         private void DcChange(object sender, DependencyPropertyChangedEventArgs e) { Console.WriteLine( e ); }
