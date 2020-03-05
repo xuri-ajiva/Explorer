@@ -1,6 +1,5 @@
 ﻿#region using
 
-using Peter;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -17,12 +16,14 @@ namespace ExplorerWpf.Handler {
 
         private List<string> history;
 
+        private void OnOnError(Exception obj) { this.OnError?.Invoke( obj ); }
+
         #region Implementation of IHandler
 
         ~LocalHandler() { ReleaseUnmanagedResources(); }
 
         public LocalHandler(string currentPath = "") {
-            this.history = new List<string> { RootPath, RootPath, this._currentPath };
+            this.history = new List<string> { this.RootPath, this.RootPath, this._currentPath };
 
             try {
                 this.OnSetCurrentPath?.Invoke( "", currentPath );
@@ -69,7 +70,7 @@ namespace ExplorerWpf.Handler {
                     //}
 
                     if ( this.history.Count > this.HistoryIndex + 1 )
-                        this.history[HistoryIndex + 1] = this._currentPath;
+                        this.history[this.HistoryIndex + 1] = this._currentPath;
                     else
                         this.history.Add( this._currentPath );
                     this.HistoryIndex++;
@@ -261,8 +262,6 @@ namespace ExplorerWpf.Handler {
         public void ThrowError(Exception obj) { OnOnError( obj ); }
 
         #endregion
-
-        private void OnOnError(Exception obj) { this.OnError?.Invoke( obj ); }
 
         #region IDisposable
 

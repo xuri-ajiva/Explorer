@@ -21,11 +21,10 @@ using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Threading;
-using ExplorerWpf.TexTBox;
+using ExplorerWpf.CustomControls;
+using ExplorerWpf.Pages;
 using Brush = System.Windows.Media.Brush;
 using MessageBox = System.Windows.Forms.MessageBox;
-using Point = System.Windows.Point;
 
 #endregion
 
@@ -56,20 +55,23 @@ namespace ExplorerWpf {
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture) => throw new NotImplementedException();
     }
 
-    public partial class MainWindow : IDisposable {
+    public partial class MainWindow : Window, IDisposable {
         private ExplorerView _currentExplorerView;
         private IPage        _currentPage = new EmptyPage();
 
         private double _drag;
 
-        private Thread  _errReaderThread;
-        private Thread  _inWriteThread;
+        private Thread _errReaderThread;
+        private Thread _inWriteThread;
+
+        private int     _linesToSkip;
         private Process _mainProcess;
         private Thread  _outReaderThread;
 
-        private TreePathItem _root;
+        private TreePathItem  _root;
+        private RowDefinition explorerNavigationBarRow;
 
-        private int _linesToSkip;
+        private SelectFolderTextBox pathBar;
 
         public MainWindow() {
             InitializeComponent();
@@ -173,8 +175,9 @@ namespace ExplorerWpf {
             EnableBlur();
             GetControls();
 
-            if ( SettingsHandler.ConsolePresent )
+            if ( SettingsHandler.ConsolePresent ) {
                 StartConsole();
+            }
             else {
                 var consoleWrapper = new Thread( StartConsole );
                 consoleWrapper.Start();
@@ -243,9 +246,6 @@ namespace ExplorerWpf {
             AddTab( TapType.EXPLORER );
         }
 
-        private SelectFolderTextBox pathBar;
-        private RowDefinition       explorerNavigationBarRow;
-
         private void GetControls() {
             var pathNode   = this.TabControl.Template.FindName( "PathBarX",             this.TabControl );
             var reloadNode = this.TabControl.Template.FindName( "ReloadButtonX",        this.TabControl );
@@ -268,9 +268,7 @@ namespace ExplorerWpf {
                 Console.WriteLine( "Disk List Support" );
             }
 
-            if ( naviCNode is RowDefinition row ) {
-                this.explorerNavigationBarRow = row;
-            }
+            if ( naviCNode is RowDefinition row ) this.explorerNavigationBarRow = row;
         }
 
         private void DcChange(object sender, DependencyPropertyChangedEventArgs e) { Console.WriteLine( e ); }
@@ -385,7 +383,7 @@ namespace ExplorerWpf {
         #region EventListener
 
         //Explorer Navigation Bar Events
-        private void RootOnClick(object sender, RoutedEventArgs e) { this._currentExplorerView?.ListP( SettingsHandler.ROOT_FOLDER, false ); }
+        private void RootOnClick(object sender, RoutedEventArgs e) { this._currentExplorerView?.ListP( SettingsHandler.ROOT_FOLDER ); }
 
         private async void ReloadOnClick(object sender, RoutedEventArgs e) {
             this._currentExplorerView.MainView.Items.Clear();
@@ -638,7 +636,7 @@ namespace ExplorerWpf {
             h.OnError          += HandlerOnOnError;
             h.OnSetCurrentPath += HOnOnSetCurrentPath;
 
-            var x = new ExplorerView( new WindowInteropHelper( this ).Handle );
+            var x = new ExplorerView();
 
             x.Init( h );
 

@@ -2,7 +2,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
@@ -19,20 +18,15 @@ using Point = System.Drawing.Point;
 
 #endregion
 
-namespace ExplorerWpf {
+namespace ExplorerWpf.Pages {
     public sealed partial class ExplorerView : UserControl, IPage {
-
-        private DriveInfo[] _devInfo;
-        private IntPtr      _hWnd;
-
-        private bool _lastError;
-
+        private DriveInfo[]    _devInfo;
         private GridViewColumn _freePb;
+        private bool           _lastError;
 
-        public ExplorerView(IntPtr hWnd) {
+        public ExplorerView() {
             this._devInfo = DriveInfo.GetDrives();
 
-            this._hWnd = hWnd;
             InitializeComponent();
         }
 
@@ -51,7 +45,6 @@ namespace ExplorerWpf {
                 this._freePb       = null;
                 this.MainView      = null;
                 this.Handler       = null;
-                this._hWnd         = default;
                 this.ParentTapItem = null;
             } catch { }
 
@@ -139,11 +132,16 @@ namespace ExplorerWpf {
         }
 
         public event Action<object, string, bool>  SendDirectoryUpdateAsCmd;
-        public event Action<object, string, Brush> UpdateStatusBar;     
-        public event Action<object, string> UpdatePathBarDirect;
-                                                                                      
+        public event Action<object, string, Brush> UpdateStatusBar;
+        public event Action<object, string>        UpdatePathBarDirect;
+
         private void List_OnMouseDown(object sender, MouseButtonEventArgs e) {
-            if ( e.RightButton != MouseButtonState.Pressed ) return;
+            if ( e.RightButton == MouseButtonState.Pressed ) {
+                var wpfP = PointToScreen( e.GetPosition( this ) );
+
+                var p = new Point( (int) wpfP.X, (int) wpfP.Y );
+                this.Handler.ShowContextMenu( new[] { new DirectoryInfo( this._currentDirUp ) }, p );
+            }
         }
 
         private void OnMouseRightButtonUp(object sender, MouseButtonEventArgs e) {
@@ -165,10 +163,12 @@ namespace ExplorerWpf {
         private void SortableListViewColumnHeaderClicked(object sender, RoutedEventArgs e) {
             if ( sender is SortableListView sl ) sl.GridViewColumnHeaderClicked( e.OriginalSource as GridViewColumnHeader );
         }
-        
+
         [DebuggerStepThrough] private void OnUpdateStatusBar(string e, Brush c) { this.UpdateStatusBar?.Invoke( this, e, c ); }
 
         [DebuggerStepThrough] private void OnDirectoryUpdate(string e, bool cd = true) { this.SendDirectoryUpdateAsCmd?.Invoke( this, e, cd ); }
+
+        private void OnUpdatePathBarDirect(string path) { this.UpdatePathBarDirect?.Invoke( this, path ); }
 
         #region ListHandeling
 
@@ -176,13 +176,13 @@ namespace ExplorerWpf {
 
         private void ClearList() { this.MainView.Items.Clear(); }
 
-        private List<Item> GetList() { return this.MainView.Items.Cast<Item>().ToList(); }
+        private List<Item> GetList() => this.MainView.Items.Cast<Item>().ToList();
 
         #endregion
 
     #if DEBUG
         ~ExplorerView() {
-            this.Dispose();
+            Dispose();
             Debug.WriteLine( "Destroyed Items: " + DestroyCount++ );
         }
 
@@ -291,7 +291,6 @@ namespace ExplorerWpf {
             }
         }
 
-
         #endregion
 
         #region status
@@ -331,12 +330,12 @@ namespace ExplorerWpf {
 
                 this._pb = true;
             }
-            
+
             OnUpdatePathBarDirect( SettingsHandler.ROOT_FOLDER );
 
             this.Handler.SetCurrentPath( "" );
         }
-        
+
         #endregion
 
         #region Implementation of IPage
@@ -376,7 +375,6 @@ namespace ExplorerWpf {
 
         #endregion
 
-        private void OnUpdatePathBarDirect(string path) { this.UpdatePathBarDirect?.Invoke( this, path ); }
     }
 
 
@@ -385,7 +383,7 @@ namespace ExplorerWpf {
         #region DependencyProperty Content
 
         /// <summary>
-        /// Registers a dependency property as backing store for the Content property
+        ///     Registers a dependency property as backing store for the Content property
         /// </summary>
         public static readonly DependencyProperty BindingForSortProperty =
             DependencyProperty.Register( "Content", typeof(Binding), typeof(GridViewColumnSortData),
@@ -394,10 +392,10 @@ namespace ExplorerWpf {
                     FrameworkPropertyMetadataOptions.AffectsParentMeasure ) );
 
         /// <summary>
-        /// Gets or sets the Content.
+        ///     Gets or sets the Content.
         /// </summary>
         /// <value>The Content.</value>
-        public Binding BindingForSort { get { return (Binding) GetValue( BindingForSortProperty ); } set { SetValue( BindingForSortProperty, value ); } }
+        public Binding BindingForSort { get => (Binding) GetValue( BindingForSortProperty ); set => SetValue( BindingForSortProperty, value ); }
 
         #endregion
 
@@ -419,14 +417,13 @@ namespace ExplorerWpf {
             string sortString;
 
             if ( clickedHeader.Column.DisplayMemberBinding == null ) {
-                if ( clickedHeader.Column is GridViewColumnSortData sortData ) {
-                    sortString = sortData.BindingForSort.Path.Path;
-                }
+                if ( clickedHeader.Column is GridViewColumnSortData sortData ) sortString = sortData.BindingForSort.Path.Path;
                 else
                     return;
             }
-            else
+            else {
                 sortString = ( (Binding) clickedHeader.Column.DisplayMemberBinding ).Path.Path;
+            }
 
             Sort( sortString, direction );
 

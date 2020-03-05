@@ -1,7 +1,11 @@
-﻿using System;
+﻿#region using
+
+using System;
 using System.Windows.Controls;
 
-namespace ExplorerWpf {
+#endregion
+
+namespace ExplorerWpf.Pages {
     public interface IPage : IDisposable {
         bool    ShowTreeView           { get; }
         bool    HideConsole            { get; }
@@ -11,7 +15,14 @@ namespace ExplorerWpf {
 
         void OnReFocus();
     }
-    class EmptyPage : IPage {
+    internal class EmptyPage : IPage {
+
+        #region IDisposable
+
+        /// <inheritdoc />
+        public void Dispose() { }
+
+        #endregion
 
         #region Implementation of IPage
 
@@ -32,13 +43,6 @@ namespace ExplorerWpf {
 
         /// <inheritdoc />
         public void OnReFocus() { }
-
-        #endregion
-
-        #region IDisposable
-
-        /// <inheritdoc />
-        public void Dispose() { }
 
         #endregion
 

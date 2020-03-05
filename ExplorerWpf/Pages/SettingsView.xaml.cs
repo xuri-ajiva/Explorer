@@ -5,7 +5,7 @@ using System.Windows.Controls;
 
 #endregion
 
-namespace ExplorerWpf {
+namespace ExplorerWpf.Pages {
     /// <summary>
     ///     Interaktionslogik für SettingsView.xaml
     /// </summary>

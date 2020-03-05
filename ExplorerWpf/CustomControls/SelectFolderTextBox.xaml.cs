@@ -1,4 +1,6 @@
-﻿using System;
+﻿#region using
+
+using System;
 using System.IO;
 using System.Linq;
 using System.Windows;
@@ -6,11 +8,21 @@ using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 
-namespace ExplorerWpf.TexTBox {
+#endregion
+
+namespace ExplorerWpf.CustomControls {
     /// <summary>
-    /// Interaction logic for SelectFolderTextBox.xaml
+    ///     Interaction logic for SelectFolderTextBox.xaml
     /// </summary>
     public partial class SelectFolderTextBox : TextBox {
+        private string _lastPath;
+
+        private bool _loaded;
+
+
+        private bool _prevState;
+
+        public SelectFolderTextBox() { InitializeComponent(); }
         public Popup   Popup    => this.Template.FindName( "PART_Popup",    this ) as Popup;
         public ListBox ItemList => this.Template.FindName( "PART_ItemList", this ) as ListBox;
 
@@ -22,19 +34,11 @@ namespace ExplorerWpf.TexTBox {
 
         public UIElement TextBoxView {
             get {
-                foreach ( object o in LogicalTreeHelper.GetChildren( this.Host ) ) return o as UIElement;
+                foreach ( var o in LogicalTreeHelper.GetChildren( this.Host ) ) return o as UIElement;
 
                 return null;
             }
         }
-
-        private bool _loaded = false;
-        string       lastPath;
-
-        public SelectFolderTextBox() { InitializeComponent(); }
-
-
-        private bool prevState = false;
 
         public override void OnApplyTemplate() {
             base.OnApplyTemplate();
@@ -47,18 +51,18 @@ namespace ExplorerWpf.TexTBox {
             //09-04-09 Based on SilverLaw's approach 
             this.Popup.CustomPopupPlacementCallback += Repositioning;
 
-            var parentWindow = getParentWindow();
+            var parentWindow = GetParentWindow();
 
             if ( parentWindow == null ) return;
 
             parentWindow.Deactivated += delegate {
-                this.prevState    = this.Popup.IsOpen;
+                this._prevState   = this.Popup.IsOpen;
                 this.Popup.IsOpen = false;
             };
-            parentWindow.Activated += delegate { this.Popup.IsOpen = this.prevState; };
+            parentWindow.Activated += delegate { this.Popup.IsOpen = this._prevState; };
         }
 
-        private Window getParentWindow() {
+        private Window GetParentWindow() {
             DependencyObject d = this;
             while ( d != null && !( d is Window ) )
                 d = LogicalTreeHelper.GetParent( d );
@@ -67,19 +71,19 @@ namespace ExplorerWpf.TexTBox {
 
         //09-04-09 Based on SilverLaw's approach 
         private CustomPopupPlacement[] Repositioning(Size popupSize, Size targetSize, Point offset) {
-            return new CustomPopupPlacement[] {
-                new CustomPopupPlacement( new Point( ( 0.01 - offset.X ), ( this.Root.ActualHeight - offset.Y ) ), PopupPrimaryAxis.None )
+            return new[] {
+                new CustomPopupPlacement( new Point( 0.01 - offset.X, this.Root.ActualHeight - offset.Y ), PopupPrimaryAxis.None )
             };
         }
 
-        void TempVisual_MouseDown(object sender, MouseButtonEventArgs e) {
-            string text = this.Text;
+        private void TempVisual_MouseDown(object sender, MouseButtonEventArgs e) {
+            var text = this.Text;
             this.ItemList.SelectedIndex = -1;
             this.Text                   = text;
             this.Popup.IsOpen           = false;
         }
 
-        void AutoCompleteTextBox_PreviewKeyDown(object sender, KeyEventArgs e) {
+        private void AutoCompleteTextBox_PreviewKeyDown(object sender, KeyEventArgs e) {
             //12-25-08 - added PageDown Support
             if ( this.ItemList.Items.Count > 0 && !( e.OriginalSource is ListBoxItem ) )
                 switch (e.Key) {
@@ -89,7 +93,7 @@ namespace ExplorerWpf.TexTBox {
                     case Key.Next:
                         this.ItemList.Focus();
                         this.ItemList.SelectedIndex = 0;
-                        ListBoxItem lbi = this.ItemList.ItemContainerGenerator.ContainerFromIndex( this.ItemList.SelectedIndex ) as ListBoxItem;
+                        var lbi = this.ItemList.ItemContainerGenerator.ContainerFromIndex( this.ItemList.SelectedIndex ) as ListBoxItem;
                         lbi.Focus();
                         e.Handled = true;
                         break;
@@ -97,16 +101,16 @@ namespace ExplorerWpf.TexTBox {
         }
 
 
-        void ItemList_KeyDown(object sender, KeyEventArgs e) {
+        private void ItemList_KeyDown(object sender, KeyEventArgs e) {
             if ( e.OriginalSource is ListBoxItem ) {
-                ListBoxItem tb = e.OriginalSource as ListBoxItem;
+                var tb = e.OriginalSource as ListBoxItem;
 
                 e.Handled = true;
 
                 switch (e.Key) {
                     case Key.Enter:
-                        this.Text = ( tb.Content as string );
-                        updateSource();
+                        this.Text = tb.Content as string;
+                        UpdateSource();
                         break;
                     //12-25-08 - added "\" support when picking in list view
                     case Key.Oem5:
@@ -114,7 +118,7 @@ namespace ExplorerWpf.TexTBox {
                         break;
                     //12-25-08 - roll back if escape is pressed
                     case Key.Escape:
-                        this.Text = this.lastPath.TrimEnd( '\\' ) + "\\";
+                        this.Text = this._lastPath.TrimEnd( '\\' ) + "\\";
                         break;
                     default:
                         e.Handled = false;
@@ -131,41 +135,41 @@ namespace ExplorerWpf.TexTBox {
         }
 
 
-        void AutoCompleteTextBox_KeyDown(object sender, KeyEventArgs e) {
+        private void AutoCompleteTextBox_KeyDown(object sender, KeyEventArgs e) {
             if ( e.Key == Key.Enter ) {
                 this.Popup.IsOpen = false;
-                updateSource();
+                UpdateSource();
             }
         }
 
-        void updateSource() {
+        private void UpdateSource() {
             if ( GetBindingExpression( TextProperty ) != null )
                 GetBindingExpression( TextProperty ).UpdateSource();
         }
 
-        void ItemList_PreviewMouseDown(object sender, MouseButtonEventArgs e) {
+        private void ItemList_PreviewMouseDown(object sender, MouseButtonEventArgs e) {
             if ( e.LeftButton != MouseButtonState.Pressed ) return;
 
             if ( !( e.OriginalSource is TextBlock tb ) ) return;
 
             this.Text = tb.Text;
-            updateSource();
+            UpdateSource();
             this.Popup.IsOpen = false;
             e.Handled         = true;
         }
 
         protected override void OnTextChanged(TextChangedEventArgs e) {
-            if ( this._loaded ) {
+            if ( this._loaded )
                 try {
                     //if (lastPath != Path.GetDirectoryName(this.Text))
                     //if (textBox.Text.EndsWith("\\"))                        
                     {
-                        this.lastPath = Path.GetDirectoryName( this.Text );
-                        string[] paths = Lookup( this.Text );
+                        this._lastPath = Path.GetDirectoryName( this.Text );
+                        var paths = Lookup( this.Text );
 
                         this.ItemList.Items.Clear();
-                        foreach ( string path in paths )
-                            if ( !( String.Equals( path, this.Text, StringComparison.CurrentCultureIgnoreCase ) ) )
+                        foreach ( var path in paths )
+                            if ( !string.Equals( path, this.Text, StringComparison.CurrentCultureIgnoreCase ) )
                                 this.ItemList.Items.Add( path );
                     }
 
@@ -178,18 +182,17 @@ namespace ExplorerWpf.TexTBox {
                     //        !(String.Equals(path, this.Text, StringComparison.CurrentCultureIgnoreCase));
                     //};
                 } catch { }
-            }
         }
 
 
         private string[] Lookup(string path) {
             try {
                 if ( Directory.Exists( Path.GetDirectoryName( path ) ) ) {
-                    DirectoryInfo lookupFolder = new DirectoryInfo( Path.GetDirectoryName( path ) );
+                    var lookupFolder = new DirectoryInfo( Path.GetDirectoryName( path ) );
 
                     if ( lookupFolder != null ) {
-                        DirectoryInfo[] AllItems = lookupFolder.GetDirectories();
-                        return ( from di in AllItems where di.FullName.StartsWith( path, StringComparison.CurrentCultureIgnoreCase ) select di.FullName ).ToArray();
+                        var allItems = lookupFolder.GetDirectories();
+                        return ( from di in allItems where di.FullName.StartsWith( path, StringComparison.CurrentCultureIgnoreCase ) select di.FullName ).ToArray();
                     }
                 }
             } catch (Exception ex) {

@@ -31,6 +31,10 @@ namespace ExplorerWpf {
         private static readonly Dictionary<string, Icon> Cache     = new Dictionary<string, Icon>();
         private static readonly object                   CacheLock = new object();
 
+        private static readonly Queue<(string, string)> CashQueue = new Queue<(string, string)>();
+
+        private static Thread _cashThread = new Thread( CashLoop );
+
         public static Bitmap ErrorIcon  => _errorCash  ?? ( _errorCash = ErrorIconI.ToBitmap() );
         public static Icon   ErrorIconI => _errorCashI ?? ( _errorCashI = SystemIcons.Error );
 
@@ -84,23 +88,6 @@ namespace ExplorerWpf {
         [DllImport( "shell32.dll" )]
         private static extern IntPtr SHGetFileInfo(string pszPath, uint dwFileAttributes, ref SHFILEINFO psfi, uint cbSizeFileInfo, uint uFlags);
 
-        //Struct used by SHGetFileInfo function
-        [StructLayout( LayoutKind.Sequential )]
-        // ReSharper disable once InconsistentNaming
-        private struct SHFILEINFO {
-            public readonly IntPtr hIcon;
-            public readonly int    iIcon;
-            public readonly uint   dwAttributes;
-
-            [MarshalAs( UnmanagedType.ByValTStr, SizeConst = 260 )]
-            public readonly string szDisplayName;
-
-            [MarshalAs( UnmanagedType.ByValTStr, SizeConst = 80 )]
-            public readonly string szTypeName;
-        }
-
-        private static readonly Queue<(string, string)> CashQueue = new Queue<(string, string)>();
-
         public static void CacheIcon(string path) {
             string key;
 
@@ -116,17 +103,13 @@ namespace ExplorerWpf {
 
             CashQueue.Enqueue( ( key, path ) );
 
-            if ( CashThread != null && CashThread.ThreadState == ThreadState.Unstarted ) {
-                CashThread.Start();
-            }
+            if ( _cashThread != null && _cashThread.ThreadState == ThreadState.Unstarted ) _cashThread.Start();
 
-            if ( CashThread == null || !CashThread.IsAlive ) {
-                CashThread = new Thread( CashLoop );
-                CashThread.Start();
+            if ( _cashThread == null || !_cashThread.IsAlive ) {
+                _cashThread = new Thread( CashLoop );
+                _cashThread.Start();
             }
         }
-
-        private static Thread CashThread = new Thread( CashLoop );
 
         public static void CashLoop() {
             try {
@@ -148,6 +131,21 @@ namespace ExplorerWpf {
             } catch (Exception e) {
                 Console.WriteLine( e.Message );
             }
+        }
+
+        //Struct used by SHGetFileInfo function
+        [StructLayout( LayoutKind.Sequential )]
+        // ReSharper disable once InconsistentNaming
+        private struct SHFILEINFO {
+            public readonly IntPtr hIcon;
+            public readonly int    iIcon;
+            public readonly uint   dwAttributes;
+
+            [MarshalAs( UnmanagedType.ByValTStr, SizeConst = 260 )]
+            public readonly string szDisplayName;
+
+            [MarshalAs( UnmanagedType.ByValTStr, SizeConst = 80 )]
+            public readonly string szTypeName;
         }
     }
 
@@ -194,8 +192,6 @@ namespace ExplorerWpf {
             this.TryGetFileInfo = f;
         }
 
-        private void PreLoadIcon() { DefaultIcons.CacheIcon( this.Path ); }
-
         public Item(DirectoryInfo d) {
             this.Path           = d.FullName.Replace( "\\\\", "\\" );
             this.Name           = d.Name;
@@ -214,14 +210,6 @@ namespace ExplorerWpf {
             ApplyFixes();
             //CreateIcon();
             this.TryGetDirectoryInfo = d;
-        }
-
-        public void ApplyFixes() {
-            if ( this.Type == FileType.DIRECTORY ) {
-                while ( this.Path.EndsWith( "\\" ) ) {
-                    this.Path = this.Path.Substring( 0, this.Path.Length - 1 );
-                }
-            }
         }
 
         protected Item() {
@@ -262,6 +250,14 @@ namespace ExplorerWpf {
             return length + " b";
         }
 
+        private void PreLoadIcon() { DefaultIcons.CacheIcon( this.Path ); }
+
+        public void ApplyFixes() {
+            if ( this.Type == FileType.DIRECTORY )
+                while ( this.Path.EndsWith( "\\" ) )
+                    this.Path = this.Path.Substring( 0, this.Path.Length - 1 );
+        }
+
         private void CreateIcon() {
             try {
                 this.Icon = this.Path != SettingsHandler.ROOT_FOLDER ? DefaultIcons.GetFileIconCashed( this.Path ).ToBitmap() : DefaultIcons.ErrorIcon;
@@ -290,9 +286,7 @@ namespace ExplorerWpf {
 
         public Bitmap Icon {
             get {
-                if ( this._icon == DefaultIcons.LoadingIcon ) {
-                    CreateIcon();
-                }
+                if ( this._icon == DefaultIcons.LoadingIcon ) CreateIcon();
 
                 return this._icon;
             }

@@ -1,6 +1,5 @@
 #region using
 
-using ExplorerWpf;
 using System;
 using System.Drawing;
 using System.IO;
@@ -10,7 +9,7 @@ using System.Windows.Forms;
 
 #endregion
 
-namespace Peter {
+namespace ExplorerWpf {
     /// <summary>
     ///     "Stand-alone" shell context menu
     ///     It isn't really debugged but is mostly working.
@@ -39,6 +38,10 @@ namespace Peter {
         public ShellContextMenu() { CreateHandle( new CreateParams() ); }
 
         #endregion
+
+        // The TrackPopupMenuEx function displays a shortcut menu at the specified location and tracks the selection of items on the shortcut menu. The shortcut menu can appear anywhere on the screen.
+        [DllImport( "user32.dll", ExactSpelling = true, CharSet = CharSet.Auto )]
+        private static extern uint TrackPopupMenuEx(IntPtr hmenu, TPM flags, int x, int y, IntPtr hwnd, IntPtr lptpm);
 
         #region Destructor
 
@@ -624,10 +627,6 @@ namespace Peter {
 
         #endregion
 
-        // The TrackPopupMenuEx function displays a shortcut menu at the specified location and tracks the selection of items on the shortcut menu. The shortcut menu can appear anywhere on the screen.
-        [DllImport( "user32.dll", ExactSpelling = true, CharSet = CharSet.Auto )]
-        private static extern uint TrackPopupMenuEx(IntPtr hmenu, TPM flags, int x, int y, IntPtr hwnd, IntPtr lptpm);
-
 
         #region Structs
 
@@ -1167,7 +1166,7 @@ namespace Peter {
 
         #region IContextMenu
 
-        [ComImport, InterfaceType( ComInterfaceType.InterfaceIsIUnknown ), GuidAttribute( "000214e4-0000-0000-c000-000000000046" )]
+        [ComImport, InterfaceType( ComInterfaceType.InterfaceIsIUnknown ), Guid( "000214e4-0000-0000-c000-000000000046" )]
         private interface IContextMenu {
             // Adds commands to a shortcut menu
             [PreserveSig]

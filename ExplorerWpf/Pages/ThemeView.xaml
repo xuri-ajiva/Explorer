@@ -1,100 +1,118 @@
 ﻿<UserControl
-             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:local="clr-namespace:ExplorerWpf"
-             xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
-             xmlns:ColorPicker="clr-namespace:ColorPicker" x:Class="ExplorerWpf.ThemeView"
-             mc:Ignorable="d" Width="Auto" Height="Auto" MinHeight="300" MinWidth="400">
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
+    x:Class="ExplorerWpf.Pages.ThemeView"
+    mc:Ignorable="d" Width="Auto" Height="Auto" MinHeight="300" MinWidth="400">
     <Grid>
         <Grid Margin="32.25,62,0,0" HorizontalAlignment="Left" VerticalAlignment="Top">
             <xctk:ColorPicker x:Name="ClrPeckerWindowBorder"
-                SelectedColorChanged="ClrPcker_WindowBorder_OnSelectedColorChanged" Margin="105,0,0,0"
-                Height="20" Width="200"
-                ColorMode="ColorCanvas" />
-            <TextBlock HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Top" Foreground="{DynamicResource WindowBorder}" Text="WindowColor"/>
+                              SelectedColorChanged="ClrPcker_WindowBorder_OnSelectedColorChanged" Margin="105,0,0,0"
+                              Height="20" Width="200"
+                              ColorMode="ColorCanvas" />
+            <TextBlock HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Top"
+                       Foreground="{DynamicResource WindowBorder}" Text="WindowColor" />
         </Grid>
         <Grid Margin="32.25,37,0,0" HorizontalAlignment="Left" VerticalAlignment="Top">
             <xctk:ColorPicker x:Name="ClrPeckerBorder" SelectedColorChanged="ClrPcker_Border_OnSelectedColorChanged"
-                Margin="105,0,0,0" Height="20"
-                Width="200" ColorMode="ColorCanvas" />
-            <TextBlock HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Top" Foreground="{DynamicResource Border}" Text="Border"/>
+                              Margin="105,0,0,0" Height="20"
+                              Width="200" ColorMode="ColorCanvas" />
+            <TextBlock HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Top"
+                       Foreground="{DynamicResource Border}" Text="Border" />
         </Grid>
         <Grid Margin="32.25,12,0,0" HorizontalAlignment="Left" VerticalAlignment="Top">
             <xctk:ColorPicker x:Name="ClrPeckerScrollBarBackground"
-                SelectedColorChanged="ClrPcker_ScrollBarBackground_OnSelectedColorChanged" Margin="105,0,0,0"
-                Height="20" Width="200" />
-            <TextBlock HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Top" Foreground="{DynamicResource ScrollBarBackground}" Text="ScrolbarForground"/>
+                              SelectedColorChanged="ClrPcker_ScrollBarBackground_OnSelectedColorChanged"
+                              Margin="105,0,0,0"
+                              Height="20" Width="200" />
+            <TextBlock HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Top"
+                       Foreground="{DynamicResource ScrollBarBackground}" Text="ScrolbarForground" />
         </Grid>
         <Grid Margin="32.25,87,0,0" HorizontalAlignment="Left" VerticalAlignment="Top">
-            <xctk:ColorPicker x:Name="ClrPeckerBackground" SelectedColorChanged="ClrPcker_Background_SelectedColorChanged"
-                Margin="105,0,0,0" Height="20"
-                Width="200" ColorMode="ColorCanvas" />
-            <TextBlock HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Top" Foreground="{DynamicResource DefBack}" Text="SolidBackground"/>
+            <xctk:ColorPicker x:Name="ClrPeckerBackground"
+                              SelectedColorChanged="ClrPcker_Background_SelectedColorChanged"
+                              Margin="105,0,0,0" Height="20"
+                              Width="200" ColorMode="ColorCanvas" />
+            <TextBlock HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Top"
+                       Foreground="{DynamicResource DefBack}" Text="SolidBackground" />
         </Grid>
         <Grid Margin="32,112,0,0" HorizontalAlignment="Left" VerticalAlignment="Top">
             <xctk:ColorPicker x:Name="ClrPeckerSelected" SelectedColorChanged="ClrPcker_Selected_SelectedColorChanged"
-                Margin="105,0,0,0" Height="20"
-                Width="200" ColorMode="ColorCanvas" />
-            <TextBlock x:Name="TxtSelected"  HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Top" Foreground="{DynamicResource SelectedBackgroundBrush}" Text="SelectedItemColor"/>
+                              Margin="105,0,0,0" Height="20"
+                              Width="200" ColorMode="ColorCanvas" />
+            <TextBlock x:Name="TxtSelected" HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Top"
+                       Foreground="{DynamicResource SelectedBackgroundBrush}" Text="SelectedItemColor" />
         </Grid>
         <Grid Margin="32,137,0,0" HorizontalAlignment="Left" VerticalAlignment="Top">
             <xctk:ColorPicker x:Name="ClrHeaderOver" SelectedColorChanged="ClrPcker_Header_SelectedColorChanged"
-                    Margin="105,0,0,0" Height="20"
-                    Width="200" ColorMode="ColorCanvas" />
-            <TextBlock x:Name="TxtHeader" HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Top" Foreground="{DynamicResource ControlLightBrush}" Text="MouseOver"/>
+                              Margin="105,0,0,0" Height="20"
+                              Width="200" ColorMode="ColorCanvas" />
+            <TextBlock x:Name="TxtHeader" HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Top"
+                       Foreground="{DynamicResource ControlLightBrush}" Text="MouseOver" />
         </Grid>
         <Grid Margin="32,187,0,0" HorizontalAlignment="Left" VerticalAlignment="Top">
             <Grid Margin="95,0,0,0">
                 <xctk:ColorPicker x:Name="ClrPeckerForegroundGrad1"
-                    SelectedColorChanged="ClrPcker_ForegroundGRAD_OnSelectedColorChanged" Margin="0,0,110,0"
-                    Height="20" ColorMode="ColorCanvas"
-                    Width="100" HorizontalAlignment="Right" />
+                                  SelectedColorChanged="ClrPcker_ForegroundGRAD_OnSelectedColorChanged"
+                                  Margin="0,0,110,0"
+                                  Height="20" ColorMode="ColorCanvas"
+                                  Width="100" HorizontalAlignment="Right" />
                 <xctk:ColorPicker x:Name="ClrPeckerForegroundGrad2"
-                    SelectedColorChanged="ClrPcker_ForegroundGRAD_OnSelectedColorChanged" Margin="0"
-                    Height="20" ColorMode="ColorCanvas"
-                    Width="100" HorizontalAlignment="Right" />
+                                  SelectedColorChanged="ClrPcker_ForegroundGRAD_OnSelectedColorChanged" Margin="0"
+                                  Height="20" ColorMode="ColorCanvas"
+                                  Width="100" HorizontalAlignment="Right" />
             </Grid>
-            <TextBlock HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Top" Foreground="{DynamicResource Foreground}" Text="ForeGround"/>
+            <TextBlock HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Top"
+                       Foreground="{DynamicResource Foreground}" Text="ForeGround" />
         </Grid>
         <Grid Margin="32,212,0,0" HorizontalAlignment="Left" VerticalAlignment="Top">
             <Grid Margin="95,0,0,0">
                 <xctk:ColorPicker x:Name="ClrPeckerBackgroundGrad1"
-                    SelectedColorChanged="ClrPcker_BackgroundGRAD_OnSelectedColorChanged" Margin="0,0,110,0"
-                    Height="20" ColorMode="ColorCanvas"
-                    Width="100" HorizontalAlignment="Right" />
+                                  SelectedColorChanged="ClrPcker_BackgroundGRAD_OnSelectedColorChanged"
+                                  Margin="0,0,110,0"
+                                  Height="20" ColorMode="ColorCanvas"
+                                  Width="100" HorizontalAlignment="Right" />
                 <xctk:ColorPicker x:Name="ClrPeckerBackgroundGrad2"
-                    SelectedColorChanged="ClrPcker_BackgroundGRAD_OnSelectedColorChanged" Margin="0"
-                    Height="20" ColorMode="ColorCanvas"
-                    Width="100" HorizontalAlignment="Right" />
+                                  SelectedColorChanged="ClrPcker_BackgroundGRAD_OnSelectedColorChanged" Margin="0"
+                                  Height="20" ColorMode="ColorCanvas"
+                                  Width="100" HorizontalAlignment="Right" />
             </Grid>
-            <TextBlock HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Top" Foreground="{DynamicResource Background}" Text="Background">
+            <TextBlock HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Top"
+                       Foreground="{DynamicResource Background}" Text="Background">
                 <TextBlock.Background>
                     <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
-                        <GradientStop Color="#7C000000" Offset="1"/>
-                        <GradientStop Color="#81FFFFFF"/>
+                        <GradientStop Color="#7C000000" Offset="1" />
+                        <GradientStop Color="#81FFFFFF" />
                     </LinearGradientBrush>
                 </TextBlock.Background>
             </TextBlock>
         </Grid>
-        <Image Source="https://avatars1.githubusercontent.com/u/21266763?s=460" Margin="0,0,10,10" Width="40" Height="40" VerticalAlignment="Bottom" HorizontalAlignment="Right" ToolTip="https://github.com/xceedsoftware/wpftoolkit/" MouseLeftButtonDown="Image_MouseLeftButtonDown"/>
+        <Image Source="https://avatars1.githubusercontent.com/u/21266763?s=460" Margin="0,0,10,10" Width="40"
+               Height="40" VerticalAlignment="Bottom" HorizontalAlignment="Right"
+               ToolTip="https://github.com/xceedsoftware/wpftoolkit/" MouseLeftButtonDown="Image_MouseLeftButtonDown" />
         <Grid Margin="32,162,0,0" HorizontalAlignment="Left" VerticalAlignment="Top">
             <xctk:ColorPicker x:Name="ClrExpander" SelectedColorChanged="ClrPcker_Expander_SelectedColorChanged"
-                Margin="105,0,0,0" Height="20"
-                Width="200" ColorMode="ColorCanvas" />
-            <TextBlock x:Name="TxtExpander" HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Top" Foreground="{DynamicResource GlyphBrush}" Text="ExpanderColor"/>
+                              Margin="105,0,0,0" Height="20"
+                              Width="200" ColorMode="ColorCanvas" />
+            <TextBlock x:Name="TxtExpander" HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Top"
+                       Foreground="{DynamicResource GlyphBrush}" Text="ExpanderColor" />
         </Grid>
         <Grid Margin="10,0,0,10" VerticalAlignment="Bottom" HorizontalAlignment="Left">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="auto"/>
-                <ColumnDefinition Width="auto"/>
+                <ColumnDefinition Width="auto" />
+                <ColumnDefinition Width="auto" />
             </Grid.ColumnDefinitions>
 
             <Button Content="Save"
-                Click="Save_Click" Template="{DynamicResource ButtonBaseControalBar1}" Background="{DynamicResource Background}" BorderBrush="{DynamicResource Border}" Foreground="{DynamicResource Foreground}" Margin="5,0,0,0" FontSize="14" Grid.Column="1" />
+                    Click="Save_Click" Template="{DynamicResource ButtonBaseControlBar1}"
+                    Background="{DynamicResource Background}" BorderBrush="{DynamicResource Border}"
+                    Foreground="{DynamicResource Foreground}" Margin="5,0,0,0" FontSize="14" Grid.Column="1" />
             <Button Content="Load" Margin="0,0,5,0"
-                Click="Load_Click" Template="{DynamicResource ButtonBaseControalBar1}" Background="{DynamicResource Background}" BorderBrush="{DynamicResource Border}" Foreground="{DynamicResource Foreground}" FontSize="14" />
+                    Click="Load_Click" Template="{DynamicResource ButtonBaseControlBar1}"
+                    Background="{DynamicResource Background}" BorderBrush="{DynamicResource Border}"
+                    Foreground="{DynamicResource Foreground}" FontSize="14" />
 
         </Grid>
     </Grid>

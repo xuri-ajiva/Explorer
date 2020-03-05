@@ -1,15 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Drawing;
-using System.Data;
-using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
+// ReSharper disable UnusedMember.Local
+// ReSharper disable ArrangeTypeMemberModifiers    
+// ReSharper disable once UnusedMember.Local
+// ReSharper disable InconsistentNaming
 
-namespace TestBuilds {
+namespace TestBuilds {                       
     public partial class UserControl1 : UserControl {
         [DllImport( "kernel32" )] private static extern bool AllocConsole();
 
@@ -36,7 +33,7 @@ namespace TestBuilds {
 
 
         [DllImport( "user32.dll", SetLastError = true )]
-        static extern bool GetWindowRect(IntPtr hwnd, out RECT lpRect);
+        static extern bool GetWindowRect(IntPtr hWnd, out RECT lpRect);
 
         [DllImport( "user32", ExactSpelling = true, SetLastError = true )]
         private static extern int MapWindowPoints(IntPtr hWndFrom, IntPtr hWndTo, [In, Out] ref RECT rect, [MarshalAs( UnmanagedType.U4 )]
@@ -50,7 +47,6 @@ namespace TestBuilds {
             public int left, top, bottom, right;
         }
 
-        private static readonly string WINDOW_NAME    = "TestTitle"; //name of the window
         private const           int    GWL_STYLE      = -16;         //hex constant for style changing
         private const           int    WS_BORDER      = 0x00800000;  //window with border
         private const           int    WS_CAPTION     = 0x00C00000;  //window with a title bar
@@ -80,7 +76,7 @@ namespace TestBuilds {
 
         void SetParrent() {
             this.hWndOriginalParent =  SetParent( this.hWndDocked, this.Handle );
-            this.SizeChanged        += new EventHandler( (sender, args) => MoveWindow( this.hWndDocked, 0, 0, this.Width, this.Height, true ) );
+            this.SizeChanged        += (sender, args) => MoveWindow( this.hWndDocked, 0, 0, this.Width, this.Height, true );
             this.Size               =  this.ClientSize;
             //DrawMenuBar( this.hWndDocked );       
             MoveWindow( this.hWndDocked, 0, 0, this.Width, this.Height, true );

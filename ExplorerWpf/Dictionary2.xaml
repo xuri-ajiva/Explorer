@@ -3,7 +3,9 @@
                     xmlns:local="clr-namespace:ExplorerWpf"
                     xmlns:Themes="clr-namespace:Microsoft.Windows.Themes;assembly=PresentationFramework.Classic"
                     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-                    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:TexTBox="clr-namespace:ExplorerWpf.TexTBox" mc:Ignorable="d">
+                    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                    xmlns:customControls="clr-namespace:ExplorerWpf.CustomControls"
+                    mc:Ignorable="d">
 
     <Style x:Key="{x:Type TreeView}"
            TargetType="{x:Type TreeView}">
@@ -365,10 +367,11 @@
                                             <Setter Property="Template">
                                                 <Setter.Value>
                                                     <ControlTemplate TargetType="{x:Type Thumb}">
-                                                        <Themes:ClassicBorderDecorator BorderBrush="{TemplateBinding BorderBrush}"
-                                                                                       BorderThickness="1"
-                                                                                       BorderStyle="Raised"
-                                                                                       Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}" />
+                                                        <Themes:ClassicBorderDecorator
+                                                            BorderBrush="{TemplateBinding BorderBrush}"
+                                                            BorderThickness="1"
+                                                            BorderStyle="Raised"
+                                                            Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}" />
                                                     </ControlTemplate>
                                                 </Setter.Value>
                                             </Setter>
@@ -510,7 +513,8 @@
                                 </Rectangle>
                                 <Track x:Name="PART_Track" Grid.Column="1">
                                     <Track.DecreaseRepeatButton>
-                                        <RepeatButton Command="ScrollBar.PageLeftCommand" Foreground="{TemplateBinding Foreground}">
+                                        <RepeatButton Command="ScrollBar.PageLeftCommand"
+                                                      Foreground="{TemplateBinding Foreground}">
                                             <RepeatButton.Style>
                                                 <Style TargetType="{x:Type RepeatButton}">
                                                     <Setter Property="OverridesDefaultStyle" Value="True" />
@@ -540,7 +544,8 @@
                                         </RepeatButton>
                                     </Track.DecreaseRepeatButton>
                                     <Track.IncreaseRepeatButton>
-                                        <RepeatButton Command="ScrollBar.PageRightCommand" Foreground="{TemplateBinding Foreground}">
+                                        <RepeatButton Command="ScrollBar.PageRightCommand"
+                                                      Foreground="{TemplateBinding Foreground}">
                                             <RepeatButton.Style>
                                                 <Style TargetType="{x:Type RepeatButton}">
                                                     <Setter Property="OverridesDefaultStyle" Value="True" />
@@ -578,10 +583,11 @@
                                                     <Setter Property="Template">
                                                         <Setter.Value>
                                                             <ControlTemplate TargetType="{x:Type Thumb}">
-                                                                <Themes:ClassicBorderDecorator BorderBrush="{TemplateBinding BorderBrush}"
-                                                                                               BorderThickness="1"
-                                                                                               BorderStyle="Raised"
-                                                                                               Background="{TemplateBinding Foreground}" />
+                                                                <Themes:ClassicBorderDecorator
+                                                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                                                    BorderThickness="1"
+                                                                    BorderStyle="Raised"
+                                                                    Background="{TemplateBinding Foreground}" />
                                                             </ControlTemplate>
                                                         </Setter.Value>
                                                     </Setter>
@@ -726,7 +732,8 @@
                         <Rectangle Grid.Row="1" Fill="{TemplateBinding Background}" />
                         <Track x:Name="PART_Track" IsDirectionReversed="True" Grid.Row="1">
                             <Track.DecreaseRepeatButton>
-                                <RepeatButton Command="ScrollBar.PageUpCommand" Foreground="{TemplateBinding Foreground}">
+                                <RepeatButton Command="ScrollBar.PageUpCommand"
+                                              Foreground="{TemplateBinding Foreground}">
                                     <RepeatButton.Style>
                                         <Style TargetType="{x:Type RepeatButton}">
                                             <Setter Property="OverridesDefaultStyle" Value="True" />
@@ -755,7 +762,8 @@
                                 </RepeatButton>
                             </Track.DecreaseRepeatButton>
                             <Track.IncreaseRepeatButton>
-                                <RepeatButton Command="ScrollBar.PageDownCommand" Foreground="{TemplateBinding Foreground}">
+                                <RepeatButton Command="ScrollBar.PageDownCommand"
+                                              Foreground="{TemplateBinding Foreground}">
                                     <RepeatButton.Style>
                                         <Style TargetType="{x:Type RepeatButton}">
                                             <Setter Property="OverridesDefaultStyle" Value="True" />
@@ -785,17 +793,20 @@
                             </Track.IncreaseRepeatButton>
                             <Track.Thumb>
                                 <Thumb
-                                       BorderBrush="{TemplateBinding BorderBrush}"
-                                       Foreground="{TemplateBinding Foreground}" BorderThickness="1" Background="{TemplateBinding Background}" SnapsToDevicePixels="False" ClipToBounds="False">
+                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                    Foreground="{TemplateBinding Foreground}" BorderThickness="1"
+                                    Background="{TemplateBinding Background}" SnapsToDevicePixels="False"
+                                    ClipToBounds="False">
                                     <Thumb.Style>
                                         <Style TargetType="{x:Type Thumb}">
                                             <Setter Property="Template">
                                                 <Setter.Value>
                                                     <ControlTemplate TargetType="{x:Type Thumb}">
-                                                        <Themes:ClassicBorderDecorator BorderBrush="{TemplateBinding BorderBrush}"
-                                                                                       BorderThickness="1"
-                                                                                       BorderStyle="Raised"
-                                                                                       Background="{TemplateBinding Foreground}" />
+                                                        <Themes:ClassicBorderDecorator
+                                                            BorderBrush="{TemplateBinding BorderBrush}"
+                                                            BorderThickness="1"
+                                                            BorderStyle="Raised"
+                                                            Background="{TemplateBinding Foreground}" />
                                                     </ControlTemplate>
                                                 </Setter.Value>
                                             </Setter>
@@ -1003,10 +1014,11 @@
                                                     <Setter Property="Template">
                                                         <Setter.Value>
                                                             <ControlTemplate TargetType="{x:Type Thumb}">
-                                                                <Themes:ClassicBorderDecorator BorderBrush="{TemplateBinding BorderBrush}"
-                                                                                               BorderThickness="1"
-                                                                                               BorderStyle="Raised"
-                                                                                               Background="{TemplateBinding Foreground}" />
+                                                                <Themes:ClassicBorderDecorator
+                                                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                                                    BorderThickness="1"
+                                                                    BorderStyle="Raised"
+                                                                    Background="{TemplateBinding Foreground}" />
                                                             </ControlTemplate>
                                                         </Setter.Value>
                                                     </Setter>
@@ -1514,7 +1526,7 @@
         </Setter>
     </Style>
 
-    
+
     <ControlTemplate x:Key="ButtonBaseButtonNormalThinBorder" TargetType="{x:Type ButtonBase}">
         <ControlTemplate.Resources>
             <Storyboard x:Key="Storyboard1">
@@ -1625,7 +1637,7 @@
         </ControlTemplate.Triggers>
     </ControlTemplate>
 
-    <ControlTemplate x:Key="ButtonBaseControalBar1" TargetType="{x:Type ButtonBase}">
+    <ControlTemplate x:Key="ButtonBaseControlBar1" TargetType="{x:Type ButtonBase}">
         <ControlTemplate.Resources>
             <Storyboard x:Key="Storyboard1">
                 <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.Opacity)"
@@ -1853,7 +1865,7 @@
                         </Grid.ColumnDefinitions>
                         <Grid.RowDefinitions>
                             <RowDefinition x:Name="RowDefinition0" Height="auto" MinHeight="30" />
-                            <RowDefinition Height="25" x:Name="NavigationBarColumnX"/>
+                            <RowDefinition Height="25" x:Name="NavigationBarColumnX" />
                             <RowDefinition x:Name="RowDefinition1" />
                         </Grid.RowDefinitions>
                         <Grid x:Name="HeaderPanel1" Grid.RowSpan="1">
@@ -1863,16 +1875,31 @@
                             <TabPanel x:Name="HeaderPanel" Background="{x:Null}" Grid.Column="0" IsItemsHost="True"
                                       Margin="0,0,120,0" Grid.Row="0" KeyboardNavigation.TabIndex="1" Panel.ZIndex="1" />
                         </Grid>
-                        <Grid HorizontalAlignment="Stretch" Height="Auto" Margin="0"  Width="Auto" Grid.RowSpan="1"
+                        <Grid HorizontalAlignment="Stretch" Height="Auto" Margin="0" Width="Auto" Grid.RowSpan="1"
                               Grid.Column="0" Grid.Row="1">
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="auto"/>
-                                <ColumnDefinition Width="auto"/>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="auto" />
+                                <ColumnDefinition Width="auto" />
                             </Grid.ColumnDefinitions>
-                            <TexTBox:SelectFolderTextBox x:Name="PathBarX" Height="Auto" TextWrapping="Wrap" Text="/" VerticalAlignment="Stretch" Width="Auto" FontSize="14" Grid.Column="0" UseLayoutRounding="False" Padding="0" Background="{DynamicResource Background}" BorderBrush="{DynamicResource Border}" Foreground="{DynamicResource Foreground}" MinWidth="100" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch" />
-                            <Button x:Name="ReloadButtonX" Content="🔄" HorizontalAlignment="Stretch" Height="Auto" Margin="0" Grid.Row="0" VerticalAlignment="Stretch" Width="Auto" Grid.Column="1" UseLayoutRounding="True" Background="{DynamicResource Background}" BorderBrush="{DynamicResource Border}" Foreground="{DynamicResource Foreground}" Template="{DynamicResource ButtonBaseButtonNormalThinBorder}"  />
-                            <Button x:Name="RootButtonX" Content="Root" HorizontalAlignment="Stretch" Height="Auto" Margin="0" Grid.Row="0" VerticalAlignment="Stretch" Width="Auto" Grid.Column="2" UseLayoutRounding="True" Background="{DynamicResource Background}" BorderBrush="{DynamicResource Border}" Foreground="{DynamicResource Foreground}" Template="{DynamicResource ButtonBaseButtonNormalThinBorder}"/>
+                            <customControls:SelectFolderTextBox x:Name="PathBarX" Height="Auto" TextWrapping="Wrap"
+                                                                Text="/" VerticalAlignment="Stretch" Width="Auto"
+                                                                FontSize="14" Grid.Column="0" UseLayoutRounding="False"
+                                                                Padding="0" Background="{DynamicResource Background}"
+                                                                BorderBrush="{DynamicResource Border}"
+                                                                Foreground="{DynamicResource Foreground}"
+                                                                MinWidth="100" HorizontalContentAlignment="Stretch"
+                                                                VerticalContentAlignment="Stretch" />
+                            <Button x:Name="ReloadButtonX" Content="🔄" HorizontalAlignment="Stretch" Height="Auto"
+                                    Margin="0" Grid.Row="0" VerticalAlignment="Stretch" Width="Auto" Grid.Column="1"
+                                    UseLayoutRounding="True" Background="{DynamicResource Background}"
+                                    BorderBrush="{DynamicResource Border}" Foreground="{DynamicResource Foreground}"
+                                    Template="{DynamicResource ButtonBaseButtonNormalThinBorder}" />
+                            <Button x:Name="RootButtonX" Content="Root" HorizontalAlignment="Stretch" Height="Auto"
+                                    Margin="0" Grid.Row="0" VerticalAlignment="Stretch" Width="Auto" Grid.Column="2"
+                                    UseLayoutRounding="True" Background="{DynamicResource Background}"
+                                    BorderBrush="{DynamicResource Border}" Foreground="{DynamicResource Foreground}"
+                                    Template="{DynamicResource ButtonBaseButtonNormalThinBorder}" />
                         </Grid>
                         <Grid x:Name="ContentPanel" Grid.Column="0"
                               KeyboardNavigation.DirectionalNavigation="Contained" Grid.Row="2"

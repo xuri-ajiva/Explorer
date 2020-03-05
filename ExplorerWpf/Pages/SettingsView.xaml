@@ -1,4 +1,4 @@
-﻿<UserControl x:Class="ExplorerWpf.SettingsView"
+﻿<UserControl x:Class="ExplorerWpf.Pages.SettingsView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -8,25 +8,35 @@
     <Grid>
         <Grid Margin="5">
             <CheckBox x:Name="ConsoleAutoChangeDisc" Content="ConsoleAutoChangeDisc" HorizontalAlignment="Left"
-                VerticalAlignment="Top" FontSize="18" Click="ConsoleAutoChangeDisc_Checked" Background="{x:Null}" BorderBrush="{DynamicResource Border}" Foreground="{DynamicResource Foreground}" />
+                      VerticalAlignment="Top" FontSize="18" Click="ConsoleAutoChangeDisc_Checked" Background="{x:Null}"
+                      BorderBrush="{DynamicResource Border}" Foreground="{DynamicResource Foreground}" />
             <CheckBox x:Name="ConsoleAutoChangePath" Content="ConsoleAutoChangePath" HorizontalAlignment="Left"
-                Margin="0,29,0,0" VerticalAlignment="Top" FontSize="18" Click="ConsoleAutoChangePath_Checked" Background="{x:Null}" BorderBrush="{DynamicResource Border}" Foreground="{DynamicResource Foreground}" />
+                      Margin="0,29,0,0" VerticalAlignment="Top" FontSize="18" Click="ConsoleAutoChangePath_Checked"
+                      Background="{x:Null}" BorderBrush="{DynamicResource Border}"
+                      Foreground="{DynamicResource Foreground}" />
             <CheckBox x:Name="ConsolePresent" Content="ConsolePresent" HorizontalAlignment="Left" Margin="0,58,0,0"
-                VerticalAlignment="Top" FontSize="18" Click="ConsolePresent_Checked" Background="{x:Null}" BorderBrush="{DynamicResource Border}" Foreground="{DynamicResource Foreground}" />
-            <CheckBox x:Name="ExecuteInNewProcess" Content="ExecuteInNewProcess" HorizontalAlignment="Left" Margin="0,87,0,0"
-                VerticalAlignment="Top" FontSize="18" Click="ExecuteInNewProcess_OnClick" Background="{x:Null}" BorderBrush="{DynamicResource Border}" Foreground="{DynamicResource Foreground}" />
+                      VerticalAlignment="Top" FontSize="18" Click="ConsolePresent_Checked" Background="{x:Null}"
+                      BorderBrush="{DynamicResource Border}" Foreground="{DynamicResource Foreground}" />
+            <CheckBox x:Name="ExecuteInNewProcess" Content="ExecuteInNewProcess" HorizontalAlignment="Left"
+                      Margin="0,87,0,0"
+                      VerticalAlignment="Top" FontSize="18" Click="ExecuteInNewProcess_OnClick" Background="{x:Null}"
+                      BorderBrush="{DynamicResource Border}" Foreground="{DynamicResource Foreground}" />
 
         </Grid>
         <Grid Margin="10,0,0,10" VerticalAlignment="Bottom" HorizontalAlignment="Left">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="auto"/>
-                <ColumnDefinition Width="auto"/>
+                <ColumnDefinition Width="auto" />
+                <ColumnDefinition Width="auto" />
             </Grid.ColumnDefinitions>
 
             <Button Content="Save"
-                Click="Save_Click" Template="{DynamicResource ButtonBaseControalBar1}" Background="{DynamicResource Background}" BorderBrush="{DynamicResource Border}" Foreground="{DynamicResource Foreground}" Margin="5,0,0,0" FontSize="14" Grid.Column="1" />
+                    Click="Save_Click" Template="{DynamicResource ButtonBaseControlBar1}"
+                    Background="{DynamicResource Background}" BorderBrush="{DynamicResource Border}"
+                    Foreground="{DynamicResource Foreground}" Margin="5,0,0,0" FontSize="14" Grid.Column="1" />
             <Button Content="Load" Margin="0,0,5,0"
-                Click="Load_Click" Template="{DynamicResource ButtonBaseControalBar1}" Background="{DynamicResource Background}" BorderBrush="{DynamicResource Border}" Foreground="{DynamicResource Foreground}" FontSize="14" />
+                    Click="Load_Click" Template="{DynamicResource ButtonBaseControlBar1}"
+                    Background="{DynamicResource Background}" BorderBrush="{DynamicResource Border}"
+                    Foreground="{DynamicResource Foreground}" FontSize="14" />
 
         </Grid>
 

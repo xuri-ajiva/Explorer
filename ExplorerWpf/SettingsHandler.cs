@@ -9,32 +9,20 @@ using System.Text;
 using System.Windows;
 using System.Windows.Media;
 using System.Xml.Serialization;
-using Color = System.Windows.Media.Color;
-using Point = System.Windows.Point;
+
+// ReSharper disable InconsistentNaming
 
 #endregion
 
 namespace ExplorerWpf {
     public static class SettingsHandler {
-        private static CurrentSettings current;
-        private static ColorSettings   color;
         public const   string          ROOT_FOLDER = CurrentSettings.S_ROOT_FOLDER;
-
-        public static bool   ExecuteInNewProcess   { get => current.SExecuteInNewProcess;   set => current.SExecuteInNewProcess = value; }
-        public static bool   ConsoleAutoChangeDisc { get => current.SConsoleAutoChangeDisc; set => current.SConsoleAutoChangeDisc = value; }
-        public static bool   ConsoleAutoChangePath { get => current.SConsoleAutoChangePath; set => current.SConsoleAutoChangePath = value; }
-        public static bool   ConsolePresent        { get => current.SConsolePresent;        set => current.SConsolePresent = value; }
-        public static string ParentDirectoryPrefix { get => current.SParentDirectoryPrefix; set => current.SParentDirectoryPrefix = value; }
-
-        public static List<string> ExtenstionWithSpecialIcons { get => current.SExtenstionWithSpecialIcons; set => current.SExtenstionWithSpecialIcons = value; }
-
-        public static ColorSettings Color1 {
-            [DebuggerStepThrough] get => color;
-        }
+        private static CurrentSettings _current;
+        private static ColorSettings   _color;
 
         static SettingsHandler() {
-            current = new CurrentSettings( true );
-            color   = new ColorSettings();
+            _current = new CurrentSettings( true );
+            _color   = new ColorSettings();
 
             try {
                 LoadCurrentState();
@@ -42,6 +30,20 @@ namespace ExplorerWpf {
                 OnError( ex );
             }
         }
+
+        public static bool   ExecuteInNewProcess   { get => _current.SExecuteInNewProcess;   set => _current.SExecuteInNewProcess = value; }
+        public static bool   ConsoleAutoChangeDisc { get => _current.SConsoleAutoChangeDisc; set => _current.SConsoleAutoChangeDisc = value; }
+        public static bool   ConsoleAutoChangePath { get => _current.SConsoleAutoChangePath; set => _current.SConsoleAutoChangePath = value; }
+        public static bool   ConsolePresent        { get => _current.SConsolePresent;        set => _current.SConsolePresent = value; }
+        public static string ParentDirectoryPrefix { get => _current.SParentDirectoryPrefix; set => _current.SParentDirectoryPrefix = value; }
+
+        public static List<string> ExtenstionWithSpecialIcons { get => _current.SExtenstionWithSpecialIcons; set => _current.SExtenstionWithSpecialIcons = value; }
+
+        public static ColorSettings Color1 {
+            [DebuggerStepThrough] get => _color;
+        }
+
+        public static byte ConTransSub => 40;
 
         public static void OnError(Exception ex) {
             Console.ForegroundColor = ConsoleColor.DarkRed;
@@ -55,10 +57,10 @@ namespace ExplorerWpf {
 
 
         public static void SaveCurrentState() {
-            XmlSerializer xr = new XmlSerializer( typeof(CurrentSettings) );
+            var xr = new XmlSerializer( typeof(CurrentSettings) );
 
             using ( var fs = File.Open( CurrentSettings.S_SETTINGS_FILE, FileMode.Create ) ) {
-                xr.Serialize( fs, current );
+                xr.Serialize( fs, _current );
             }
         }
 
@@ -71,21 +73,21 @@ namespace ExplorerWpf {
                 using ( var fs = File.Open( CurrentSettings.S_SETTINGS_FILE, FileMode.Open ) ) {
                     var tmp = (CurrentSettings) xr.Deserialize( fs );
 
-                    current = tmp.Equals( new CurrentSettings() ) ? new CurrentSettings( true ) : tmp;
+                    _current = tmp.Equals( new CurrentSettings() ) ? new CurrentSettings( true ) : tmp;
                 }
             } catch (Exception e) {
                 OnError( e );
-                current = new CurrentSettings( true );
+                _current = new CurrentSettings( true );
                 SaveCurrentState();
             }
         }
 
         public static void SaveCurrentColor() {
-            color.SyncFromApplication();
-            XmlSerializer xr = new XmlSerializer( typeof(ColorSettings) );
+            _color.SyncFromApplication();
+            var xr = new XmlSerializer( typeof(ColorSettings) );
 
             using ( var fs = File.Open( ColorSettings.S_SETTINGS_FILE, FileMode.Create ) ) {
-                xr.Serialize( fs, color );
+                xr.Serialize( fs, _color );
             }
         }
 
@@ -98,15 +100,15 @@ namespace ExplorerWpf {
                 using ( var fs = File.Open( ColorSettings.S_SETTINGS_FILE, FileMode.Open ) ) {
                     var tmp = (ColorSettings) xr.Deserialize( fs );
 
-                    color = /* TODO: check for null tmp.Equals( new ColorSettings() ) ? new ColorSettings( true ) :*/ tmp;
+                    _color = /* TODO: check for null tmp.Equals( new ColorSettings() ) ? new ColorSettings( true ) :*/ tmp;
                 }
             } catch (Exception e) {
                 OnError( e );
-                color = new ColorSettings( true );
+                _color = new ColorSettings( true );
                 SaveCurrentColor();
             }
 
-            color.SyncToApplication();
+            _color.SyncToApplication();
         }
 
         [Serializable]
@@ -132,7 +134,7 @@ namespace ExplorerWpf {
         }
         [Serializable]
         public struct ColorSettings {
-            public static string S_SETTINGS_FILE = "colors.xmlx";
+            public const string S_SETTINGS_FILE = "colors.xmlx";
 
             public XmlColor Background;
             public XmlColor Border;
@@ -188,34 +190,33 @@ namespace ExplorerWpf {
 
                 Application.Current.Resources["GlyphColor"] = (Color) this.Expander;
 
-                Application.Current.Resources["Foreground"] = new LinearGradientBrush( this.ForegroundGrad1, this.ForegroundGrad2, new Point( 0, 0 ), new Point( 1, 0 ) );
+                Application.Current.Resources["Foreground"]                         = new LinearGradientBrush( this.ForegroundGrad1, this.ForegroundGrad2, new Point( 0, 0 ), new Point( 1, 0 ) );
                 Application.Current.Resources["DynamicResourceControlTextBrushKey"] = Application.Current.Resources["Foreground"];
 
-                Application.Current.Resources["Background"]      = new LinearGradientBrush( this.BackgroundGrad1,                                                                      this.BackgroundGrad2,                                                                      new Point( 0, 0 ), new Point( 1, 0 ) );
-                Application.Current.Resources["BackgroundLight"] = new LinearGradientBrush( Color.Subtract( BackgroundGrad1, Color.FromArgb( SettingsHandler.ConTransSub, 1, 1, 0 ) ), Color.Subtract( BackgroundGrad2, Color.FromArgb( SettingsHandler.ConTransSub, 1, 1, 1 ) ), new Point( 0, 0 ), new Point( 1, 0 ) );
+                Application.Current.Resources["Background"]      = new LinearGradientBrush( this.BackgroundGrad1,                                                           this.BackgroundGrad2,                                                           new Point( 0, 0 ), new Point( 1, 0 ) );
+                Application.Current.Resources["BackgroundLight"] = new LinearGradientBrush( Color.Subtract( this.BackgroundGrad1, Color.FromArgb( ConTransSub, 1, 1, 0 ) ), Color.Subtract( this.BackgroundGrad2, Color.FromArgb( ConTransSub, 1, 1, 1 ) ), new Point( 0, 0 ), new Point( 1, 0 ) );
             }
 
             [Serializable]
             public struct XmlColor {
 
-                private Color color_;
+                private Color _colorM;
 
-                public XmlColor(Color c) { color_ = c; }
+                public XmlColor(Color c) => this._colorM = c;
 
 
-                public Color ToColor() { return color_; }
+                public Color ToColor() => this._colorM;
 
-                public void FromColor(Color c) { color_ = c; }
+                public void FromColor(Color c) { this._colorM = c; }
 
-                public static implicit operator Color(XmlColor x) { return x.ToColor(); }
+                public static implicit operator Color(XmlColor x) => x.ToColor();
 
-                public static implicit operator XmlColor(Color c) { return new XmlColor( c ); }
+                public static implicit operator XmlColor(Color c) => new XmlColor( c );
 
                 [XmlAttribute]
-                public string Web { get => this.color_.ToString(); set => this.color_ = (Color) ColorConverter.ConvertFromString( value ); }
+                public string Web { get => this._colorM.ToString(); set => this._colorM = (Color) ColorConverter.ConvertFromString( value ); }
             }
         }
-        public static byte ConTransSub => 40;
     }
 
     #region NativeMethods

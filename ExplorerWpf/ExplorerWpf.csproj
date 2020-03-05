@@ -96,42 +96,35 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="ColorPicker\CopyBox.cs" />
-    <Compile Include="ColorPicker\MouseCliping.cs" />
-    <Compile Include="ColorPicker\MouseControling.cs" />
-    <Compile Include="ColorPicker\ValueBox.cs" />
-    <Compile Include="ColorPicker\_ColorPicker.xaml.cs">
-      <DependentUpon>_ColorPicker.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="ConsoleImplementation.xaml.cs">
+    <Compile Include="CustomControls\ConsoleImplementation.xaml.cs">
       <DependentUpon>ConsoleImplementation.xaml</DependentUpon>
     </Compile>
-    <Compile Include="ExplorerView.xaml.cs">
-      <DependentUpon>ExplorerView.xaml</DependentUpon>
+    <Compile Include="CustomControls\InvertSign.cs" />
+    <Compile Include="CustomControls\SelectFolderTextBox.xaml.cs">
+      <DependentUpon>SelectFolderTextBox.xaml</DependentUpon>
     </Compile>
     <Compile Include="Handler\IHandler.cs" />
     <Compile Include="Handler\localHandler.cs" />
-    <Compile Include="IPage.cs" />
     <Compile Include="Item.cs" />
-    <Compile Include="SettingsView.xaml.cs">
+    <Compile Include="Pages\ExplorerView.xaml.cs">
+      <DependentUpon>ExplorerView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\IPage.cs" />
+    <Compile Include="Pages\SettingsView.xaml.cs">
       <DependentUpon>SettingsView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\ThemeView.xaml.cs">
+      <DependentUpon>ThemeView.xaml</DependentUpon>
     </Compile>
     <Compile Include="SettingsHandler.cs" />
     <Compile Include="ShellContextMenu.cs" />
-    <Compile Include="TexTBox\InvertSign.cs" />
-    <Compile Include="TexTBox\SelectFolderTextBox.xaml.cs">
-      <DependentUpon>SelectFolderTextBox.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="ThemeView.xaml.cs">
-      <DependentUpon>ThemeView.xaml</DependentUpon>
-    </Compile>
-    <Page Include="ColorPicker\_ColorPicker.xaml">
+    <Page Include="CustomControls\ConsoleImplementation.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="ConsoleImplementation.xaml">
-      <SubType>Designer</SubType>
+    <Page Include="CustomControls\SelectFolderTextBox.xaml">
       <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="Dictionary2.xaml">
       <SubType>Designer</SubType>
@@ -149,21 +142,17 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Page Include="ExplorerView.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="SettingsView.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="TexTBox\SelectFolderTextBox.xaml">
+    <Page Include="Pages\ExplorerView.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="ThemeView.xaml">
-      <SubType>Designer</SubType>
+    <Page Include="Pages\SettingsView.xaml">
       <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Pages\ThemeView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
   </ItemGroup>
   <ItemGroup>
@@ -214,5 +203,6 @@
     <Resource Include="Icon\ExploereIcon.ico" />
     <Resource Include="Icon\ExploereIcon.png" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
