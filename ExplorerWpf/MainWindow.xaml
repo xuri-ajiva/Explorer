@@ -83,11 +83,11 @@
                                 ToolTip="Window Always On Top" />
                     </Grid>
                 </Grid>
-                <Grid Grid.Row="1">
+                <Grid Grid.Row="1" x:Name="ContendView">
                     <Grid>
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Name="TreeColumn" Width="120" />
-                            <ColumnDefinition Name="VerticalSplitter1" Width="6" />
+                            <ColumnDefinition x:Name="TreeColumn" Width="120" />
+                            <ColumnDefinition x:Name="VerticalSplitter1" Width="6" />
                             <ColumnDefinition Width="688*" />
                         </Grid.ColumnDefinitions>
                         <Grid.RowDefinitions>
@@ -98,9 +98,9 @@
                         </Grid.RowDefinitions>
                         <Grid>
                             <TreeView x:Name="TreeControl" BorderBrush="{DynamicResource Border}"
-                                      MouseDown="trvMenu_MouseDown" MouseDoubleClick="trvMenu_MouseDoubleClick"
-                                      TreeViewItem.Expanded="trvMenu_Expanded"
-                                      TreeViewItem.Collapsed="trvMenu_Collapsed"
+                                      MouseDown="TrvMenu_MouseDown" MouseDoubleClick="TrvMenu_MouseDoubleClick"
+                                      TreeViewItem.Expanded="TrvMenu_Expanded"
+                                      TreeViewItem.Collapsed="TrvMenu_Collapsed"
                                       Style="{DynamicResource {x:Type TreeView}}"
                                       Foreground="{DynamicResource Foreground}"
                                       Background="{DynamicResource Background}" BorderThickness="0,13,0,0">
@@ -127,7 +127,7 @@
                                       BorderThickness="1" Foreground="{DynamicResource Foreground}" />
                         <Grid Grid.Row="0" Grid.Column="2">
                             <TabControl x:Name="TabControl" DataContextChanged="DcChange"
-                                        SelectionChanged="taps_SelectionChanged"
+                                        SelectionChanged="Taps_SelectionChanged"
                                         Background="{DynamicResource Background}"
                                         Foreground="{DynamicResource Foreground}"
                                         BorderBrush="{DynamicResource Border}" Margin="0,-30,0,0" FontSize="14"

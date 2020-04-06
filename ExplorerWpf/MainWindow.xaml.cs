@@ -21,6 +21,7 @@ using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media;
+using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
 using ExplorerWpf.CustomControls;
 using ExplorerWpf.Pages;
@@ -32,23 +33,46 @@ using MessageBox = System.Windows.Forms.MessageBox;
 
 namespace ExplorerWpf {
     public partial class MainWindow : Window, IDisposable {
-        private ExplorerView _currentExplorerView;
-        private IPage        _currentPage = new EmptyPage();
 
-        private double _drag;
-        private int    _linesToSkip;
+        private const int          WM_EXIT_SIZE_MOVE  = 0x232;
+        private const int          WM_ENTER_SIZE_MOVE = 0x0231;
+        private       ExplorerView _currentExplorerView;
+        private       IPage        _currentPage = new EmptyPage();
 
-        private TreePathItem        _root;
+        private double              _drag;
         private RowDefinition       _explorerNavigationBarRow;
+        private int                 _linesToSkip;
         private SelectFolderTextBox _pathBar;
+
+        private TreePathItem _root;
 
         public MainWindow() {
             InitializeComponent();
             this.CopyRightTextBox.Text = Program.Version + "    " + Program.CopyRight;
+
+            Optimize();
         }
 
-
         private IHandler Handler => this._currentExplorerView.Handler;
+
+        /// <summary>
+        ///     Reduce CPU Consumption for WPF Animations according to computer performance
+        ///     WPF draws animations at 60 frames per second. You can reduce this to a lower optimal rate, resulting in less CPU usage.
+        /// </summary>
+        private static void Optimize() {
+            int displayTier = RenderCapability.Tier >> 16;
+
+            if ( displayTier < 2 ) {
+                Console.WriteLine( "No hardware acceleration" );
+                RenderOptions.ProcessRenderMode = RenderMode.SoftwareOnly;
+                Timeline.DesiredFrameRateProperty.OverrideMetadata( typeof(Timeline), new FrameworkPropertyMetadata { DefaultValue = 24 } );
+            }
+            else {
+                Console.WriteLine( "Supports hardware acceleration: " + displayTier );
+                RenderOptions.ProcessRenderMode = RenderMode.Default;
+                Timeline.DesiredFrameRateProperty.OverrideMetadata( typeof(Timeline), new FrameworkPropertyMetadata { DefaultValue = 60 } );
+            }
+        }
 
         private void StartConsole() {
             this._mainProcess = new Process {
@@ -83,7 +107,7 @@ namespace ExplorerWpf {
             var naviCNode  = this.TabControl.Template.FindName( "NavigationBarColumnX", this.TabControl );
 
             if ( pathNode is SelectFolderTextBox box ) {
-                box.KeyDown  += BoxOnKeyDown;
+                box.KeyDown   += BoxOnKeyDown;
                 this._pathBar =  box;
                 //Console.WriteLine( "PathBar Support" );
             }
@@ -107,6 +131,28 @@ namespace ExplorerWpf {
                 this._mainProcess.StandardInput.WriteLine( SettingsHandler.UserPowerShell ? "pwd" : "echo %cd%" );
         }
 
+        private IntPtr HwndMessageHook(IntPtr wnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled) {
+            if ( !SettingsHandler.PerformanceMode ) return IntPtr.Zero;
+            if ( this.IsDrag ) return IntPtr.Zero;
+
+            switch (msg) {
+                case WM_EXIT_SIZE_MOVE:
+                    NativeMethods.EnableBlur( new WindowInteropHelper( this ).Handle );
+                    this.ContendView.Visibility = Visibility.Visible;
+
+                    handled = true;
+                    break;
+                case WM_ENTER_SIZE_MOVE:
+                    NativeMethods.DisableBlur( new WindowInteropHelper( this ).Handle );
+                    this.ContendView.Visibility = Visibility.Hidden;
+
+                    handled = true;
+                    break;
+            }
+
+            return IntPtr.Zero;
+        }
+
         #region ConsoleThreads
 
         private Thread  _errReaderThread;
@@ -126,7 +172,7 @@ namespace ExplorerWpf {
             Console.ForegroundColor = ConsoleColor.White; //TODO: Setting
 
             while ( !this._mainProcess.StandardOutput.EndOfStream && Program.Running ) {
-                var line = this._mainProcess.StandardOutput.ReadLine();
+                string line = this._mainProcess.StandardOutput.ReadLine();
 
                 if ( this._linesToSkip <= negativeBegin ) {
                     Console.ForegroundColor = ConsoleColor.Yellow;
@@ -141,7 +187,7 @@ namespace ExplorerWpf {
                     Debug.WriteLine( line );
 
                     if ( parches.Success ) {
-                        var path = parches.Value.Substring( 0, parches.Length );
+                        string path = parches.Value.Substring( 0, parches.Length );
 
                         while ( path.EndsWith( " " ) ) path = path.Substring( 0, path.Length - 1 );
 
@@ -179,7 +225,7 @@ namespace ExplorerWpf {
 
         private void ConsoleWrite() {
             while ( Program.Running ) {
-                var line = Console.In.ReadLine();
+                string line = Console.In.ReadLine();
                 this._linesToSkip++;
                 WriteCmd( line );
             }
@@ -187,7 +233,7 @@ namespace ExplorerWpf {
 
         private void ConsoleError() {
             while ( !this._mainProcess.StandardError.EndOfStream && Program.Running ) {
-                var line = this._mainProcess.StandardError.ReadLine();
+                string line = this._mainProcess.StandardError.ReadLine();
                 Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine( line );
                 Console.ForegroundColor = ConsoleColor.Yellow;
@@ -196,12 +242,11 @@ namespace ExplorerWpf {
 
         #endregion
 
-
         #region WindowEvents
 
         private void DcChange(object sender, DependencyPropertyChangedEventArgs e) { Console.WriteLine( e ); }
 
-        private void taps_SelectionChanged(object sender, SelectionChangedEventArgs e) {
+        private void Taps_SelectionChanged(object sender, SelectionChangedEventArgs e) {
             if ( this.TabControl.Items.Count == 1 ) return;
 
             if ( !( this.TabControl.SelectedItem is TabItem tp ) ) return;
@@ -235,16 +280,16 @@ namespace ExplorerWpf {
                 this._explorerNavigationBarRow.Height = page.HideExplorerNavigation ? new GridLength( 0 ) : GridLength.Auto;
 
                 switch (page) {
-                    case EmptyPage ep:
+                    case EmptyPage _:
                         //Console.WriteLine();
                         break;
                     case ExplorerView explorer:
                         this._currentExplorerView = explorer;
                         break;
-                    case SettingsView sp:
+                    case SettingsView _:
                         //Console.WriteLine();
                         break;
-                    case ThemeView ep:
+                    case ThemeView _:
                         //Console.WriteLine();
                         break;
                 }
@@ -259,16 +304,36 @@ namespace ExplorerWpf {
 
             if ( this.WindowState == WindowState.Maximized ) this.WindowState = WindowState.Normal;
 
+            this.IsDrag = true;
+
+            if ( SettingsHandler.PerformanceMode ) //NativeMethods.DisableBlur( new WindowInteropHelper( this ).Handle );
+                this.ContendView.Visibility = Visibility.Hidden;
+
             try {
                 DragMove();
             } catch (Exception exception) {
                 HandlerOnOnError( exception );
             }
+
+            if ( SettingsHandler.PerformanceMode ) //NativeMethods.EnableBlur( new WindowInteropHelper( this ).Handle );
+                this.ContendView.Visibility = Visibility.Visible;
+
+            this.IsDrag = false;
         }
+
+        public bool IsDrag { get; set; }
 
         private void MainWindow_OnLoaded(object sender, RoutedEventArgs e) {
             NativeMethods.EnableBlur( new WindowInteropHelper( this ).Handle );
             GetControls();
+
+            var helper = new WindowInteropHelper( this );
+
+            if ( helper.Handle != null ) {
+                var source = HwndSource.FromHwnd( helper.Handle );
+                if ( source != null )
+                    source.AddHook( HwndMessageHook );
+            }
 
             if ( SettingsHandler.ConsolePresent ) {
                 StartConsole();
@@ -384,7 +449,7 @@ namespace ExplorerWpf {
             this._inWriteThread?.Abort();
             Close();
             Dispose();
-            //Environment.Exit( 0 );
+            Environment.Exit( 0 );
         }
 
         // ReSharper disable once UnusedMember.Local
@@ -422,7 +487,7 @@ namespace ExplorerWpf {
 
                         if ( parches.Success ) {
                             WriteCmd( "cd /", false );
-                            var path = parches.Value.Substring( 0, 2 );
+                            string path = parches.Value.Substring( 0, 2 );
                             Console.WriteLine( "cd " + path + "\\" );
                             Console.ForegroundColor = ConsoleColor.DarkGreen;
                             Console.Write( path + "> " );
@@ -473,7 +538,7 @@ namespace ExplorerWpf {
         private void PingClick(object sender, RoutedEventArgs e) { this.Topmost = !this.Topmost; }
 
         private void UpClick(object sender, RoutedEventArgs e) {
-            var dir = this._currentExplorerView.GetDirUp();
+            string dir = this._currentExplorerView.GetDirUp();
             this.Handler.SetCurrentPath( dir );
             this._currentExplorerView.ListP( dir );
         }
@@ -504,9 +569,9 @@ namespace ExplorerWpf {
 
         #region TreeControal
 
-        private void trvMenu_MouseDown(object sender, MouseButtonEventArgs e) { }
+        private void TrvMenu_MouseDown(object sender, MouseButtonEventArgs e) { }
 
-        private void trvMenu_MouseDoubleClick(object sender, MouseButtonEventArgs e) {
+        private void TrvMenu_MouseDoubleClick(object sender, MouseButtonEventArgs e) {
             if ( this.TreeControl.SelectedItem == null ) return;
 
             try {
@@ -517,7 +582,7 @@ namespace ExplorerWpf {
             }
         }
 
-        private void trvMenu_Expanded(object sender, RoutedEventArgs e) {
+        private void TrvMenu_Expanded(object sender, RoutedEventArgs e) {
             if ( !( e.OriginalSource is TreeViewItem tvi ) ) return;
             if ( !( tvi.DataContext is TreePathItem node ) ) return;
             if ( node.Type == Item.FileType.NONE ) return;
@@ -553,7 +618,7 @@ namespace ExplorerWpf {
             }
         }
 
-        private void trvMenu_Collapsed(object sender, RoutedEventArgs e) { }
+        private void TrvMenu_Collapsed(object sender, RoutedEventArgs e) { }
 
         #endregion
 
@@ -628,7 +693,7 @@ namespace ExplorerWpf {
             this.TabControl.Items[this.TabControl.Items.Count - 1] = p;
 
             this.TabControl.SelectedIndex = this.TabControl.Items.Count - 2;
-            taps_SelectionChanged( this, null );
+            Taps_SelectionChanged( this, null );
         }
 
         private void AddTab(TapType type, string path = SettingsHandler.ROOT_FOLDER) {

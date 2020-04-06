@@ -27,7 +27,7 @@
                         <ScrollViewer Focusable="False" CanContentScroll="False" Padding="4"
                                       BorderBrush="{TemplateBinding BorderBrush}"
                                       Foreground="{TemplateBinding Foreground}"
-                                      Template="{DynamicResource ScrollViewerControlTemplate1}">
+                                      Style="{DynamicResource ScrollViewerStyle3}">
                             <ItemsPresenter />
                         </ScrollViewer>
                     </Border>

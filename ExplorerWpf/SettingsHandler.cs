@@ -34,6 +34,7 @@ namespace ExplorerWpf {
         public static readonly bool UserPowerShell;
 
         public static bool   ChangeUserPowerShell  { get => _current.SUserPowerShell;        set => _current.SUserPowerShell = value; }
+        public static bool   PerformanceMode       { get => _current.SPerformanceMode;       set => _current.SPerformanceMode = value; }
         public static bool   ExecuteInNewProcess   { get => _current.SExecuteInNewProcess;   set => _current.SExecuteInNewProcess = value; }
         public static bool   ConsoleAutoChangeDisc { get => _current.SConsoleAutoChangeDisc; set => _current.SConsoleAutoChangeDisc = value; }
         public static bool   ConsoleAutoChangePath { get => _current.SConsoleAutoChangePath; set => _current.SConsoleAutoChangePath = value; }
@@ -122,6 +123,7 @@ namespace ExplorerWpf {
             public string SParentDirectoryPrefix;
             public bool   SExecuteInNewProcess;
             public bool   SUserPowerShell;
+            public bool   SPerformanceMode;
 
             public       List<string> SExtenstionWithSpecialIcons;
             public const string       S_ROOT_FOLDER   = "/";
@@ -134,6 +136,7 @@ namespace ExplorerWpf {
                 this.SUserPowerShell             = true;
                 this.SConsolePresent             = false;
                 this.SExecuteInNewProcess        = false;
+                this.SPerformanceMode            = false;
                 this.SParentDirectoryPrefix      = "⤴ ";
             }
         }
@@ -266,10 +269,14 @@ namespace ExplorerWpf {
             private readonly int         AnimationId;
         }
 
-        public static void EnableBlur(IntPtr handle) {
+        public static void EnableBlur(IntPtr handle) { SetAccent( handle, AccentState.ACCENT_ENABLE_BLURBEHIND ); }
+
+        public static void DisableBlur(IntPtr handle) { SetAccent( handle, AccentState.ACCENT_DISABLED ); }
+
+        private static void SetAccent(IntPtr handle, AccentState state) {
             var accent           = new AccentPolicy();
             var accentStructSize = Marshal.SizeOf( accent );
-            accent.AccentState = AccentState.ACCENT_ENABLE_BLURBEHIND;
+            accent.AccentState = state;
 
             var accentPtr = Marshal.AllocHGlobal( accentStructSize );
             Marshal.StructureToPtr( accent, accentPtr, false );

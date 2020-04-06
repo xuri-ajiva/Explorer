@@ -4,7 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:local="clr-namespace:ExplorerWpf"
-             mc:Ignorable="d" Loaded="SettingsView_OnLoaded" Margin="0,0,0,5" MinHeight="200" MinWidth="250">
+             mc:Ignorable="d" Loaded="SettingsView_OnLoaded" Margin="0,0,0,5" MinHeight="250" MinWidth="250">
     <Grid>
         <Grid Margin="5">
             <CheckBox x:Name="ConsoleAutoChangeDisc" Content="ConsoleAutoChangeDisc" HorizontalAlignment="Left"
@@ -24,6 +24,10 @@
             <CheckBox x:Name="UserPowerShell" Content="UserPowerShell" HorizontalAlignment="Left"
                 Margin="0,116,0,0" ToolTip="Requests Restart!"
                 VerticalAlignment="Top" FontSize="18" Click="UserPowerShell_OnClick" Background="{x:Null}"
+                BorderBrush="{DynamicResource Border}" Foreground="{DynamicResource Foreground}" />
+            <CheckBox x:Name="PerformanceMode" Content="PerformanceMode" HorizontalAlignment="Left"
+                Margin="0,145,0,0" ToolTip="Requests Restart!"
+                VerticalAlignment="Top" FontSize="18" Click="PerformanceMode_OnClick" Background="{x:Null}"
                 BorderBrush="{DynamicResource Border}" Foreground="{DynamicResource Foreground}" />
 
         </Grid>

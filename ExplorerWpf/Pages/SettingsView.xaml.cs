@@ -25,6 +25,7 @@ namespace ExplorerWpf.Pages {
         #endregion
 
         private void UpdateToUi() {
+            this.PerformanceMode.IsChecked       = SettingsHandler.PerformanceMode;
             this.ConsoleAutoChangeDisc.IsChecked = SettingsHandler.ConsoleAutoChangeDisc;
             this.ConsoleAutoChangePath.IsChecked = SettingsHandler.ConsoleAutoChangeDisc;
             this.ConsolePresent.IsChecked        = SettingsHandler.ConsolePresent;
@@ -61,6 +62,18 @@ namespace ExplorerWpf.Pages {
             if ( isChecked != null ) SettingsHandler.ExecuteInNewProcess = isChecked.Value;
         }
 
+        private void UserPowerShell_OnClick(object sender, RoutedEventArgs e) {
+            var isChecked = this.UserPowerShell.IsChecked;
+
+            if ( isChecked != null ) SettingsHandler.ChangeUserPowerShell = isChecked.Value;
+        }
+
+        private void PerformanceMode_OnClick(object sender, RoutedEventArgs e) {
+            var isChecked = this.PerformanceMode.IsChecked;
+
+            if ( isChecked != null ) SettingsHandler.PerformanceMode = isChecked.Value;
+        }
+
         private void SettingsView_OnLoaded(object sender, RoutedEventArgs e) { }
 
         #region Implementation of IPage
@@ -85,10 +98,5 @@ namespace ExplorerWpf.Pages {
 
         #endregion
 
-        private void UserPowerShell_OnClick(object sender, RoutedEventArgs e) {
-            var isChecked = this.UserPowerShell.IsChecked;
-
-            if ( isChecked != null ) SettingsHandler.ChangeUserPowerShell = isChecked.Value;
-        }
     }
 }
